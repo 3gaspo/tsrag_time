@@ -1,0 +1,477 @@
+[2026-09-16 16:27:17 UTC] Slurm=3449889 launch=selena_3449889 stages=prepare,vanilla,extract,predict,mix,evaluate,report mode=full
+
+[2026-09-16 16:27:17 UTC] stage=prepare
+[2026-09-16 18:27:34,490][datasets][INFO] - PyTorch version 2.9.1 available.
+[2026-09-16 16:27:41 UTC] stage=prepare tasks=90 seed=0 device=cuda Slurm=3449889
+[2026-09-16 16:27:41 UTC] prepare dataset=Water_Quality_Darwin/15T term=short H=16 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Water_Quality_Darwin/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:41.792449+00:00
+[2026-09-16 16:27:42 UTC] prepare dataset=Water_Quality_Darwin/15T term=medium H=96 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Water_Quality_Darwin/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:42.150298+00:00
+[2026-09-16 16:27:42 UTC] prepare dataset=Water_Quality_Darwin/15T term=long H=288 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Water_Quality_Darwin/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:42.458660+00:00
+[2026-09-16 16:27:42 UTC] prepare dataset=current_velocity/5T term=short H=36 validation=4320
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:42.760169+00:00
+[2026-09-16 16:27:42 UTC] prepare dataset=current_velocity/5T term=medium H=288 validation=4320
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:42.839044+00:00
+[2026-09-16 16:27:42 UTC] prepare dataset=current_velocity/5T term=long H=864 validation=4320
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:42.915537+00:00
+[2026-09-16 16:27:42 UTC] prepare dataset=current_velocity/10T term=short H=18 validation=2160
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/10T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:42.990854+00:00
+[2026-09-16 16:27:43 UTC] prepare dataset=current_velocity/10T term=medium H=144 validation=2160
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/10T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:43.615496+00:00
+[2026-09-16 16:27:44 UTC] prepare dataset=current_velocity/10T term=long H=432 validation=2160
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/10T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:44.203909+00:00
+[2026-09-16 16:27:44 UTC] prepare dataset=current_velocity/15T term=short H=12 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:44.785320+00:00
+[2026-09-16 16:27:44 UTC] prepare dataset=current_velocity/15T term=medium H=96 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:44.923593+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=current_velocity/15T term=long H=288 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.049091+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=current_velocity/H term=short H=24 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.171535+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=current_velocity/H term=medium H=168 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.395393+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=current_velocity/H term=long H=336 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/current_velocity/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.585640+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/15T term=short H=12 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.765070+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/15T term=medium H=96 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.786051+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/15T term=long H=288 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.804853+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/30T term=short H=12 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/30T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.823613+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/30T term=medium H=48 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/30T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.846728+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/30T term=long H=144 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/30T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.869494+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/H term=short H=24 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.892051+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/H term=medium H=168 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.911844+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=CPHL/H term=long H=336 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/CPHL/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.930908+00:00
+[2026-09-16 16:27:45 UTC] prepare dataset=Coastal_T_S/15T term=short H=12 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:45.950184+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/15T term=medium H=96 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.110031+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/15T term=long H=288 validation=1440
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.265826+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/20T term=short H=9 validation=1080
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/20T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.419059+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/20T term=medium H=72 validation=1080
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/20T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.441898+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/20T term=long H=216 validation=1080
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/20T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.462833+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/H term=short H=24 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.483801+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/H term=medium H=168 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.676955+00:00
+[2026-09-16 16:27:46 UTC] prepare dataset=Coastal_T_S/H term=long H=336 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Coastal_T_S/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:46.857359+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=SG_Weather/D term=short H=3 validation=366
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_Weather/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.034308+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=SG_Weather/D term=medium H=7 validation=366
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_Weather/D/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.083021+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=SG_Weather/D term=long H=14 validation=366
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_Weather/D/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.125128+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=SG_PM25/H term=short H=24 validation=2160
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_PM25/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.166572+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=SG_PM25/H term=medium H=72 validation=2160
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_PM25/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.257920+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=SG_PM25/H term=long H=168 validation=2160
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_PM25/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.348177+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=NE_China_Wind/H term=short H=24 validation=720
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/NE_China_Wind/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.438119+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=NE_China_Wind/H term=medium H=72 validation=720
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/NE_China_Wind/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.464591+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=NE_China_Wind/H term=long H=168 validation=720
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/NE_China_Wind/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.489704+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=Australia_Solar/H term=short H=24 validation=2520
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Australia_Solar/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.514730+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=Australia_Solar/H term=medium H=72 validation=2520
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Australia_Solar/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.567971+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=Australia_Solar/H term=long H=168 validation=2520
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Australia_Solar/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.621259+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=epf_electricity_price/H term=short H=24 validation=2520
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/epf_electricity_price/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.674449+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=epf_electricity_price/H term=medium H=72 validation=2520
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/epf_electricity_price/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.808677+00:00
+[2026-09-16 16:27:47 UTC] prepare dataset=epf_electricity_price/H term=long H=168 validation=2520
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/epf_electricity_price/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:47.941924+00:00
+[2026-09-16 16:27:48 UTC] prepare dataset=OpenElectricity_NEM/5T term=short H=24 validation=4032
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/OpenElectricity_NEM/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:48.074731+00:00
+[2026-09-16 16:27:48 UTC] prepare dataset=OpenElectricity_NEM/5T term=medium H=96 validation=4032
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/OpenElectricity_NEM/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:48.271417+00:00
+[2026-09-16 16:27:48 UTC] prepare dataset=OpenElectricity_NEM/5T term=long H=288 validation=4032
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/OpenElectricity_NEM/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:48.466549+00:00
+[2026-09-16 16:27:48 UTC] prepare dataset=EWELD_Load/15T term=short H=24 validation=1344
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/EWELD_Load/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:48.659850+00:00
+[2026-09-16 16:27:48 UTC] prepare dataset=EWELD_Load/15T term=medium H=96 validation=1344
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/EWELD_Load/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:48.755578+00:00
+[2026-09-16 16:27:48 UTC] prepare dataset=EWELD_Load/15T term=long H=672 validation=1344
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/EWELD_Load/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:48.849810+00:00
+[2026-09-16 16:27:48 UTC] prepare dataset=SG_Carpark/15T term=short H=16 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_Carpark/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:48.941295+00:00
+[2026-09-16 16:27:51 UTC] prepare dataset=SG_Carpark/15T term=medium H=96 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_Carpark/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:51.703641+00:00
+[2026-09-16 16:27:54 UTC] prepare dataset=SG_Carpark/15T term=long H=672 validation=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/SG_Carpark/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:54.203896+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=Finland_Traffic/15T term=short H=16 validation=2880
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Finland_Traffic/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.576202+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=Finland_Traffic/15T term=medium H=96 validation=2880
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Finland_Traffic/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.603940+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=Finland_Traffic/15T term=long H=672 validation=2880
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Finland_Traffic/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.630549+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=Port_Activity/D term=short H=30 validation=90
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Port_Activity/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.656182+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=Port_Activity/W term=short H=13 validation=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Port_Activity/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.841130+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=ECDC_COVID/D term=short H=30 validation=30
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/ECDC_COVID/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.871774+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=ECDC_COVID/W term=short H=13 validation=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/ECDC_COVID/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.887807+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=Global_Influenza/W term=short H=13 validation=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Global_Influenza/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.901241+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=Crypto/D term=short H=30 validation=92
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Crypto/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.916432+00:00
+[2026-09-16 16:27:56 UTC] prepare dataset=US_Term_Structure/B term=short H=20 validation=100
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/US_Term_Structure/B/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:56.932347+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Oil_Price/B term=short H=20 validation=100
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Oil_Price/B/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.094946+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Job_Claims/W term=short H=13 validation=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Job_Claims/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.130143+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Uncertainty_1M/M term=short H=6 validation=18
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Uncertainty_1M/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.142729+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Housing_Inventory/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Housing_Inventory/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.155137+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=JOLTS/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/JOLTS/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.167134+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=US_Labor/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/US_Labor/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.178955+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Vehicle_Supply/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Vehicle_Supply/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.191172+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Auto_Production_SF/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Auto_Production_SF/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.203066+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Commodity_Production/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Commodity_Production/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.214346+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Commodity_Import/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Commodity_Import/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.229562+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=WUI_Global/Q term=short H=4 validation=20
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/WUI_Global/Q/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.242778+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Global_Price/Q term=short H=4 validation=8
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Global_Price/Q/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.254851+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Vehicle_Sales/M term=short H=12 validation=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Vehicle_Sales/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.268339+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Online_Retail_2_UCI/D term=short H=30 validation=90
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Online_Retail_2_UCI/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.280438+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Supply_Chain_Customer/D term=short H=30 validation=90
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Supply_Chain_Customer/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.291838+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Supply_Chain_Location/D term=short H=30 validation=90
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Supply_Chain_Location/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.326644+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=azure2019_U/5T term=short H=48 validation=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/azure2019_U/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.370597+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Smart_Manufacturing/H term=short H=24 validation=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Smart_Manufacturing/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.496965+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Smart_Manufacturing/H term=medium H=168 validation=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Smart_Manufacturing/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.627114+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=Smart_Manufacturing/H term=long H=336 validation=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/Smart_Manufacturing/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.727294+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=MetroPT-3/5T term=short H=48 validation=1728
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/MetroPT-3/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.815598+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=MetroPT-3/5T term=medium H=288 validation=1728
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/MetroPT-3/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.868964+00:00
+[2026-09-16 16:27:57 UTC] prepare dataset=MetroPT-3/5T term=long H=576 validation=1728
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/data/shared/MetroPT-3/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:27:57.921039+00:00
+
+[2026-09-16 16:27:59 UTC] stage=vanilla
+[2026-09-16 18:28:01,041][datasets][INFO] - PyTorch version 2.9.1 available.
+[2026-09-16 16:28:03 UTC] stage=vanilla tasks=90 seed=0 device=cuda Slurm=3449889
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Water_Quality_Darwin/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:28:03.177047+00:00
+[2026-09-16 16:29:50 UTC] vanilla method=chronos_bolt_512 dataset=Water_Quality_Darwin/15T term=short L=512 H=16
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Water_Quality_Darwin/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:07.396271+00:00
+[2026-09-16 16:30:07 UTC] vanilla method=chronos_bolt_512 dataset=Water_Quality_Darwin/15T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Water_Quality_Darwin/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:12.032063+00:00
+[2026-09-16 16:30:12 UTC] vanilla method=chronos_bolt_512 dataset=Water_Quality_Darwin/15T term=long L=512 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:15.963920+00:00
+[2026-09-16 16:30:15 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/5T term=short L=512 H=36
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:16.841112+00:00
+[2026-09-16 16:30:16 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/5T term=medium L=512 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:18.534802+00:00
+[2026-09-16 16:30:18 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/5T term=long L=512 H=864
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/10T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:20.312981+00:00
+[2026-09-16 16:30:20 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/10T term=short L=512 H=18
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/10T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:28.737671+00:00
+[2026-09-16 16:30:28 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/10T term=medium L=512 H=144
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/10T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:37.674418+00:00
+[2026-09-16 16:30:37 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/10T term=long L=512 H=432
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:46.003251+00:00
+[2026-09-16 16:30:46 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/15T term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:50.175768+00:00
+[2026-09-16 16:30:50 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/15T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:52.720832+00:00
+[2026-09-16 16:30:52 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/15T term=long L=512 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:55.573299+00:00
+[2026-09-16 16:30:55 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:30:59.716670+00:00
+[2026-09-16 16:30:59 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/H term=medium L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/current_velocity/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:04.710725+00:00
+[2026-09-16 16:31:04 UTC] vanilla method=chronos_bolt_512 dataset=current_velocity/H term=long L=512 H=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:10.507911+00:00
+[2026-09-16 16:31:10 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/15T term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:10.828788+00:00
+[2026-09-16 16:31:10 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/15T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:11.030141+00:00
+[2026-09-16 16:31:11 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/15T term=long L=512 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/30T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:11.324801+00:00
+[2026-09-16 16:31:11 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/30T term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/30T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:12.263665+00:00
+[2026-09-16 16:31:12 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/30T term=medium L=512 H=48
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/30T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:12.370321+00:00
+[2026-09-16 16:31:12 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/30T term=long L=512 H=144
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:12.628800+00:00
+[2026-09-16 16:31:12 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:12.808759+00:00
+[2026-09-16 16:31:12 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/H term=medium L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/CPHL/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:13.026544+00:00
+[2026-09-16 16:31:13 UTC] vanilla method=chronos_bolt_512 dataset=CPHL/H term=long L=512 H=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:13.337523+00:00
+[2026-09-16 16:31:13 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/15T term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:15.489927+00:00
+[2026-09-16 16:31:15 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/15T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:17.036989+00:00
+[2026-09-16 16:31:17 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/15T term=long L=512 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/20T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:18.541294+00:00
+[2026-09-16 16:31:18 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/20T term=short L=512 H=9
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/20T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:19.007360+00:00
+[2026-09-16 16:31:19 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/20T term=medium L=512 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/20T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:19.310377+00:00
+[2026-09-16 16:31:19 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/20T term=long L=512 H=216
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:19.591098+00:00
+[2026-09-16 16:31:19 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:21.987890+00:00
+[2026-09-16 16:31:21 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/H term=medium L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Coastal_T_S/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:24.858779+00:00
+[2026-09-16 16:31:24 UTC] vanilla method=chronos_bolt_512 dataset=Coastal_T_S/H term=long L=512 H=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_Weather/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:28.243558+00:00
+[2026-09-16 16:31:28 UTC] vanilla method=chronos_bolt_512 dataset=SG_Weather/D term=short L=512 H=3
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_Weather/D/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:31.620844+00:00
+[2026-09-16 16:31:31 UTC] vanilla method=chronos_bolt_512 dataset=SG_Weather/D term=medium L=512 H=7
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_Weather/D/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:33.087820+00:00
+[2026-09-16 16:31:33 UTC] vanilla method=chronos_bolt_512 dataset=SG_Weather/D term=long L=512 H=14
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_PM25/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:33.863356+00:00
+[2026-09-16 16:31:33 UTC] vanilla method=chronos_bolt_512 dataset=SG_PM25/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_PM25/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:34.443910+00:00
+[2026-09-16 16:31:34 UTC] vanilla method=chronos_bolt_512 dataset=SG_PM25/H term=medium L=512 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_PM25/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:35.310653+00:00
+[2026-09-16 16:31:35 UTC] vanilla method=chronos_bolt_512 dataset=SG_PM25/H term=long L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/NE_China_Wind/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:35.998302+00:00
+[2026-09-16 16:31:36 UTC] vanilla method=chronos_bolt_512 dataset=NE_China_Wind/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/NE_China_Wind/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:36.179374+00:00
+[2026-09-16 16:31:36 UTC] vanilla method=chronos_bolt_512 dataset=NE_China_Wind/H term=medium L=512 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/NE_China_Wind/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:36.465292+00:00
+[2026-09-16 16:31:36 UTC] vanilla method=chronos_bolt_512 dataset=NE_China_Wind/H term=long L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Australia_Solar/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:36.681947+00:00
+[2026-09-16 16:31:36 UTC] vanilla method=chronos_bolt_512 dataset=Australia_Solar/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Australia_Solar/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:37.091735+00:00
+[2026-09-16 16:31:37 UTC] vanilla method=chronos_bolt_512 dataset=Australia_Solar/H term=medium L=512 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Australia_Solar/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:37.728270+00:00
+[2026-09-16 16:31:37 UTC] vanilla method=chronos_bolt_512 dataset=Australia_Solar/H term=long L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/epf_electricity_price/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:38.238425+00:00
+[2026-09-16 16:31:38 UTC] vanilla method=chronos_bolt_512 dataset=epf_electricity_price/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/epf_electricity_price/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:38.938121+00:00
+[2026-09-16 16:31:38 UTC] vanilla method=chronos_bolt_512 dataset=epf_electricity_price/H term=medium L=512 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/epf_electricity_price/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:39.983786+00:00
+[2026-09-16 16:31:39 UTC] vanilla method=chronos_bolt_512 dataset=epf_electricity_price/H term=long L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/OpenElectricity_NEM/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:40.825016+00:00
+[2026-09-16 16:31:40 UTC] vanilla method=chronos_bolt_512 dataset=OpenElectricity_NEM/5T term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/OpenElectricity_NEM/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:42.800932+00:00
+[2026-09-16 16:31:42 UTC] vanilla method=chronos_bolt_512 dataset=OpenElectricity_NEM/5T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/OpenElectricity_NEM/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:45.155848+00:00
+[2026-09-16 16:31:45 UTC] vanilla method=chronos_bolt_512 dataset=OpenElectricity_NEM/5T term=long L=512 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/EWELD_Load/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:47.805218+00:00
+[2026-09-16 16:31:47 UTC] vanilla method=chronos_bolt_512 dataset=EWELD_Load/15T term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/EWELD_Load/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:48.502935+00:00
+[2026-09-16 16:31:48 UTC] vanilla method=chronos_bolt_512 dataset=EWELD_Load/15T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/EWELD_Load/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:49.321837+00:00
+[2026-09-16 16:31:49 UTC] vanilla method=chronos_bolt_512 dataset=EWELD_Load/15T term=long L=512 H=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_Carpark/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:31:50.360049+00:00
+[2026-09-16 16:31:50 UTC] vanilla method=chronos_bolt_512 dataset=SG_Carpark/15T term=short L=512 H=16
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_Carpark/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:08.282045+00:00
+[2026-09-16 16:32:08 UTC] vanilla method=chronos_bolt_512 dataset=SG_Carpark/15T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/SG_Carpark/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:22.637052+00:00
+[2026-09-16 16:32:22 UTC] vanilla method=chronos_bolt_512 dataset=SG_Carpark/15T term=long L=512 H=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Finland_Traffic/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:39.381260+00:00
+[2026-09-16 16:32:39 UTC] vanilla method=chronos_bolt_512 dataset=Finland_Traffic/15T term=short L=512 H=16
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Finland_Traffic/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:39.645641+00:00
+[2026-09-16 16:32:39 UTC] vanilla method=chronos_bolt_512 dataset=Finland_Traffic/15T term=medium L=512 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Finland_Traffic/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:39.854483+00:00
+[2026-09-16 16:32:39 UTC] vanilla method=chronos_bolt_512 dataset=Finland_Traffic/15T term=long L=512 H=672
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Port_Activity/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:40.285738+00:00
+[2026-09-16 16:32:40 UTC] vanilla method=chronos_bolt_512 dataset=Port_Activity/D term=short L=512 H=30
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Port_Activity/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:42.124866+00:00
+[2026-09-16 16:32:42 UTC] vanilla method=chronos_bolt_512 dataset=Port_Activity/W term=short L=512 H=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/ECDC_COVID/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:42.739125+00:00
+[2026-09-16 16:32:42 UTC] vanilla method=chronos_bolt_512 dataset=ECDC_COVID/D term=short L=512 H=30
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/ECDC_COVID/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:42.827873+00:00
+[2026-09-16 16:32:42 UTC] vanilla method=chronos_bolt_512 dataset=ECDC_COVID/W term=short L=512 H=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Global_Influenza/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:42.924282+00:00
+[2026-09-16 16:32:42 UTC] vanilla method=chronos_bolt_512 dataset=Global_Influenza/W term=short L=512 H=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Crypto/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:43.138532+00:00
+[2026-09-16 16:32:43 UTC] vanilla method=chronos_bolt_512 dataset=Crypto/D term=short L=512 H=30
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/US_Term_Structure/B/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:43.225267+00:00
+[2026-09-16 16:32:43 UTC] vanilla method=chronos_bolt_512 dataset=US_Term_Structure/B term=short L=512 H=20
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Oil_Price/B/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.210497+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=Oil_Price/B term=short L=512 H=20
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Job_Claims/W/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.540335+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=Job_Claims/W term=short L=512 H=13
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Uncertainty_1M/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.607550+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=Uncertainty_1M/M term=short L=512 H=6
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Housing_Inventory/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.673956+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=Housing_Inventory/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/JOLTS/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.740013+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=JOLTS/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/US_Labor/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.803478+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=US_Labor/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Vehicle_Supply/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.903742+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=Vehicle_Supply/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Auto_Production_SF/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:44.971794+00:00
+[2026-09-16 16:32:44 UTC] vanilla method=chronos_bolt_512 dataset=Auto_Production_SF/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Commodity_Production/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:45.038115+00:00
+[2026-09-16 16:32:45 UTC] vanilla method=chronos_bolt_512 dataset=Commodity_Production/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Commodity_Import/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:45.186683+00:00
+[2026-09-16 16:32:45 UTC] vanilla method=chronos_bolt_512 dataset=Commodity_Import/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/WUI_Global/Q/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:45.274975+00:00
+[2026-09-16 16:32:45 UTC] vanilla method=chronos_bolt_512 dataset=WUI_Global/Q term=short L=512 H=4
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Global_Price/Q/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:45.408324+00:00
+[2026-09-16 16:32:45 UTC] vanilla method=chronos_bolt_512 dataset=Global_Price/Q term=short L=512 H=4
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Vehicle_Sales/M/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:45.679387+00:00
+[2026-09-16 16:32:45 UTC] vanilla method=chronos_bolt_512 dataset=Vehicle_Sales/M term=short L=512 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Online_Retail_2_UCI/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:45.768905+00:00
+[2026-09-16 16:32:45 UTC] vanilla method=chronos_bolt_512 dataset=Online_Retail_2_UCI/D term=short L=512 H=30
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Supply_Chain_Customer/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:45.831700+00:00
+[2026-09-16 16:32:45 UTC] vanilla method=chronos_bolt_512 dataset=Supply_Chain_Customer/D term=short L=512 H=30
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Supply_Chain_Location/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:46.191542+00:00
+[2026-09-16 16:32:46 UTC] vanilla method=chronos_bolt_512 dataset=Supply_Chain_Location/D term=short L=512 H=30
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/azure2019_U/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:46.682874+00:00
+[2026-09-16 16:32:46 UTC] vanilla method=chronos_bolt_512 dataset=azure2019_U/5T term=short L=512 H=48
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Smart_Manufacturing/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:47.869238+00:00
+[2026-09-16 16:32:47 UTC] vanilla method=chronos_bolt_512 dataset=Smart_Manufacturing/H term=short L=512 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Smart_Manufacturing/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:50.687180+00:00
+[2026-09-16 16:32:50 UTC] vanilla method=chronos_bolt_512 dataset=Smart_Manufacturing/H term=medium L=512 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/Smart_Manufacturing/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:54.079684+00:00
+[2026-09-16 16:32:54 UTC] vanilla method=chronos_bolt_512 dataset=Smart_Manufacturing/H term=long L=512 H=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/MetroPT-3/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:58.073343+00:00
+[2026-09-16 16:32:58 UTC] vanilla method=chronos_bolt_512 dataset=MetroPT-3/5T term=short L=512 H=48
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/MetroPT-3/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:58.376614+00:00
+[2026-09-16 16:32:58 UTC] vanilla method=chronos_bolt_512 dataset=MetroPT-3/5T term=medium L=512 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_512/MetroPT-3/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:59.178079+00:00
+[2026-09-16 16:32:59 UTC] vanilla method=chronos_bolt_512 dataset=MetroPT-3/5T term=long L=512 H=576
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Water_Quality_Darwin/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:32:59.860353+00:00
+[2026-09-16 16:32:59 UTC] vanilla method=chronos_bolt_max dataset=Water_Quality_Darwin/15T term=short L=2048 H=16
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Water_Quality_Darwin/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:33:08.362298+00:00
+[2026-09-16 16:33:08 UTC] vanilla method=chronos_bolt_max dataset=Water_Quality_Darwin/15T term=medium L=2048 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Water_Quality_Darwin/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:33:20.506302+00:00
+[2026-09-16 16:33:20 UTC] vanilla method=chronos_bolt_max dataset=Water_Quality_Darwin/15T term=long L=2048 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:33:35.287506+00:00
+[2026-09-16 16:33:35 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/5T term=short L=2048 H=36
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:33:36.914914+00:00
+[2026-09-16 16:33:36 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/5T term=medium L=2048 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:33:43.265578+00:00
+[2026-09-16 16:33:43 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/5T term=long L=2048 H=864
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/10T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:33:50.090530+00:00
+[2026-09-16 16:33:50 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/10T term=short L=2048 H=18
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/10T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:34:06.088668+00:00
+[2026-09-16 16:34:06 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/10T term=medium L=2048 H=144
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/10T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:34:38.694330+00:00
+[2026-09-16 16:34:38 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/10T term=long L=2048 H=432
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:35:10.005252+00:00
+[2026-09-16 16:35:10 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/15T term=short L=2048 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:35:17.842213+00:00
+[2026-09-16 16:35:17 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/15T term=medium L=2048 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:35:26.493345+00:00
+[2026-09-16 16:35:26 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/15T term=long L=2048 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:35:38.120812+00:00
+[2026-09-16 16:35:38 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/H term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:35:45.932049+00:00
+[2026-09-16 16:35:45 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/H term=medium L=2048 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/current_velocity/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:03.849244+00:00
+[2026-09-16 16:36:03 UTC] vanilla method=chronos_bolt_max dataset=current_velocity/H term=long L=2048 H=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:25.746621+00:00
+[2026-09-16 16:36:25 UTC] vanilla method=chronos_bolt_max dataset=CPHL/15T term=short L=2048 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:26.316143+00:00
+[2026-09-16 16:36:26 UTC] vanilla method=chronos_bolt_max dataset=CPHL/15T term=medium L=2048 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:26.905146+00:00
+[2026-09-16 16:36:26 UTC] vanilla method=chronos_bolt_max dataset=CPHL/15T term=long L=2048 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/30T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:27.730148+00:00
+[2026-09-16 16:36:27 UTC] vanilla method=chronos_bolt_max dataset=CPHL/30T term=short L=2048 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/30T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:28.302446+00:00
+[2026-09-16 16:36:28 UTC] vanilla method=chronos_bolt_max dataset=CPHL/30T term=medium L=2048 H=48
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/30T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:28.474267+00:00
+[2026-09-16 16:36:28 UTC] vanilla method=chronos_bolt_max dataset=CPHL/30T term=long L=2048 H=144
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:29.228819+00:00
+[2026-09-16 16:36:29 UTC] vanilla method=chronos_bolt_max dataset=CPHL/H term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:29.524053+00:00
+[2026-09-16 16:36:29 UTC] vanilla method=chronos_bolt_max dataset=CPHL/H term=medium L=2048 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/CPHL/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:30.157028+00:00
+[2026-09-16 16:36:30 UTC] vanilla method=chronos_bolt_max dataset=CPHL/H term=long L=2048 H=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:30.938034+00:00
+[2026-09-16 16:36:30 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/15T term=short L=2048 H=12
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:34.950890+00:00
+[2026-09-16 16:36:34 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/15T term=medium L=2048 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:39.319657+00:00
+[2026-09-16 16:36:39 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/15T term=long L=2048 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/20T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:44.676461+00:00
+[2026-09-16 16:36:44 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/20T term=short L=2048 H=9
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/20T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:45.510475+00:00
+[2026-09-16 16:36:45 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/20T term=medium L=2048 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/20T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:46.385365+00:00
+[2026-09-16 16:36:46 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/20T term=long L=2048 H=216
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:47.287172+00:00
+[2026-09-16 16:36:47 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/H term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:36:51.794016+00:00
+[2026-09-16 16:36:51 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/H term=medium L=2048 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:02.175486+00:00
+[2026-09-16 16:37:02 UTC] vanilla method=chronos_bolt_max dataset=Coastal_T_S/H term=long L=2048 H=336
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/SG_Weather/D/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:14.780065+00:00
+[2026-09-16 16:37:14 UTC] vanilla method=chronos_bolt_max dataset=SG_Weather/D term=short L=2048 H=3
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/SG_Weather/D/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:21.272752+00:00
+[2026-09-16 16:37:21 UTC] vanilla method=chronos_bolt_max dataset=SG_Weather/D term=medium L=2048 H=7
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/SG_Weather/D/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:24.069051+00:00
+[2026-09-16 16:37:24 UTC] vanilla method=chronos_bolt_max dataset=SG_Weather/D term=long L=2048 H=14
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/SG_PM25/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:25.508528+00:00
+[2026-09-16 16:37:25 UTC] vanilla method=chronos_bolt_max dataset=SG_PM25/H term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/SG_PM25/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:26.569984+00:00
+[2026-09-16 16:37:26 UTC] vanilla method=chronos_bolt_max dataset=SG_PM25/H term=medium L=2048 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/SG_PM25/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:29.448095+00:00
+[2026-09-16 16:37:29 UTC] vanilla method=chronos_bolt_max dataset=SG_PM25/H term=long L=2048 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/NE_China_Wind/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:31.755228+00:00
+[2026-09-16 16:37:31 UTC] vanilla method=chronos_bolt_max dataset=NE_China_Wind/H term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/NE_China_Wind/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:32.064345+00:00
+[2026-09-16 16:37:32 UTC] vanilla method=chronos_bolt_max dataset=NE_China_Wind/H term=medium L=2048 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/NE_China_Wind/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:32.857134+00:00
+[2026-09-16 16:37:32 UTC] vanilla method=chronos_bolt_max dataset=NE_China_Wind/H term=long L=2048 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Australia_Solar/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:33.489584+00:00
+[2026-09-16 16:37:33 UTC] vanilla method=chronos_bolt_max dataset=Australia_Solar/H term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Australia_Solar/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:34.233009+00:00
+[2026-09-16 16:37:34 UTC] vanilla method=chronos_bolt_max dataset=Australia_Solar/H term=medium L=2048 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/Australia_Solar/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:36.270521+00:00
+[2026-09-16 16:37:36 UTC] vanilla method=chronos_bolt_max dataset=Australia_Solar/H term=long L=2048 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/epf_electricity_price/H/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:37.923724+00:00
+[2026-09-16 16:37:37 UTC] vanilla method=chronos_bolt_max dataset=epf_electricity_price/H term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/epf_electricity_price/H/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:39.182252+00:00
+[2026-09-16 16:37:39 UTC] vanilla method=chronos_bolt_max dataset=epf_electricity_price/H term=medium L=2048 H=72
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/epf_electricity_price/H/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:42.597516+00:00
+[2026-09-16 16:37:42 UTC] vanilla method=chronos_bolt_max dataset=epf_electricity_price/H term=long L=2048 H=168
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/OpenElectricity_NEM/5T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:45.390426+00:00
+[2026-09-16 16:37:45 UTC] vanilla method=chronos_bolt_max dataset=OpenElectricity_NEM/5T term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/OpenElectricity_NEM/5T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:49.121855+00:00
+[2026-09-16 16:37:49 UTC] vanilla method=chronos_bolt_max dataset=OpenElectricity_NEM/5T term=medium L=2048 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/OpenElectricity_NEM/5T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:37:57.156073+00:00
+[2026-09-16 16:37:57 UTC] vanilla method=chronos_bolt_max dataset=OpenElectricity_NEM/5T term=long L=2048 H=288
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/EWELD_Load/15T/short/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:38:07.009730+00:00
+[2026-09-16 16:38:07 UTC] vanilla method=chronos_bolt_max dataset=EWELD_Load/15T term=short L=2048 H=24
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/EWELD_Load/15T/medium/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:38:08.300317+00:00
+[2026-09-16 16:38:08 UTC] vanilla method=chronos_bolt_max dataset=EWELD_Load/15T term=medium L=2048 H=96
+TIME run allocation action=new run=/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/tsrag/predictions/chronos_bolt_max/EWELD_Load/15T/long/run_0 launch_id=selena_3449889 slurm_job_id=3449889 launched_at=2026-09-16T16:38:11.015077+00:00
+[2026-09-16 16:38:11 UTC] vanilla method=chronos_bolt_max dataset=EWELD_Load/15T term=long L=2048 H=672
