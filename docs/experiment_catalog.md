@@ -7,7 +7,7 @@
 | `seasonal_naive.slurm` | Produce the common finite-support grid and matched scaling baseline | Seasonal forecast/evaluation |
 | `seasonal_naive_selena.slurm` | Same Seasonal producer on the overflow execution surface | same stage |
 
-Use `bash submit_experiment.sh dgx` from the project root. The default `full`
+Use `bash scripts/submit_experiment.sh dgx` from the project root. The default `full`
 mode selects all three terms present for each configured dataset except the
 four documented Adaptime exclusions, giving 90 tasks. `EXPERIMENT_MODE=test`
 selects `SG_Weather/D`, short when `datasets=[all]`; explicit datasets/terms
@@ -27,6 +27,9 @@ Without usable validation, the mixture is explicitly pure Chronos-2.
 `datastore_stride=1` and `max_datastore_windows=null` admit every eligible date.
 The same causal admission rule applies to validation and testing. Candidate
 history and future are 512 and 64 points regardless of the official horizon.
+After validation selects the mixture weight, test retrieval extends through all
+available observations, including validation dates, subject to stride, cap and
+the complete-neighbor boundary. The selected weight remains frozen.
 Changing stride, cap, validation, T5 sample count, or seed produces a different
 plain scientific computation and cannot silently reuse incompatible results.
 

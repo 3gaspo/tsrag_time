@@ -60,14 +60,14 @@ Run from the project root. If the selected Seasonal grid does not exist, first
 submit its producer and wait for completion:
 
 ```bash
-bash submit_seasonal_naive.sh dgx shared
+bash scripts/submit_seasonal_naive.sh dgx shared
 ```
 
 Run the narrow remote smoke task (`SG_Weather/D`, short), then the full comparison:
 
 ```bash
-EXPERIMENT_MODE=test bash submit_experiment.sh dgx
-bash submit_experiment.sh dgx
+EXPERIMENT_MODE=test bash scripts/submit_experiment.sh dgx
+bash scripts/submit_experiment.sh dgx
 ```
 
 The full configuration preserves Adaptime's 90-task scope, excluding
@@ -75,8 +75,8 @@ The full configuration preserves Adaptime's 90-task scope, excluding
 Overrides apply to every stage and report:
 
 ```bash
-bash submit_experiment.sh dgx 'datasets=[SG_Weather/D]' 'terms=[short]'
-bash submit_experiment.sh dgx validation_length=0
+bash scripts/submit_experiment.sh dgx 'datasets=[SG_Weather/D]' 'terms=[short]'
+bash scripts/submit_experiment.sh dgx validation_length=0
 ```
 
 Default validation uses TIME's configured interval immediately before testing.
@@ -84,6 +84,11 @@ The mixture estimates a Beta(1,1)-smoothed probability that TS-RAG has lower
 per-date mean-variate MSSE than Chronos-2, counting ties as half wins. With
 no usable validation dates it uses pure Chronos-2. Validation length never
 changes the official test interval.
+
+Once the validation mixture weight is selected, it stays frozen for testing.
+Test retrieval includes all observations available at each query, including the
+validation period. There is no cutoff at the start of validation; stride,
+the optional window cap and complete-neighbor boundaries still apply.
 
 The datastore includes every historical date by default, with no fitting-derived
 boundary. At each real query, a neighbor is eligible only if its entire
@@ -95,7 +100,8 @@ cutoff stays at the real query date. `datastore_stride` and
 ## Outputs and cluster operations
 
 One allocation executes `prepare,vanilla,extract,predict,mix,evaluate,report` in
-order. Root fronts source `src/slurm/` implementations. Each stage allocates
+order. Launchers under `scripts/` submit the root Slurm fronts and source
+`src/slurm/` implementations. Each stage allocates
 schema-1 `run_n` manifests before work; completion occurs after successful
 `srun`. Restarting the launcher skips exact completed tasks and recomputes
 interrupted tasks from their beginning. `STAGES` is a comma-separated recovery
@@ -134,6 +140,7 @@ All implementation and tests are under `src/`: `data/` owns windows;
 owns borrowed ARM/retrieval and native inference; `proposal/` owns the mixture;
 `pipeline/` owns orchestration/manifests; `results/` owns reports; `conf/` and
 `scripts/` own configuration and entry points. `src/slurm/` owns scheduler shells.
+Root-level `scripts/` contains the concise experiment and Seasonal launchers.
 
 `src/scripts/build_docs.py --render all` builds the three PDFs with pdfLaTeX;
 its default mode validates the required public views. Update scientific protocol

@@ -1,6 +1,8 @@
 # Architecture
 
 All Python implementation, entry points, tests, and workflow shells are below `src/`.
+Concise shell submission fronts live in root-level `scripts/`; they resolve the
+project root before delegating to `src/slurm/` and submitting the root Slurm files.
 
 | Owner | Responsibility |
 |---|---|
@@ -28,6 +30,12 @@ retriever filters each candidate by `candidate_origin + 64 <= real_query_origin`
 An unbounded index adds newly observed dates incrementally; a capped index
 retains the most recent eligible dates. Recursive forecast chunks re-embed and
 retrieve using the unchanged real cutoff.
+
+The prepared union extends through the final test query. After validation selects
+the frozen mixture weight, testing admits validation-period observations under
+the same stride, most-recent-window cap and complete 64-point future boundary.
+Neither validation length nor weight selection freezes the test datastore at
+the start of validation. Validation queries still see only their own observed past.
 
 Every phase owns an independent `run_n/manifest.json`. Producer dependencies
 embed schema, identity, model/pipeline/experiment configuration, and seed as

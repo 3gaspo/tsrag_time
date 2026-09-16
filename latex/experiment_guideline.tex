@@ -50,6 +50,10 @@ Crop when $H\le64$. Otherwise append each median chunk, retain the last 512
 points, re-embed, retrieve and repeat. Candidate eligibility stays anchored
 to the real $t$ in every chunk. Earlier test observations may be retrieved
 by later real queries once the full native continuation is observed.
+Validation does not freeze the test datastore at the validation boundary.
+After selecting the mixture weight, keep that weight fixed and admit all
+observations available at each test query, including validation-period dates,
+subject to the same stride, optional cap and $s+64\le t$ boundary.
 Missing query history, fewer than 11 eligible neighbors, recorded extraction
 or inference errors, and non-finite forecasts on required target steps use
 the independently computed Bolt-512 forecast for the entire window/variate.
@@ -122,13 +126,14 @@ These paths are under \texttt{src/timebench/}.
 \item Evaluate all six methods on the selected Seasonal grid.
 \item Write matched comparison and source-manifest reports.
 \end{enumerate}
-Run \texttt{bash submit\_experiment.sh dgx} from the project root after the
+Run \texttt{bash scripts/submit\_experiment.sh dgx} from the project root after the
 selected Seasonal store is complete. Hydra configuration is
 \begin{quote}\path{src/timebench/conf/experiment.yaml}\end{quote}
 Use \texttt{validation\_length=0} for no validation, and explicit
 \texttt{datasets=[...]} / \texttt{terms=[...]} overrides for a subset.
-Root experiment and Seasonal fronts source implementations under
-\texttt{src/slurm/}; one allocation runs the visible stages sequentially.
+Experiment and Seasonal launchers live under \texttt{scripts/}; they submit
+the root Slurm fronts and delegate implementations to \texttt{src/slurm/}.
+One allocation runs the visible stages sequentially.
 
 Every task phase has a schema-1 plain scientific manifest allocated before
 expensive work. Exact completed phases are reusable; interrupted tasks restart

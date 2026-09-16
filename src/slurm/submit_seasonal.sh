@@ -13,7 +13,7 @@ case "$cluster" in
         source "$PROJECT_ROOT/src/slurm/selena_runtime.sh"
         front=seasonal_naive_selena.slurm
         ;;
-    *) echo 'usage: bash submit_seasonal_naive.sh dgx|selena [shared|project] [Hydra overrides...]' >&2; exit 2 ;;
+    *) echo 'usage: bash scripts/submit_seasonal_naive.sh dgx|selena [shared|project] [Hydra overrides...]' >&2; exit 2 ;;
 esac
 if [ "$#" -ge 2 ]; then shift 2; elif [ "$#" -eq 1 ]; then shift; fi
 sbatch "$front" "$@"

@@ -77,7 +77,7 @@ class Windows:
                            for item, channel, origin in references], dtype=np.float64).reshape(-1, horizon)
 
     def datastore(self, split_references):
-        """Materialize the union once; eligibility is still checked per query."""
+        """Union through testing, including validation; filter at each real query."""
         rows = []
         keys = np.unique(split_references[:, :2], axis=0)
         for item, channel in keys:

@@ -19,7 +19,7 @@ import torch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'src'))
 
-from timebench.data.windows import Task, Windows, candidate_origins, query_origins
+from timebench.data.windows import Task, Windows, candidate_origins, query_origins, write_prepared
 from timebench.evaluation.metrics import summarize_metric_values
 from timebench.evaluation.grid import build_evaluation_grid, save_evaluation_grid
 from timebench.external_models.tsrag.inference import CausalRetriever, forecast_query
@@ -84,6 +84,43 @@ class SyntheticForecaster:
 
 
 class Contract(unittest.TestCase):
+    def test_test_datastore_includes_validation(self):
+        task = Task('synthetic/D', 'short', 10, 100, 128, 2, datastore_stride=7,
+                    max_datastore_windows=13)
+        windows = SyntheticWindows(task, '.')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            write_prepared(windows, root)
+            refs = np.load(root/'datastore_references.npy')
+            validation = np.load(root/'validation_references.npy')
+            test = np.load(root/'test_references.npy')
+            # Select on validation first, then query the same observed series at test time.
+            vectors = np.arange(len(refs), dtype=np.float32)[:, None]
+            with patch('timebench.external_models.tsrag.inference.TSRAGIndex', ArrayIndex):
+                retrieval = CausalRetriever(refs, vectors, task.max_datastore_windows)
+                retrieval.search(validation[0], np.zeros((1, 1)))
+                validation_positions = retrieval.positions.copy()
+                first_test = test[0]
+                self.assertIsNotNone(retrieval.search(first_test, np.zeros((1, 1))))
+                eligible = refs[retrieval.positions]
+                self.assertEqual(len(eligible), task.max_datastore_windows)
+                self.assertTrue(np.any(eligible[:, 2] >= validation[0, 2]))
+                self.assertTrue(np.any(~np.isin(retrieval.positions, validation_positions)))
+                expected = candidate_origins(int(first_test[2]), stride=task.datastore_stride,
+                                             maximum=task.max_datastore_windows)
+                np.testing.assert_array_equal(eligible[:, 2], expected)
+                self.assertTrue(np.all(eligible[:, 2] + 64 <= first_test[2]))
+                last_test = test[test[:, 1] == 0][-1]
+                retrieval.search(last_test, np.zeros((1, 1)))
+                self.assertTrue(np.any(refs[retrieval.positions, 2] >= first_test[2]))
+                self.assertTrue(np.all(refs[retrieval.positions, 2] + 64 <= last_test[2]))
+            # Disabling validation does not shrink the datastore available to testing.
+            no_validation = root/'no_validation'
+            no_validation.mkdir()
+            write_prepared(SyntheticWindows(Task('synthetic/D', 'short', 10, 100, 0, 2,
+                                                 datastore_stride=7, max_datastore_windows=13), '.'), no_validation)
+            np.testing.assert_array_equal(refs, np.load(no_validation/'datastore_references.npy'))
+
     def test_causal_dates_and_rollout(self):
         self.assertEqual(candidate_origins(600).tolist(), list(range(512, 537)))
         self.assertEqual(candidate_origins(600, maximum=3).tolist(), [534, 535, 536])
@@ -235,10 +272,14 @@ class Contract(unittest.TestCase):
         self.assertFalse((ROOT/'src/timebench/adaptime').exists())
         self.assertFalse((ROOT/'src/timebench/models').exists())
         self.assertFalse((ROOT/'experiments').exists())
+        for name in ('submit_experiment.sh', 'submit_seasonal_naive.sh'):
+            self.assertTrue((ROOT/'scripts'/name).is_file())
+            self.assertFalse((ROOT/name).exists())
         # Bash is the installed Git shell; this requires no project environment.
         bash = Path(r'C:\Program Files\Git\bin\bash.exe')
         if bash.exists():
             files = list(ROOT.glob('*.sh')) + list(ROOT.glob('*.slurm')) + list((ROOT/'src/slurm').glob('*.sh'))
+            files += list((ROOT/'scripts').glob('*.sh'))
             for path in files:
                 subprocess.run([str(bash), '-n', path.as_posix()], check=True)
 

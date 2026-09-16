@@ -12,7 +12,7 @@ case "$cluster" in
         source "$PROJECT_ROOT/src/slurm/selena_runtime.sh"
         front=experiment_selena.slurm
         ;;
-    *) echo 'usage: bash submit_experiment.sh dgx|selena [Hydra overrides...]' >&2; exit 2 ;;
+    *) echo 'usage: bash scripts/submit_experiment.sh dgx|selena [Hydra overrides...]' >&2; exit 2 ;;
 esac
 shift || true
 dependency=()
