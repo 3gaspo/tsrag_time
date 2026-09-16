@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from unittest.mock import patch
 import ast
 import json
+from itertools import product
 import os
 import re
 import subprocess
@@ -22,11 +23,16 @@ sys.path.insert(0, str(ROOT / 'src'))
 from timebench.data.windows import Task, Windows, candidate_origins, query_origins, write_prepared
 from timebench.evaluation.metrics import summarize_metric_values
 from timebench.evaluation.grid import build_evaluation_grid, save_evaluation_grid
-from timebench.external_models.tsrag.inference import CausalRetriever, forecast_query
+from timebench.external_models.tsrag.inference import CausalRetriever, forecast_query, instance_normalize, query_scaled_neighbors, normalized_l2
 from timebench.model_loading.foundation import Forecaster
-from timebench.pipeline.workflow import Workflow, CONTROLS
+from timebench.pipeline.workflow import Workflow, CONTROLS, retrieval_methods
 from timebench.pipeline.runs import load_manifest, RunHandle
 from timebench.proposal.mixture import estimate_weight
+
+
+OPTIONS = {'scope': 'all', 'aligned': False, 'query_scale': False, 'representation': 't5'}
+GRID = {'scope': ['all', 'same_series'], 'aligned': [False, True],
+        'query_scale': [False, True], 'representation': ['t5', 'instance_l2']}
 
 
 class ArrayIndex:
@@ -56,7 +62,8 @@ class SyntheticWindows(Windows):
     def __init__(self, task, storage):
         self.task, self.source_path = task, Path(storage) / task.dataset
         t = np.arange(900, dtype=float)
-        self.source = [{'target': np.stack((np.sin(t/9) + t/1000, np.cos(t/7) + t/800)), 'freq': 'D'}]
+        self.source = [{'target': np.stack((np.sin(t/9) + t/1000, np.cos(t/7) + t/800)), 'freq': 'D', 'start': '2000-01-01'}]
+        self._targets, self.start_ticks, self.tick_step = {}, np.array([0]), 1
 
 
 class SyntheticDataset:
@@ -96,12 +103,13 @@ class Contract(unittest.TestCase):
             test = np.load(root/'test_references.npy')
             # Select on validation first, then query the same observed series at test time.
             vectors = np.arange(len(refs), dtype=np.float32)[:, None]
-            with patch('timebench.external_models.tsrag.inference.TSRAGIndex', ArrayIndex):
-                retrieval = CausalRetriever(refs, vectors, task.max_datastore_windows)
-                retrieval.search(validation[0], np.zeros((1, 1)))
+            with patch('timebench.external_models.tsrag.retriever.TSRAGIndex', ArrayIndex):
+                retrieval = CausalRetriever(refs, vectors, task.max_datastore_windows, windows=windows,
+                                            options={**OPTIONS, 'scope': 'same_series'})
+                retrieval.search(validation[0], np.zeros((1, 1)), np.zeros((1, 512)))
                 validation_positions = retrieval.positions.copy()
                 first_test = test[0]
-                self.assertIsNotNone(retrieval.search(first_test, np.zeros((1, 1))))
+                self.assertIsNotNone(retrieval.search(first_test, np.zeros((1, 1)), np.zeros((1, 512))))
                 eligible = refs[retrieval.positions]
                 self.assertEqual(len(eligible), task.max_datastore_windows)
                 self.assertTrue(np.any(eligible[:, 2] >= validation[0, 2]))
@@ -111,7 +119,7 @@ class Contract(unittest.TestCase):
                 np.testing.assert_array_equal(eligible[:, 2], expected)
                 self.assertTrue(np.all(eligible[:, 2] + 64 <= first_test[2]))
                 last_test = test[test[:, 1] == 0][-1]
-                retrieval.search(last_test, np.zeros((1, 1)))
+                retrieval.search(last_test, np.zeros((1, 1)), np.zeros((1, 512)))
                 self.assertTrue(np.any(refs[retrieval.positions, 2] >= first_test[2]))
                 self.assertTrue(np.all(refs[retrieval.positions, 2] + 64 <= last_test[2]))
             # Disabling validation does not shrink the datastore available to testing.
@@ -125,15 +133,17 @@ class Contract(unittest.TestCase):
         self.assertEqual(candidate_origins(600).tolist(), list(range(512, 537)))
         self.assertEqual(candidate_origins(600, maximum=3).tolist(), [534, 535, 536])
         self.assertEqual(query_origins(1000, 11, 4).tolist(), [989, 993])
+        windows = SyntheticWindows(Task('synthetic/D', 'short', 4, 8, 0, 2), '.')
         refs = np.array([(0, 0, date) for date in range(512, 550)] + [(0, 1, 512)])
+        refs = refs[np.argsort(windows.ticks(refs), kind='stable')]
         vectors = np.arange(len(refs), dtype=np.float32)[:, None]
-        with patch('timebench.external_models.tsrag.inference.TSRAGIndex', ArrayIndex):
-            retrieval = CausalRetriever(refs, vectors)
-            self.assertIsNone(retrieval.search((0, 0, 585), np.zeros((1, 1))))
-            found = retrieval.search((0, 0, 600), np.zeros((1, 1)))
+        with patch('timebench.external_models.tsrag.retriever.TSRAGIndex', ArrayIndex):
+            retrieval = CausalRetriever(refs, vectors, windows=windows, options={**OPTIONS, 'scope': 'same_series'})
+            self.assertIsNone(retrieval.search((0, 0, 585), np.zeros((1, 1)), np.zeros((1, 512))))
+            found = retrieval.search((0, 0, 600), np.zeros((1, 1)), np.zeros((1, 512)))
             self.assertTrue(np.all(refs[found[1], 2] + 64 <= 600))
             self.assertEqual(len(retrieval.positions), 25)
-            retrieval.search((0, 0, 604), np.zeros((1, 1)))
+            retrieval.search((0, 0, 604), np.zeros((1, 1)), np.zeros((1, 512)))
             self.assertEqual(len(retrieval.positions), 29)
         task = Task('synthetic/D', 'long', 130, 130, 0, 2)
         windows = SyntheticWindows(task, '.')
@@ -141,8 +151,9 @@ class Contract(unittest.TestCase):
         model = SimpleNamespace(model=lambda **kwargs: (lengths.append(kwargs['context'].shape[-1]) or
                                 SimpleNamespace(quantile_preds=torch.zeros(1, 1, 64))), median_index=0)
         class Retrieval:
+            options = OPTIONS
             references = np.array([(0, 0, 512)] * 10)
-            def search(self, reference, representation):
+            def search(self, reference, representation, context):
                 cutoffs.append(int(reference[2]))
                 return np.zeros((1, 10), dtype=np.float32), np.arange(10)[None]
         prediction, reason = forecast_query(model, Encoder(), Retrieval(), windows, (0, 0, 700), np.zeros(768), 130, 'cpu')
@@ -150,6 +161,54 @@ class Contract(unittest.TestCase):
         self.assertEqual(len(prediction), 130)
         self.assertEqual(lengths, [512, 512, 512])
         self.assertEqual(cutoffs, [700, 700, 700])
+
+    def test_factorial_grid_and_cross_variate_calendar_alignment(self):
+        methods = retrieval_methods({'retrieval': OPTIONS, 'retrieval_grid': GRID, 'ablation': True})
+        self.assertEqual(len(methods), 16)
+        expected = set(product(GRID['scope'], GRID['aligned'], GRID['query_scale'], GRID['representation']))
+        self.assertEqual({tuple(option[key] for key in GRID) for option in methods.values()}, expected)
+        self.assertEqual(retrieval_methods({'retrieval': OPTIONS, 'ablation': False}), {'tsrag': OPTIONS})
+        task = Task('synthetic/15T', 'short', 4, 8, 0, 2, alignment_period=7)
+        target = SyntheticWindows(task, '.').source[0]['target']
+        source = [{'target': target, 'freq': '15min', 'start': '2000-01-01 00:00:00'},
+                  {'target': target, 'freq': '15min', 'start': '2000-01-01 01:15:00'}]
+        with patch.dict(sys.modules, {'datasets': SimpleNamespace(load_from_disk=lambda path: source)}):
+            windows = Windows(task, '.')
+        self.assertEqual(windows.tick_step, 15)
+        self.assertEqual(windows.start_ticks[1] - windows.start_ticks[0], 75)
+        reference = np.array([0, 0, 800])
+        refs = windows.datastore(reference[None])
+        query = np.asarray(windows.histories([reference], 512), dtype=np.float32)
+        vectors = np.broadcast_to(instance_normalize(query), (len(refs), 512)).copy()
+        # L2 cells must not initialize a T5 encoder or FAISS index.
+        with patch('timebench.external_models.tsrag.retriever.TSRAGIndex', side_effect=AssertionError('L2 invoked FAISS')):
+            cross = CausalRetriever(refs, vectors, windows=windows,
+                                    options={**OPTIONS, 'representation': 'instance_l2', 'aligned': True},
+                                    batch_size=31)
+            found = cross.search(reference, None, query)
+            self.assertIsNotNone(found)
+            selected = refs[found[1][0]]
+            tick = windows.ticks(reference[None])[0]
+            self.assertTrue(np.all(windows.ticks(selected) + 64 * 15 <= tick))
+            self.assertTrue(np.all((tick - windows.ticks(selected)) % (7 * 15) == 0))
+            self.assertTrue(np.any((selected[:, 0] != 0) | (selected[:, 1] != 0)))
+            single = CausalRetriever(refs, vectors, windows=windows,
+                                     options={**OPTIONS, 'scope': 'same_series', 'representation': 'instance_l2'})
+            selected = refs[single.search(reference, None, query)[1][0]]
+            self.assertTrue(np.all(selected[:, :2] == (0, 0)))
+
+    def test_query_scale_alignment_and_normalized_l2(self):
+        trajectory = np.sin(np.arange(576, dtype=np.float32) / 17)
+        query = (3 * trajectory[:512] - 12)[None]
+        neighbors = np.stack((2 * trajectory + 50, 5 * trajectory - 7))
+        aligned = query_scaled_neighbors(query, neighbors)
+        np.testing.assert_allclose(aligned, np.broadcast_to(3 * trajectory - 12, aligned.shape), atol=1e-4)
+        vectors = instance_normalize(neighbors[:, :512])
+        distances = normalized_l2(instance_normalize(query)[0], vectors, 0.8)
+        self.assertTrue(np.all(distances < 1e-6))
+        damaged = vectors.copy()
+        damaged[0, :200] = np.nan
+        self.assertFalse(np.isfinite(normalized_l2(instance_normalize(query)[0], damaged, 0.8)[0]))
 
     def test_mixture_and_population_dispersion(self):
         refs = np.array([(0, 0, 10), (0, 1, 10), (0, 0, 12)])
@@ -186,7 +245,9 @@ class Contract(unittest.TestCase):
             root = Path(directory)
             workflow = Workflow.__new__(Workflow)
             task = Task('synthetic/D', 'short', 4, 8, 8, 2)
-            workflow.config = {'t5_samples': 20, 'embedding_batch_size': 16}
+            workflow.config = {'t5_samples': 20, 'embedding_batch_size': 16, 'minimum_overlap_fraction': 0.8,
+                               'ablation': True, 'retrieval': OPTIONS, 'retrieval_grid': GRID}
+            workflow.rag_methods = retrieval_methods(workflow.config)
             workflow.root, workflow.storage, workflow.weights = root/'tsrag', root/'datasets', root/'weights'
             workflow.tasks, workflow.seed, workflow.device, workflow.batch_size = [task], 0, 'cpu', 2
             grid = root/'seasonal'/'run_0'/'evaluation_grid.npz'
@@ -207,7 +268,7 @@ class Contract(unittest.TestCase):
                  patch('timebench.model_loading.foundation.Forecaster', SyntheticForecaster), \
                  patch('timebench.external_models.tsrag.retriever.TSRAGRetriever', Encoder), \
                  patch('timebench.external_models.tsrag.inference.forecast_query', query), \
-                 patch('timebench.external_models.tsrag.inference.TSRAGIndex', ArrayIndex), \
+                 patch('timebench.external_models.tsrag.retriever.TSRAGIndex', ArrayIndex), \
                  patch('timebench.model_loading.tsrag.load_tsrag', lambda *a, **kw: SimpleNamespace()), \
                  patch('timebench.pipeline.workflow.resolve_shared_evaluation_grid', lambda *a: grid), \
                  patch('timebench.results.comparison.resolve_shared_evaluation_grid', lambda *a: grid), \
@@ -220,7 +281,11 @@ class Contract(unittest.TestCase):
                 workflow.evaluate()
                 workflow.report()
                 rag = workflow.rag(task)
-                bolt = workflow.raw(task, 'chronos_bolt_512')
+                bolt = workflow.raw(task, 'chronos_bolt_max')
+                for method in workflow.rag_methods:
+                    prediction = workflow.rag(task, method)
+                    np.testing.assert_array_equal(np.load(prediction/'test.npy'), np.load(bolt/'test.npy'))
+                    self.assertTrue(np.load(prediction/'test_fallback.npy').all())
                 np.testing.assert_array_equal(np.load(rag/'test.npy'), np.load(bolt/'test.npy'))
                 self.assertTrue(np.load(rag/'test_fallback.npy').all())
                 summary = json.loads((workflow.evaluation(task, 'tsrag')/'metrics_summary.json').read_text())
@@ -232,7 +297,7 @@ class Contract(unittest.TestCase):
                 self.assertEqual(len(before), len(list(workflow.root.rglob('run_0/manifest.json'))))
                 self.assertFalse(list(workflow.root.rglob('run_1')))
                 report = json.loads((workflow.root/'reports/synthetic/report_manifest.json').read_text())
-                self.assertEqual(len(report['inputs']), 6)
+                self.assertEqual(len(report['inputs']), 21)
                 aggregate = json.loads((workflow.root/'reports/synthetic/comparison_summary.json').read_text())
                 self.assertEqual(aggregate['tsrag']['pooled_fallback_rate'], 1.)
                 self.assertEqual(aggregate['tsrag']['mean_task_fallback_rate'], 1.)
@@ -272,9 +337,16 @@ class Contract(unittest.TestCase):
         self.assertFalse((ROOT/'src/timebench/adaptime').exists())
         self.assertFalse((ROOT/'src/timebench/models').exists())
         self.assertFalse((ROOT/'experiments').exists())
-        for name in ('submit_experiment.sh', 'submit_seasonal_naive.sh'):
+        for name in ('submit_experiment.sh', 'submit_seasonal_naive.sh', 'submit_ablation.sh'):
             self.assertTrue((ROOT/'scripts'/name).is_file())
             self.assertFalse((ROOT/name).exists())
+        required = ('--gres=gpu:1', '--partition=an', '--qos=an_preemptable', '--exclusive',
+                    '--wckey=P12CU:DATASCIENCE', '--ntasks=1')
+        for front in ROOT.glob('*_selena.slurm'):
+            text = front.read_text()
+            for directive in required:
+                self.assertIn(f'#SBATCH {directive}', text)
+            self.assertIn('/codes/tsrag_time/logs/%x_%j', text)
         # Bash is the installed Git shell; this requires no project environment.
         bash = Path(r'C:\Program Files\Git\bin\bash.exe')
         if bash.exists():
@@ -292,15 +364,25 @@ class Contract(unittest.TestCase):
             (root/'.env').write_text(f'TIME_DATASET="{root.as_posix()}/configured_arrow"\n')
             environment = {key: value for key, value in os.environ.items()
                            if not key.startswith(('TIME_', 'HF_', 'TRANSFORMERS_', 'TORCH_'))
-                           and key not in ('OUTPUTS_ROOT', 'LOGS_ROOT')}
-            environment.update(PROJECT_ROOT=root.as_posix(), TIME_STORAGE_ROOT=root.as_posix(),
+                           and key not in ('OUTPUTS_ROOT', 'LOGS_ROOT', 'SELENA_NNI')}
+            environment.update(TIME_OUTPUTS='/foreign/outputs', OUTPUTS_ROOT='/foreign/outputs',
+                               TIME_LOGS='/foreign/logs', LOGS_ROOT='/foreign/logs', PROJECT_ROOT=root.as_posix(), TIME_STORAGE_ROOT=root.as_posix(),
                                TSRAG_RUNTIME_SCRIPT=(ROOT/'src/slurm/runtime_paths.sh').as_posix())
             command = 'source "$TSRAG_RUNTIME_SCRIPT"\nprintf "%s" "$TIME_DATASET"'
             result = subprocess.run([str(bash), '-c', command], env=environment, capture_output=True, text=True, check=True)
-            self.assertEqual(result.stdout, f'{root.as_posix()}/configured_arrow')
+            self.assertEqual(result.stdout.splitlines()[-1], f'{root.as_posix()}/configured_arrow')
             environment['TIME_DATASET'] = f'{root.as_posix()}/submitted_arrow'
             result = subprocess.run([str(bash), '-c', command], env=environment, capture_output=True, text=True, check=True)
-            self.assertEqual(result.stdout, environment['TIME_DATASET'])
+            self.assertEqual(result.stdout.splitlines()[-1], environment['TIME_DATASET'])
+            paths_command = command.replace('printf "%s"', 'printf "%s\\n%s"').replace(
+                '"$TIME_DATASET"', '"$TIME_OUTPUTS" "$TIME_LOGS"')
+            result = subprocess.run([str(bash), '-c', paths_command], env=environment, capture_output=True, text=True, check=True)
+            self.assertEqual(result.stdout.splitlines()[-2:], [f'{root.as_posix()}/outputs', f'{root.as_posix()}/logs'])
+            environment.update(SELENA_NNI='H12345', TIME_SCRATCH_ROOT='/foreign/project')
+            result = subprocess.run([str(bash), '-c', 'mkdir() { :; }\n' + paths_command], env=environment,
+                                    capture_output=True, text=True, check=True)
+            scratch = f'/scratch/users/h12345/codes/{root.name}'
+            self.assertEqual(result.stdout.splitlines()[-2:], [f'{scratch}/outputs', f'{scratch}/logs'])
 
 
 if __name__ == '__main__':

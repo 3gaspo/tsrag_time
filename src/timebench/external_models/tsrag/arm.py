@@ -113,6 +113,7 @@ class ChronosBoltModelForForecastingWithRetrieval(
         target_mask: Optional[torch.Tensor] = None,
         retrieved_seq: Optional[torch.Tensor] = None,
         distances: Optional[torch.Tensor] = None,
+        neighbors_in_query_scale: bool = False,
     ) -> ChronosBoltOutput:
         del distances
         if retrieved_seq is None:
@@ -122,7 +123,13 @@ class ChronosBoltModelForForecastingWithRetrieval(
             context=context,
             mask=mask,
         )
-        retrieved_seq, _ = self.instance_norm(retrieved_seq)
+        if neighbors_in_query_scale:
+            # Project ablation: aligned neighbors share the query's normalization.
+            # Re-estimating their full-trajectory scale would cancel the alignment.
+            loc, scale = loc_scale
+            retrieved_seq = (retrieved_seq - loc[:, None]) / scale[:, None]
+        else:
+            retrieved_seq, _ = self.instance_norm(retrieved_seq)
         retrieved_batch, retrieved_count, retrieved_length = retrieved_seq.shape
         if retrieved_batch != batch_size:
             raise ValueError("query and retrieval batch sizes differ")
@@ -218,4 +225,3 @@ class ChronosBoltModelForForecastingWithRetrieval(
             loc_scale,
         ).view(*prediction_shape)
         return ChronosBoltOutput(loss=loss, quantile_preds=quantile_preds)
-

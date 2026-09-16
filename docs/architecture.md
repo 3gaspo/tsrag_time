@@ -18,18 +18,22 @@ project root before delegating to `src/slurm/` and submitting the root Slurm fil
 | `src/tests/` | Locally runnable synthetic scientific and lifecycle contracts |
 
 The visible workflow is preparation, four vanilla controls, retrieval extraction,
-native TS-RAG prediction, mixture weighting/prediction, TIME evaluation, and report.
+one or sixteen native TS-RAG predictions, mixture weighting/prediction, TIME evaluation, and report.
 Prepared references use `(Arrow item, variate, origin)` and follow TIME's
 item-variate-window order. The selected shared Seasonal grid is flattened into
 that same order before finite-output checks. The inherited saver reverses this
 flattening for standard series-window-variate metric arrays.
 
-Extraction stores the union of potentially usable same-series historical
-representations once. Its presence never grants query eligibility: the native
-retriever filters each candidate by `candidate_origin + 64 <= real_query_origin`.
+Extraction stores the union of potentially usable historical T5 EOS and IN-512 representations
+across all dataset items and variates once. Its presence never grants query eligibility: the native
+retriever filters each candidate by the neighbor's complete 64-point continuation in calendar coordinates.
 An unbounded index adds newly observed dates incrementally; a capped index
-retains the most recent eligible dates. Recursive forecast chunks re-embed and
-retrieve using the unchanged real cutoff.
+retains the most recent eligible dates. Recursive forecast chunks retain the unchanged real cutoff. Date-aligned cells
+add a query-calendar-phase restriction. Same-variate cells restrict item/variate;
+IN-L2 cells use blockwise finite-overlap distances without T5. Query-scaled T5
+cells encode eligible aligned lookbacks at each query and chunk; this cost is
+included in query timings. Aligned neighbors share the query's Bolt normalization
+during fusion, so full-trajectory IN cannot cancel the alignment.
 
 The prepared union extends through the final test query. After validation selects
 the frozen mixture weight, testing admits validation-period observations under
@@ -54,6 +58,11 @@ The native ARM and retriever are adapted from
 [UConn-DSIS/TS-RAG, revision 73ac807](https://github.com/UConn-DSIS/TS-RAG/tree/73ac807789d2e61b8a3dfc8514e3fc947fe185cc).
 The local Bolt core is adapted from
 [Chronos forecasting, revision 7dc4435](https://github.com/amazon-science/chronos-forecasting/tree/7dc4435706a4454feb79df44ca9f33631f3027bf).
-Released MoE forward computation and normalization are retained; training and
+Default MoE forward computation and full-neighbor normalization are retained;
+the explicit query-scale ablation changes neighbor normalization only. Training and
 alternate ARM paths are narrowed away. Causal datastore admission, rollout,
-fallback, lifecycle, and the Bayesian-style mixture are project-specific.
+fallback, lifecycle, ablation grid and the Bayesian-style mixture are project-specific.
+Date-period settings, lookback IN, finite-overlap L2 and affine query-scale
+alignment are narrowed from Adaptime; no fitting/training boundary was imported.
+Scheduler runtimes derive artifact roots from the owning project, so another
+checkout's environment settings cannot redirect predictions or logs.

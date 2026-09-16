@@ -18,10 +18,11 @@ forecast invocation; an early window uses the available shorter history.
 For one series $x_0,\ldots,x_{T-1}$ and a real query origin $t$, let
 $c_t=(x_{t-512},\ldots,x_{t-1})$ be its native history. The frozen
 Chronos-T5-base encoder maps it to an EOS representation $e_t\in\mathbb R^{768}$.
-For every candidate origin $s$, the same encoder embeds $c_s$. Eligible
-same-series candidates satisfy
+For every candidate origin $s$, the same encoder embeds $c_s$. Candidates may come from any item and variate in the selected dataset.
+Let $\tau_i(s)$ denote the calendar date of item $i$ at index $s$.
+Eligible candidates satisfy
 \[
-  \mathcal D_t=\{s: s\ge512,\ s+64\le t\}.
+  \mathcal D_t=\{(i,v,s): s\ge512,\ \tau_i(s+64)\le\tau_q(t)\}.
 \]
 The configurable stride restricts $s$ to $512+j\Delta$, where $j\ge0$ is an
 integer and $\Delta=1$ by default. An optional cap retains the most recent
@@ -43,10 +44,37 @@ median chunk, retain the last 512 values, re-embed and retrieve, and repeat.
 The observed candidate cutoff remains $t$ throughout recursion: predicted
 future values never grant access to real observations after $t$.
 
+\section{Full factorial retrieval ablation}
+Keep the native $L=512$, $K=10$ and 64-point continuation fixed while crossing
+four binary choices: all dataset items/variates versus the query's own item/variate;
+unaligned versus query-calendar-phase-aligned dates; released neighbor
+normalization versus query-scale alignment; and T5 EOS versus IN-lookback L2.
+The $2^4=16$ cells include the default all/unaligned/released/T5 configuration.
+Date-phase periods count observations and follow Adaptime's dataset protocol.
+
+For neighbor lookback mean/std $(\mu_i,\sigma_i)$ and query statistics
+$(\mu_q,\sigma_q)$, with standard deviations floored at $10^{-8}$, align the full
+neighbor trajectory by
+\[
+ r_i'=\frac{r_i-\mu_i}{\sigma_i}\sigma_q+\mu_q.
+\]
+Only the 512-point lookback enters neighbor statistics. T5 selection embeds
+the aligned lookback at each query; fusion uses the query's Bolt normalization
+rather than re-estimating full-neighbor statistics, which would cancel alignment.
+
+For the alternative distance, cache lookback instance normalization:
+\[
+ z(c)=\frac{c-\mu(c)}{\max\{\operatorname{std}(c),10^{-8}\}}.
+\]
+Rank by squared L2 over finite overlapping coordinates, multiplying by $512/m$
+for $m$ observed overlaps and requiring at least $\lceil0.8\cdot512\rceil$.
+This selection uses no T5. Affine query-scale alignment preserves IN L2 rankings,
+while the normalization axis still changes fusion. Keep all factorial cells.
+
 \section{Fallback and validation mixture}
 The TS-RAG forecast $R_t$ is replaced as one complete window by the independent
-Bolt-512 median $B_t$ for insufficient history/candidates, extraction or model
-errors, or non-finite predictions on required target steps. Preserve masks,
+Bolt-max ($L=2048$) median $B_t$ for insufficient history/candidates, extraction or model
+errors, or non-finite native predictions. Preserve masks,
 counts and reasons; the fallback is part of the implemented method.
 
 Let $C_t$ denote the maximum-context Chronos-2 median. Validation dates lie
@@ -68,7 +96,7 @@ This is a smoothed win frequency, not a fitted optimal ensemble weight.
 
 \section{Evaluation and attribution}
 The shared Seasonal Naive artifact fixes finite target support and eligible
-metric cells. All six methods use that same grid and TIME's median metrics.
+metric cells. All main and ablation methods use that same grid and TIME's median metrics.
 Task summaries report mean, population variance and standard deviation over
 finite series-window-variate cells; this dispersion is not across-run seed
 uncertainty. Reports retain coverage, fallback rates and pipeline timings.
@@ -79,6 +107,7 @@ ARM and retrieval are source-adapted from
 \href{https://github.com/UConn-DSIS/TS-RAG/tree/73ac807789d2e61b8a3dfc8514e3fc947fe185cc}{TS-RAG revision 73ac807}.
 The local Bolt forecasting core is source-adapted from
 \href{https://github.com/amazon-science/chronos-forecasting/tree/7dc4435706a4454feb79df44ca9f33631f3027bf}{Chronos revision 7dc4435}.
-The causal datastore, rollout, fallback and validation mixture are
-project-specific. Training and alternate ARM augmentation paths are omitted.
+Lookback IN, overlap L2, query-scale alignment and date periods are narrowed
+from Adaptime revision 33e75400. Calendar-causal datastore construction, rollout,
+fallback, factorial orchestration and validation mixing are project-specific. Training and alternate ARM augmentation paths are omitted.
 \end{document}

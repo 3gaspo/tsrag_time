@@ -16,11 +16,11 @@ The repository retains this parent's Git history for future synchronization.
 | Vanilla `chronos_bolt` (base) | 512 |
 | Vanilla `chronos_bolt` (base) | Maximum: 2,048 |
 | Vanilla `chronos2` | Maximum: 8,192 |
-| Native TS-RAG, released MoE ARM | 512; Bolt-512 fallback |
+| Native TS-RAG, released MoE ARM | 512; Bolt-max fallback |
 | Validation-weighted Chronos-2 / TS-RAG mixture | Frozen Beta-smoothed win-frequency weight |
 
 Forecasts are univariate medians. TS-RAG uses Chronos-T5-base EOS embeddings,
-same-series exact FAISS retrieval, ten neighbors, and 64-step native forecasts.
+cross-user, cross-variate exact FAISS retrieval within each dataset, ten neighbors, and 64-step native forecasts.
 The independent T5 control uses 20 forecast samples by default. No Ridge fitting,
 training split, learned wrapper training, or hyperparameter selection is performed.
 
@@ -92,15 +92,52 @@ the optional window cap and complete-neighbor boundaries still apply.
 
 The datastore includes every historical date by default, with no fitting-derived
 boundary. At each real query, a neighbor is eligible only if its entire
-512-point history and 64-point future are observed. Previously observed test
+512-point history and 64-point future are observed before the real query date. Previously observed test
 dates may enter later queries' datastores. During long-horizon rollout the
 cutoff stays at the real query date. `datastore_stride` and
 `max_datastore_windows` explicitly restrict this pool when supplied.
 
+## Retrieval ablation
+
+The default is cross-user and cross-variate retrieval within the selected dataset,
+without date alignment or query-scale normalization, using T5 EOS representations.
+The ablation computes all **16 combinations** of:
+
+| Axis | Values |
+|---|---|
+| Retrieval scope | All items/variates; same item and variate |
+| Date alignment | Disabled; same calendar phase as query |
+| Neighbor normalization | Released full-trajectory IN; align to query scale before retrieval and fusion |
+| Retrieval representation | T5 EOS; instance-normalized L2 over 512 lookback points |
+
+Date alignment uses the observation-count periods copied from Adaptime's dataset
+protocol, including multiplied sampling frequencies. Calendar eligibility requires
+the neighbor's 64-point continuation to end by the real query date, even for items
+with different starts. Validation observations remain available to test queries.
+
+Query-scale alignment uses each neighbor's **512-point lookback** mean/std and
+the query's mean/std. T5 cells encode aligned candidates per query because these
+representations depend on query scale. During fusion, aligned neighbors use the
+query's Bolt normalization rather than their own 576-point normalization.
+
+L2 cells select neighbors without T5. They cache IN lookbacks and compute squared
+L2 on finite overlap, rescaled to 512 coordinates, with Adaptime's default minimum
+overlap fraction of 0.8. Affine alignment leaves IN L2 rankings unchanged while
+changing fusion; these combinations remain in the full grid.
+
+```bash
+bash scripts/submit_ablation.sh dgx
+```
+
+The ablation includes the four vanilla controls and the default TS-RAG mixture,
+giving 21 method labels per task. Main and ablation executions share exact matching
+prepared data, extraction caches and default predictions. Comparison CSV/JSON
+reports identify every cell's retrieval settings, alignment period and fallback.
+
 ## Outputs and cluster operations
 
 One allocation executes `prepare,vanilla,extract,predict,mix,evaluate,report` in
-order. Launchers under `scripts/` submit the root Slurm fronts and source
+order. Launchers under `scripts/` submit the experiment, ablation and Seasonal root Slurm fronts and source
 `src/slurm/` implementations. Each stage allocates
 schema-1 `run_n` manifests before work; completion occurs after successful
 `srun`. Restarting the launcher skips exact completed tasks and recomputes
@@ -108,6 +145,8 @@ interrupted tasks from their beginning. `STAGES` is a comma-separated recovery
 override. `TIME_RUN_CONFLICT_POLICY=overwrite_exact|overwrite_path|new`,
 `TIME_SKIP_COMPLETED`, and `TIME_FORCE_RERUN` retain the shared lifecycle controls.
 
+Scheduler launchers enforce project-owned artifact roots, ignoring inherited or
+copied artifact-path settings while preserving shared data/weight settings.
 Artifacts live under `outputs/tsrag/{data,extractions,predictions,evaluations,reports}`.
 Canonical `predictions/<method>/<dataset>/<term>/run_n/test.npy` files retain
 float32 medians. Evaluation runs contain standard TIME predictions, metric
@@ -116,13 +155,13 @@ are persisted. Reports include mean, population variance, standard deviation,
 finite-value counts, scaled MASE, and the matched Seasonal MASE variance ratio.
 An unavailable or zero Seasonal variance leaves that ratio undefined.
 
-TS-RAG falls back to Bolt-512 for insufficient history/retrieval, extraction or
-inference errors, and non-finite predictions on required target steps. A fallback
+Every TS-RAG variant falls back to Bolt-max (2,048 points) for insufficient history/retrieval, extraction or
+inference errors, and non-finite native predictions. A fallback
 replaces the complete window/variate forecast. Foundation controls must be finite
-on the selected grid. The mixture uses Chronos-2 if its combined output is invalid.
+on the selected grid. The mixture also uses Bolt-max if its combined output is invalid.
 
 Recorded timings separate datastore preprocessing and query inference.
-TS-RAG reuses the already computed Bolt-512 fallback; mixture inference totals
+TS-RAG reuses the already computed Bolt-max fallback; mixture inference totals
 include both components and mixing. These are pipeline timings, not independent
 fresh-process latency measurements.
 
@@ -140,9 +179,10 @@ All implementation and tests are under `src/`: `data/` owns windows;
 owns borrowed ARM/retrieval and native inference; `proposal/` owns the mixture;
 `pipeline/` owns orchestration/manifests; `results/` owns reports; `conf/` and
 `scripts/` own configuration and entry points. `src/slurm/` owns scheduler shells.
-Root-level `scripts/` contains the concise experiment and Seasonal launchers.
+Root-level `scripts/` contains the concise experiment, ablation and Seasonal launchers.
 
 `src/scripts/build_docs.py --render all` builds the three PDFs with pdfLaTeX;
+`--render protocol` updates only the method and experiment PDFs.
 its default mode validates the required public views. Update scientific protocol
 documents when behavior changes and evidence documents only after result analysis.
 

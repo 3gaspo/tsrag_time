@@ -1,6 +1,7 @@
 """Stage orchestration over independent, exact-configuration TIME task runs."""
 
 from datetime import datetime, timezone
+from itertools import product
 from pathlib import Path
 from time import perf_counter
 import json
@@ -47,6 +48,21 @@ def seed_run(seed):
         torch.cuda.manual_seed_all(seed)
 
 
+def retrieval_methods(config):
+    base = dict(config['retrieval'])
+    methods = {'tsrag': base}
+    axis_names = ('scope', 'aligned', 'query_scale', 'representation')
+    if config['ablation']:
+        axes = config['retrieval_grid']
+        for values in product(*(axes[name] for name in axis_names)):
+            options = dict(zip(axis_names, values))
+            if options != base:
+                scope, aligned, scale, representation = values
+                name = f'tsrag_{scope}_{"aligned" if aligned else "unaligned"}_{"query_scale" if scale else "raw"}_{representation}'
+                methods[name] = options
+    return methods
+
+
 class Workflow:
     def __init__(self, config):
         from timebench.evaluation.data import load_dataset_config
@@ -60,6 +76,12 @@ class Workflow:
         self.seed = int(config['seed'])
         self.device = config['device']
         self.batch_size = int(config['batch_size'])
+        self.rag_methods = retrieval_methods(config)
+        for options in self.rag_methods.values():
+            if options['scope'] not in ('all', 'same_series') or options['representation'] not in ('t5', 'instance_l2'):
+                raise ValueError(f'Unsupported retrieval configuration: {options}')
+        if not 0 < float(config['minimum_overlap_fraction']) <= 1:
+            raise ValueError('minimum_overlap_fraction must be in (0, 1]')
         self.tasks = []
         settings = load_dataset_config(Path(config['dataset_config']))
         selected = config['datasets']
@@ -92,8 +114,13 @@ class Workflow:
                 if minimum_length - test_length - validation < 1:
                     validation = 0
                     log(f'{name}/{term}: no room for requested validation; mixture uses Chronos-2')
+                alignment = config['alignment_period']
+                if alignment is None:
+                    alignment = settings.get('alignment_periods', {}).get(name, seasonality)
+                if int(alignment) < 1:
+                    raise ValueError('alignment_period must be positive')
                 self.tasks.append(Task(name, term, horizon, test_length, validation, seasonality,
-                                       int(config['datastore_stride']), config['max_datastore_windows']))
+                                       int(config['datastore_stride']), config['max_datastore_windows'], int(alignment)))
         if not self.tasks:
             raise ValueError('No tasks selected')
         if self.batch_size < 1 or int(config['embedding_batch_size']) < 1:
@@ -113,15 +140,18 @@ class Workflow:
             if alias == 'chronos_t5':
                 result['num_samples'] = int(self.config['t5_samples'])
             return result
-        if method == 'tsrag':
+        if method in self.rag_methods:
+            options = self.rag_methods[method]
             return {'method': 'tsrag', 'backbone': 'chronos_bolt', 'context_length': 512,
-                    'native_horizon': 64, 'top_k': 10, 'retrieval_encoder': 'chronos_t5_base_eos',
+                    'native_horizon': 64, 'top_k': 10, 'retrieval': options,
+                    'retrieval_encoder': 'chronos_t5_base_eos' if options['representation'] == 't5' else 'instance_normalized_512_lookback',
+                    'minimum_overlap_fraction': float(self.config['minimum_overlap_fraction']),
                     'checkpoint': 'released_moe_arm', 'source_commit': '73ac807789d2e61b8a3dfc8514e3fc947fe185cc',
-                    'fallback': 'chronos_bolt_512', 'point_forecast': 'median'}
+                    'fallback': 'chronos_bolt_max', 'point_forecast': 'median'}
         if method == 'bayes_mixture':
             return {'method': method, 'components': ['chronos2_max', 'tsrag'], 'prior': [1, 1],
                     'score': 'per_date_mean_variate_msse', 'no_validation': 'chronos2',
-                    'nonfinite_fallback': 'chronos2_max'}
+                    'nonfinite_fallback': 'chronos_bolt_max'}
         return {'method': 'shared', 'target_mode': 'univariate'}
 
     def identity(self, task, method):
@@ -134,13 +164,21 @@ class Workflow:
 
     def science(self, task, phase, method, dependencies):
         pipe = {'task': task.config(), 'target_mode': 'univariate', 'covariates': 'none',
-                'datastore_policy': 'growing_same_series_complete_64_step_future_before_real_query',
+                'datastore_policy': 'growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query',
                 'dependencies': {name: {key: load_manifest(path)[key] for key in
                                        ('schema_version', 'identity', 'model_config', 'pipeline_config', 'experiment_config')}
                                  for name, path in dependencies.items()}}
         if phase == 'evaluations':
             pipe['evaluation_grid'] = EVALUATION_GRID_DEFINITION
-        return {'model_config': self.model_config(method), 'pipeline_config': pipe,
+        if phase == 'extractions':
+            pipe['representations'] = sorted({'instance_l2'} | {options['representation'] for options in self.rag_methods.values()})
+            pipe['t5_query_scaled_candidates'] = 'encoded_at_query_time'
+        model = self.model_config(method)
+        if phase == 'extractions':
+            model = {'method': 'retrieval_representations', 'representations': pipe['representations'],
+                     'context_length': CONTEXT_LENGTH, 't5_checkpoint': 'chronos-t5-base',
+                     'instance_normalization': 'lookback_nanmean_nanstd_eps_1e-8'}
+        return {'model_config': model, 'pipeline_config': pipe,
                 'experiment_config': {'seed': self.seed}}
 
     def allocate(self, task, phase, method, dependencies=None):
@@ -179,12 +217,13 @@ class Workflow:
         data = self.prepared(task)
         return self.resolve(task, 'extractions', 'tsrag', {'data': data})
 
-    def rag(self, task):
-        deps = {'data': self.prepared(task), 'extraction': self.extraction(task), 'fallback': self.raw(task, 'chronos_bolt_512')}
-        return self.resolve(task, 'predictions', 'tsrag', deps)
+    def rag(self, task, method='tsrag'):
+        deps = {'data': self.prepared(task), 'extraction': self.extraction(task), 'fallback': self.raw(task, 'chronos_bolt_max')}
+        return self.resolve(task, 'predictions', method, deps)
 
     def mixture(self, task):
-        deps = {'data': self.prepared(task), 'chronos2': self.raw(task, 'chronos2_max'), 'tsrag': self.rag(task)}
+        deps = {'data': self.prepared(task), 'chronos2': self.raw(task, 'chronos2_max'), 'tsrag': self.rag(task),
+                'fallback': self.raw(task, 'chronos_bolt_max')}
         return self.resolve(task, 'predictions', 'bayes_mixture', deps)
 
     def refs(self, data, split):
@@ -257,41 +296,54 @@ class Workflow:
     def extract(self):
         import torch
         from timebench.external_models.tsrag.retriever import TSRAGRetriever
+        from timebench.external_models.tsrag.inference import instance_normalize
 
         encoder = None
+        representations = {'instance_l2'} | {options['representation'] for options in self.rag_methods.values()}
         for task in self.tasks:
             data = self.prepared(task)
             with self.allocate(task, 'extractions', 'tsrag', {'data': data}) as run:
                 if not run.should_run:
                     continue
                 started = perf_counter()
-                files = []
-                error = None
-                try:
-                    if encoder is None:
-                        encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
-                    windows = Windows(task, self.storage)
-                    for split in ('datastore', 'validation', 'test'):
-                        refs = self.refs(data, split)
-                        embeddings = np.lib.format.open_memmap(run.run_dir / f'{split}_embedding.npy', mode='w+', dtype=np.float32,
-                                                             shape=(len(refs), 768))
-                        batch_size = int(self.config['embedding_batch_size'])
-                        for start in range(0, len(refs), batch_size):
-                            rows = refs[start:start + batch_size]
-                            histories = windows.histories(rows, 512)
-                            values = np.full((len(histories), 512), np.nan, dtype=np.float32)
-                            for index, history in enumerate(histories):
-                                values[index, -len(history):] = history
-                            embeddings[start:start + len(rows)] = encoder.representation(torch.from_numpy(values[:, None])).detach().float().cpu().numpy()
-                        embeddings.flush()
-                        if not np.isfinite(embeddings).all():
-                            raise ValueError(f'Non-finite {split} retrieval embedding')
-                        files.append(f'{split}_embedding.npy')
-                except Exception as exception:
-                    error = {'type': type(exception).__name__, 'message': str(exception)}
-                    log(f'TS-RAG extraction fallback {task.dataset}/{task.term}: {error}')
-                    files = []
-                write_json(run.run_dir / 'extraction.json', {'schema_version': 1, 'error': error,
+                files, errors, seconds = [], {}, {}
+                windows = Windows(task, self.storage)
+                for representation in sorted(representations):
+                    representation_start = perf_counter()
+                    errors[representation] = None
+                    representation_files = []
+                    try:
+                        if representation == 't5' and encoder is None:
+                            encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
+                        for split in ('datastore', 'validation', 'test'):
+                            refs = self.refs(data, split)
+                            width = 768 if representation == 't5' else CONTEXT_LENGTH
+                            filename = f'{split}_{representation}.npy'
+                            embeddings = np.lib.format.open_memmap(run.run_dir / filename, mode='w+', dtype=np.float32,
+                                                                  shape=(len(refs), width))
+                            batch_size = int(self.config['embedding_batch_size'])
+                            for start in range(0, len(refs), batch_size):
+                                rows = refs[start:start + batch_size]
+                                histories = windows.histories(rows, CONTEXT_LENGTH)
+                                values = np.full((len(histories), CONTEXT_LENGTH), np.nan, dtype=np.float32)
+                                for index, history in enumerate(histories):
+                                    values[index, -len(history):] = history
+                                if representation == 't5':
+                                    block = encoder.representation(torch.from_numpy(values[:, None])).detach().float().cpu().numpy()
+                                    if not np.isfinite(block).all():
+                                        raise ValueError(f'Non-finite {split} retrieval embedding')
+                                else:
+                                    block = instance_normalize(values)
+                                embeddings[start:start + len(rows)] = block
+                            embeddings.flush()
+                            representation_files.append(filename)
+                        files.extend(representation_files)
+                    except Exception as exception:
+                        errors[representation] = {'type': type(exception).__name__, 'message': str(exception)}
+                        log(f'TS-RAG {representation} extraction fallback {task.dataset}/{task.term}: {errors[representation]}')
+                    seconds[representation] = perf_counter() - representation_start
+                write_json(run.run_dir / 'extraction.json', {'schema_version': 1, 'errors': errors,
+                                                          'representation_seconds': seconds,
                                                           'extraction_seconds': perf_counter() - started})
                 self.finish(run, [*files, 'extraction.json'])
 
@@ -301,81 +353,90 @@ class Workflow:
         from timebench.model_loading.tsrag import load_tsrag
 
         loaded = encoder = None
-        for task in self.tasks:
-            data, extraction, fallback = self.prepared(task), self.extraction(task), self.raw(task, 'chronos_bolt_512')
-            deps = {'data': data, 'extraction': extraction, 'fallback': fallback}
-            with self.allocate(task, 'predictions', 'tsrag', deps) as run:
-                if not run.should_run:
-                    continue
-                seed_run(self.seed)
-                windows = Windows(task, self.storage)
-                metadata = json.loads((extraction / 'extraction.json').read_text())
-                task_error = metadata['error']
-                if task_error is None:
-                    try:
-                        if loaded is None:
-                            loaded = load_tsrag(self.weights / 'chronos-bolt-base', self.weights / 'ts-rag', device=self.device)
-                        if encoder is None:
-                            encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
-                    except Exception as exception:
-                        task_error = {'type': type(exception).__name__, 'message': str(exception)}
-                files = []
-                timing, counts, reason_counts = {}, {}, {}
-                for split in ('validation', 'test'):
-                    refs = self.refs(data, split)
-                    base = np.load(fallback / f'{split}.npy', mmap_mode='r')
-                    values = np.lib.format.open_memmap(run.run_dir / f'{split}.npy', mode='w+', dtype=np.float32, shape=base.shape)
-                    values[:] = base
-                    mask = np.zeros(len(refs), dtype=bool)
-                    reasons = []
-                    targets, cells = self.support(task, split, windows, refs)
-                    retrieval = None
+        for method, options in self.rag_methods.items():
+            for task in self.tasks:
+                data, extraction, fallback = self.prepared(task), self.extraction(task), self.raw(task, 'chronos_bolt_max')
+                deps = {'data': data, 'extraction': extraction, 'fallback': fallback}
+                with self.allocate(task, 'predictions', method, deps) as run:
+                    if not run.should_run:
+                        continue
+                    log(f'predict method={method} dataset={task.dataset} term={task.term} retrieval={options} '
+                        f'alignment_period={task.alignment_period} fallback=chronos_bolt_max')
+                    seed_run(self.seed)
+                    windows = Windows(task, self.storage)
+                    metadata = json.loads((extraction / 'extraction.json').read_text())
+                    task_error = metadata['errors'][options['representation']]
                     if task_error is None:
-                        retrieval = CausalRetriever(self.refs(data, 'datastore'), np.load(extraction / 'datastore_embedding.npy', mmap_mode='r'),
-                                                    task.max_datastore_windows)
-                        embeddings = np.load(extraction / f'{split}_embedding.npy', mmap_mode='r')
-                    timer = EvaluationTimer()
-                    timer.start()
-                    for row, reference in enumerate(refs):
-                        reason = 'extraction_or_model_error' if task_error else None
-                        if reason is None:
-                            try:
-                                forecast, reason = forecast_query(loaded, encoder, retrieval, windows, reference, embeddings[row],
-                                                                  task.prediction_length, self.device)
-                                if reason is None:
-                                    if cells[row] and not np.all(~targets[row] | np.isfinite(forecast)):
-                                        reason = 'nonfinite_prediction'
-                                    else:
-                                        values[row] = forecast
-                            except Exception as exception:
-                                reason = 'inference_error'
-                                reasons.append({'row': row, 'type': type(exception).__name__, 'message': str(exception)})
-                        if reason:
-                            mask[row] = True
-                            reason_counts[reason] = reason_counts.get(reason, 0) + 1
-                            if reason != 'inference_error':
-                                reasons.append({'row': row, 'reason': reason})
-                    timing[f'{split}_inference_seconds'] = timer.stop()
-                    values.flush()
-                    np.save(run.run_dir / f'{split}_fallback.npy', mask, allow_pickle=False)
-                    write_json(run.run_dir / f'{split}_fallback_reasons.json', reasons)
-                    counts[split] = {'all_rows': int(mask.sum()), 'eligible_rows': int((mask & cells).sum()),
-                                     'grid_rows': int(cells.sum()), 'total_rows': len(refs)}
-                    files.extend([f'{split}.npy', f'{split}_fallback.npy', f'{split}_fallback_reasons.json'])
-                write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': 'tsrag', 'context_limit': 512,
-                                                           'fallback_method': 'chronos_bolt_512', 'task_error': task_error,
-                                                           'fallback_counts': counts, 'fallback_reasons': reason_counts,
-                                                           'datastore_preprocessing_seconds': metadata['extraction_seconds'],
-                                                           'fallback_source_test_inference_seconds': json.loads((fallback / 'prediction.json').read_text())['test_inference_seconds'],
-                                                           'timing_policy': 'measured_query_work_with_precomputed_bolt_512_fallback', **timing})
-                self.finish(run, [*files, 'prediction.json'])
+                        try:
+                            if loaded is None:
+                                loaded = load_tsrag(self.weights / 'chronos-bolt-base', self.weights / 'ts-rag', device=self.device)
+                            if options['representation'] == 't5' and encoder is None:
+                                encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
+                        except Exception as exception:
+                            task_error = {'type': type(exception).__name__, 'message': str(exception)}
+                    files = []
+                    timing, counts, reason_counts = {}, {}, {}
+                    for split in ('validation', 'test'):
+                        refs = self.refs(data, split)
+                        base = np.load(fallback / f'{split}.npy', mmap_mode='r')
+                        values = np.lib.format.open_memmap(run.run_dir / f'{split}.npy', mode='w+', dtype=np.float32, shape=base.shape)
+                        values[:] = base
+                        mask = np.zeros(len(refs), dtype=bool)
+                        reasons = []
+                        targets, cells = self.support(task, split, windows, refs)
+                        retrieval = None
+                        if task_error is None:
+                            retrieval = CausalRetriever(self.refs(data, 'datastore'), np.load(extraction / f"datastore_{options['representation']}.npy", mmap_mode='r'),
+                                                        task.max_datastore_windows, windows=windows, options=options, encoder=encoder,
+                                                        batch_size=int(self.config['embedding_batch_size']),
+                                                        minimum_overlap=float(self.config['minimum_overlap_fraction']))
+                            embeddings = (np.load(extraction / f'{split}_t5.npy', mmap_mode='r')
+                                          if options['representation'] == 't5' else None)
+                        timer = EvaluationTimer()
+                        timer.start()
+                        for row, reference in enumerate(refs):
+                            reason = 'extraction_or_model_error' if task_error else None
+                            if reason is None:
+                                try:
+                                    forecast, reason = forecast_query(loaded, encoder, retrieval, windows, reference,
+                                                                      embeddings[row] if embeddings is not None else None,
+                                                                      task.prediction_length, self.device)
+                                    if reason is None:
+                                        if cells[row] and not np.all(~targets[row] | np.isfinite(forecast)):
+                                            reason = 'nonfinite_prediction'
+                                        else:
+                                            values[row] = forecast
+                                except Exception as exception:
+                                    reason = 'inference_error'
+                                    reasons.append({'row': row, 'type': type(exception).__name__, 'message': str(exception)})
+                            if reason:
+                                mask[row] = True
+                                reason_counts[reason] = reason_counts.get(reason, 0) + 1
+                                if reason != 'inference_error':
+                                    reasons.append({'row': row, 'reason': reason})
+                        timing[f'{split}_inference_seconds'] = timer.stop()
+                        values.flush()
+                        np.save(run.run_dir / f'{split}_fallback.npy', mask, allow_pickle=False)
+                        write_json(run.run_dir / f'{split}_fallback_reasons.json', reasons)
+                        counts[split] = {'all_rows': int(mask.sum()), 'eligible_rows': int((mask & cells).sum()),
+                                         'grid_rows': int(cells.sum()), 'total_rows': len(refs)}
+                        files.extend([f'{split}.npy', f'{split}_fallback.npy', f'{split}_fallback_reasons.json'])
+                    write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method, 'context_limit': 512, 'retrieval': options,
+                                                               'alignment_period': task.alignment_period,
+                                                               'fallback_method': 'chronos_bolt_max', 'task_error': task_error,
+                                                               'fallback_counts': counts, 'fallback_reasons': reason_counts,
+                                                               'datastore_preprocessing_seconds': metadata['representation_seconds'][options['representation']],
+                                                               'fallback_source_test_inference_seconds': json.loads((fallback / 'prediction.json').read_text())['test_inference_seconds'],
+                                                               'timing_policy': 'measured_query_work_with_precomputed_bolt_max_fallback', **timing})
+                    self.finish(run, [*files, 'prediction.json'])
 
     def mix(self):
         from timebench.proposal.mixture import estimate_weight, mix
 
         for task in self.tasks:
             data, c2, rag = self.prepared(task), self.raw(task, 'chronos2_max'), self.rag(task)
-            with self.allocate(task, 'predictions', 'bayes_mixture', {'data': data, 'chronos2': c2, 'tsrag': rag}) as run:
+            fallback = self.raw(task, 'chronos_bolt_max')
+            with self.allocate(task, 'predictions', 'bayes_mixture', {'data': data, 'chronos2': c2, 'tsrag': rag, 'fallback': fallback}) as run:
                 if not run.should_run:
                     continue
                 windows = Windows(task, self.storage)
@@ -390,20 +451,21 @@ class Workflow:
                 inference_seconds = timer.stop()
                 targets, cells = self.support(task, 'test', windows, self.refs(data, 'test'))
                 invalid = cells & ~np.all(~targets | np.isfinite(prediction), axis=-1)
-                prediction[invalid] = c2_test[invalid]
+                prediction[invalid] = np.load(fallback / 'test.npy', mmap_mode='r')[invalid]
                 np.save(run.run_dir / 'test.npy', prediction, allow_pickle=False)
                 np.save(run.run_dir / 'test_fallback.npy', invalid, allow_pickle=False)
                 component_seconds = sum(json.loads((path / 'prediction.json').read_text())['test_inference_seconds'] for path in (c2, rag))
                 write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': 'bayes_mixture', **weight,
+                                                           'fallback_method': 'chronos_bolt_max',
                                                            'test_inference_seconds': component_seconds + inference_seconds,
                                                            'mix_only_seconds': inference_seconds, 'nonfinite_fallback_count': int(invalid.sum())})
                 self.finish(run, ['test.npy', 'test_fallback.npy', 'weight.json', 'prediction.json'])
 
     def methods(self):
-        return [*CONTROLS, 'tsrag', 'bayes_mixture']
+        return [*CONTROLS, *self.rag_methods, 'bayes_mixture']
 
     def prediction(self, task, method):
-        return self.rag(task) if method == 'tsrag' else self.mixture(task) if method == 'bayes_mixture' else self.raw(task, method)
+        return self.rag(task, method) if method in self.rag_methods else self.mixture(task) if method == 'bayes_mixture' else self.raw(task, method)
 
     def evaluation(self, task, method):
         return self.resolve(task, 'evaluations', method, {'prediction': self.prediction(task, method)})
@@ -431,6 +493,7 @@ class Workflow:
                                                                'forecast_type': 'point', 'prediction_manifest': str(prediction / 'manifest.json'),
                                                                'context_length': metadata.get('context_limit', CONTEXT_LIMITS['chronos2']),
                                                                'fallback_counts': metadata.get('fallback_counts'), 'tsrag_weight': metadata.get('tsrag_weight'),
+                                                               'retrieval': metadata.get('retrieval'), 'alignment_period': metadata.get('alignment_period'),
                                                                'nonfinite_fallback_count': metadata.get('nonfinite_fallback_count', 0)},
                                             inference_seconds=metadata['test_inference_seconds'],
                                             evaluation_grid_path=str(resolve_shared_evaluation_grid(task.dataset, task.term, 'univariate')))

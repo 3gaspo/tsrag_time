@@ -11,7 +11,7 @@ SOURCES = ('method_overview', 'experiment_guideline', 'executive_summary')
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--render', choices=('method', 'all'))
+    parser.add_argument('--render', choices=('method', 'protocol', 'all'))
     args = parser.parse_args()
     required = ['README.md', 'docs/architecture.md', 'docs/experiment_catalog.md', 'docs/results_recap.md']
     required += [f'latex/{name}.{extension}' for name in SOURCES for extension in ('tex',)]
@@ -22,7 +22,8 @@ def main():
         pdflatex = shutil.which('pdflatex')
         if pdflatex is None:
             pdflatex = r'C:\Users\Gaspard\AppData\Local\Programs\MiKTeX\miktex\bin\x64\pdflatex.exe'
-        names = SOURCES if args.render == 'all' else ('method_overview',)
+        names = (SOURCES if args.render == 'all' else ('method_overview', 'experiment_guideline')
+                 if args.render == 'protocol' else ('method_overview',))
         for name in names:
             build = ROOT/'outputs/documentation_build'/name
             build.mkdir(parents=True, exist_ok=True)

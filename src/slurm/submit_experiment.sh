@@ -2,15 +2,17 @@
 set -euo pipefail
 cd "$PROJECT_ROOT"
 cluster="${1:-dgx}"
+family="${TSRAG_EXPERIMENT_FAMILY:-experiment}"
+case "$family" in experiment|ablation) ;; *) echo 'unknown TS-RAG experiment family' >&2; exit 2 ;; esac
 case "$cluster" in
     dgx)
         export TIME_STORAGE_ROOT="${TIME_STORAGE_ROOT:-$HOME}"
         source "$PROJECT_ROOT/src/slurm/runtime_paths.sh"
-        front=experiment.slurm
+        front="$family.slurm"
         ;;
     selena)
         source "$PROJECT_ROOT/src/slurm/selena_runtime.sh"
-        front=experiment_selena.slurm
+        front="${family}_selena.slurm"
         ;;
     *) echo 'usage: bash scripts/submit_experiment.sh dgx|selena [Hydra overrides...]' >&2; exit 2 ;;
 esac

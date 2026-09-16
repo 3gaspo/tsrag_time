@@ -22,6 +22,12 @@ def build_report(inputs, destination, config):
         seasonal_root = resolve_shared_evaluation_grid(task.dataset, task.term, 'univariate').parent
         seasonal = json.loads((seasonal_root / 'metrics_summary.json').read_text())
         row = {'dataset': task.dataset, 'term': task.term, 'method': method,
+               'retrieval_scope': pred.get('retrieval', {}).get('scope'),
+               'aligned_datastore': pred.get('retrieval', {}).get('aligned'),
+               'neighbor_query_scale': pred.get('retrieval', {}).get('query_scale'),
+               'retrieval_representation': pred.get('retrieval', {}).get('representation'),
+               'alignment_period': pred.get('alignment_period'),
+               'fallback_method': pred.get('fallback_method'),
                'inference_seconds': summary['inference_seconds'],
                'tsrag_weight': pred.get('tsrag_weight'), 'validation_dates': pred.get('validation_dates'),
                'fallback_count': pred.get('fallback_counts', {}).get('test', {}).get('eligible_rows', pred.get('nonfinite_fallback_count', 0)),
@@ -63,6 +69,8 @@ def build_report(inputs, destination, config):
             if row['scaled_MASE_mean'] is not None:
                 per_dataset[row['dataset']].append(row['scaled_MASE_mean'])
         overall[method] = {'tasks': len(values), 'tasks_with_finite_MASE': len(mase_values),
+                           'retrieval': {key: values[0][key] for key in
+                                         ('retrieval_scope', 'aligned_datastore', 'neighbor_query_scale', 'retrieval_representation')},
                            'mean_task_MASE': float(np.mean(mase_values)) if mase_values else None,
                            'mean_task_scaled_MASE': float(np.mean(scaled)) if scaled else None,
                            'equal_dataset_scaled_MASE': float(np.mean([np.mean(v) for v in per_dataset.values()])) if per_dataset else None,

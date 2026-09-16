@@ -32,8 +32,15 @@ TIME_DATA_ROOT="${TIME_DATA_ROOT:-$TIME_STORAGE_ROOT/datasets}"
 TIME_DATASET="${TIME_DATASET:-$TIME_DATA_ROOT/hf_dataset}"
 TIME_METADATA="${TIME_METADATA:-$TIME_DATA_ROOT/time_metadata}"
 TIME_WEIGHTS="${TIME_WEIGHTS:-$TIME_STORAGE_ROOT/weights}"
-OUTPUTS_ROOT="${OUTPUTS_ROOT:-${TIME_OUTPUTS:-$runtime_project_root/outputs}}"
-LOGS_ROOT="${LOGS_ROOT:-${TIME_LOGS:-$runtime_project_root/logs}}"
+# Artifacts belong to this project; copied .env files and inherited shells must
+# never route TS-RAG runs into another TIME project's outputs or logs.
+runtime_artifact_root="$runtime_project_root"
+if [ -n "${SELENA_NNI:-}" ]; then
+    runtime_artifact_root="/scratch/users/${SELENA_NNI,,}/codes/$(basename "$runtime_project_root")"
+    export TIME_SCRATCH_ROOT="$runtime_artifact_root"
+fi
+OUTPUTS_ROOT="$runtime_artifact_root/outputs"
+LOGS_ROOT="$runtime_artifact_root/logs"
 TIME_OUTPUTS="$OUTPUTS_ROOT"
 TIME_LOGS="$LOGS_ROOT"
 
@@ -63,5 +70,6 @@ export TIME_STORAGE_ROOT TIME_DATA_ROOT TIME_DATASET TIME_METADATA TIME_WEIGHTS
 export TIME_SEASONAL_SCOPE TIME_SEASONAL_ROOT TIME_SEASONAL_TASKS_ROOT
 export OUTPUTS_ROOT LOGS_ROOT TIME_OUTPUTS TIME_LOGS
 export HF_HOME HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE TORCH_HOME
+echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] TS-RAG paths: project=$runtime_project_root outputs=$TIME_OUTPUTS logs=$TIME_LOGS"
 
 mkdir -p "$TIME_DATA_ROOT" "$TIME_METADATA" "$TIME_WEIGHTS" "$TIME_OUTPUTS" "$TIME_LOGS"

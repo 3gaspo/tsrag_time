@@ -4,10 +4,12 @@
 |---|---|---|
 | `experiment.slurm` | Retrieval benefit, context restriction, stronger backbone, and validation mixing | prepare, vanilla, extract, predict, mix, evaluate, report |
 | `experiment_selena.slurm` | Same scientific experiment on the overflow execution surface | same stages |
+| `ablation.slurm` | Full factorial retrieval-scope, alignment, normalization and representation grid | same seven stages |
+| `ablation_selena.slurm` | Same 16-cell ablation on the overflow execution surface | same stages |
 | `seasonal_naive.slurm` | Produce the common finite-support grid and matched scaling baseline | Seasonal forecast/evaluation |
 | `seasonal_naive_selena.slurm` | Same Seasonal producer on the overflow execution surface | same stage |
 
-Both Selena fronts request one GPU, partition `an`, QoS `an_preemptable`,
+All Selena fronts request one GPU, partition `an`, QoS `an_preemptable`,
 exclusive allocation and WCKey `P12CU:DATASCIENCE`, retaining cluster requeue.
 Their defaults are one node, one task, eight CPUs, 80 GB memory and 23 hours.
 
@@ -17,7 +19,7 @@ four documented Adaptime exclusions, giving 90 tasks. `EXPERIMENT_MODE=test`
 selects `SG_Weather/D`, short when `datasets=[all]`; explicit datasets/terms
 remain authoritative. Scale is selection only and does not change run identity.
 
-Six method labels distinguish four vanilla contexts, TS-RAG, and the mixture.
+The main experiment's six method labels distinguish four vanilla contexts, TS-RAG, and the mixture.
 All backbones are frozen and forecasts are univariate medians. T5 is sampled
 with the single run seed and `t5_samples=20`; the retrieval encoder does not
 sample forecasts. Bolt-512 maintains its cap throughout the official quantile
@@ -42,3 +44,35 @@ Conflict/repeat controls retain the shared TIME behavior. Reports select the
 requested exact configuration and its selected repeat, record every evaluation
 and source manifest, and reject additional metric-coverage loss relative to
 the selected Seasonal baseline.
+
+## Retrieval grid
+
+`bash scripts/submit_ablation.sh dgx` runs the complete 16-cell grid configured
+by `retrieval_grid` in Hydra:
+
+| Setting | Grid values | Main default |
+|---|---|---|
+| `scope` | `all`, `same_series` | `all` |
+| `aligned` | `false`, `true` | `false` |
+| `query_scale` | `false`, `true` | `false` |
+| `representation` | `t5`, `instance_l2` | `t5` |
+
+All items and variates are pooled within the selected dataset. Same-series
+retrieval means the query's own item and variate. Alignment uses Adaptime's
+observation-count date periods, accounting for multiplied frequencies and
+different item starts. `alignment_period` explicitly overrides those periods.
+
+Query-scale alignment uses lookback-only neighbor statistics before retrieval;
+T5 candidates are encoded per query. Fusion uses query normalization rather
+than full-neighbor normalization. L2 cells use cached IN lookbacks of length
+512, with finite-overlap distances and `minimum_overlap_fraction=0.8`, and do
+not invoke T5 selection. The normalization axis still changes their fusion.
+
+Every cell falls back to Bolt-max (2,048 points). The four vanilla controls and
+default TS-RAG mixture give 21 method labels per task. Main and grid executions
+reuse exact matching prepared data, caches and default predictions. Reports
+identify every axis, alignment period and fallback method.
+
+Scheduler runtimes enforce project-owned artifact roots while retaining shared
+dataset, checkpoint and Seasonal configuration. The current scientific
+manifests prevent reuse of previous incompatible TS-RAG computations.

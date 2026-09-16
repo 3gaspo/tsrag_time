@@ -431,3 +431,54 @@ datasets:
       prediction_length: 288
     long:
       prediction_length: 576
+
+# Observation counts for date-phase alignment, narrowed from Adaptime's task protocol.
+alignment_periods:
+  Water_Quality_Darwin/15T: 96
+  current_velocity/5T: 288
+  current_velocity/10T: 144
+  current_velocity/15T: 96
+  current_velocity/20T: 72
+  current_velocity/H: 24
+  CPHL/15T: 96
+  CPHL/30T: 48
+  CPHL/H: 24
+  Coastal_T_S/5T: 288
+  Coastal_T_S/15T: 96
+  Coastal_T_S/20T: 72
+  Coastal_T_S/H: 24
+  SG_Weather/D: 1
+  SG_PM25/H: 24
+  NE_China_Wind/H: 24
+  Australia_Solar/H: 24
+  epf_electricity_price/H: 168
+  OpenElectricity_NEM/5T: 2016
+  EWELD_Load/15T: 672
+  SG_Carpark/15T: 672
+  Finland_Traffic/15T: 672
+  Port_Activity/D: 7
+  Port_Activity/W: 1
+  ECDC_COVID/D: 7
+  ECDC_COVID/W: 1
+  Global_Influenza/W: 1
+  Crypto/D: 1
+  US_Term_Structure/B: 1
+  Oil_Price/B: 1
+  Job_Claims/W: 1
+  Economic_Uncertainty/M: 12
+  Marriages_Divorces/M: 12
+  Monthly_Australia/M: 12
+  Personal_Income_Expenditure/M: 12
+  Monthly_USA/M: 12
+  Market_Index/Q: 4
+  Economic_Indicators/Q: 4
+  Tourism_Quarterly/Q: 4
+  Vehicle_Sales/M: 12
+  Online_Retail_2_UCI/D: 7
+  Supply_Chain_Customer/D: 7
+  Supply_Chain_Location/D: 7
+  azure2019_D/5T: 2016
+  azure2019_I/5T: 2016
+  azure2019_U/5T: 2016
+  Smart_Manufacturing/H: 168
+  MetroPT-3/5T: 288
