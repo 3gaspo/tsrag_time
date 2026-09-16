@@ -7,6 +7,10 @@
 | `seasonal_naive.slurm` | Produce the common finite-support grid and matched scaling baseline | Seasonal forecast/evaluation |
 | `seasonal_naive_selena.slurm` | Same Seasonal producer on the overflow execution surface | same stage |
 
+Both Selena fronts request one GPU, partition `an`, QoS `an_preemptable`,
+exclusive allocation and WCKey `P12CU:DATASCIENCE`, retaining cluster requeue.
+Their defaults are one node, one task, eight CPUs, 80 GB memory and 23 hours.
+
 Use `bash scripts/submit_experiment.sh dgx` from the project root. The default `full`
 mode selects all three terms present for each configured dataset except the
 four documented Adaptime exclusions, giving 90 tasks. `EXPERIMENT_MODE=test`

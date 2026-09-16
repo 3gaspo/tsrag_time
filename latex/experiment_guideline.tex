@@ -134,6 +134,10 @@ Use \texttt{validation\_length=0} for no validation, and explicit
 Experiment and Seasonal launchers live under \texttt{scripts/}; they submit
 the root Slurm fronts and delegate implementations to \texttt{src/slurm/}.
 One allocation runs the visible stages sequentially.
+Both Selena fronts request one GPU, partition \texttt{an}, QoS
+\texttt{an\_preemptable}, exclusive allocation and WCKey
+\texttt{P12CU:DATASCIENCE}. Their defaults are one node, one task,
+eight CPUs, 80\,GB memory and 23 hours; cluster requeue remains enabled.
 
 Every task phase has a schema-1 plain scientific manifest allocated before
 expensive work. Exact completed phases are reusable; interrupted tasks restart
