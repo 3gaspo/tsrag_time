@@ -3,13 +3,14 @@
 import os
 from pathlib import Path
 
-from dotenv import load_dotenv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 def _configured_path(variable: str, fallback: Path) -> Path:
+    from dotenv import load_dotenv
+
     load_dotenv(PROJECT_ROOT / ".env")
     value = os.getenv(variable)
     return Path(value).expanduser() if value else fallback

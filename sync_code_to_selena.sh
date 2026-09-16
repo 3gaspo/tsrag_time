@@ -50,6 +50,10 @@ rsync -rlptz --delete-delay --itemize-changes --partial --info=progress2 \
     --exclude='PENDING_UPDATES.md' \
     --exclude='CLUSTER_STATUS.txt' \
     --exclude='docs/INTERNAL_WORKFLOW.md' \
+    --exclude='docs/IMPROVEMENTS.md' \
+    --exclude='datasets/' \
+    --exclude='weights/' \
+    --exclude='archive/' \
     --exclude='outputs/' \
     --exclude='logs/' \
     "$PROJECT_ROOT/" \
@@ -70,4 +74,3 @@ echo "Selena weights: $SCRATCH_STORAGE_ROOT/weights"
 echo "Selena uv environments: $SCRATCH_STORAGE_ROOT/venvs"
 echo "Selena outputs: $SCRATCH_PROJECT_ROOT/outputs"
 echo "Selena logs: $SCRATCH_PROJECT_ROOT/logs"
-

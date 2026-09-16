@@ -1,0 +1,26 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=25mm]{geometry}
+\usepackage{hyperref}
+\title{TS-RAG TIME: evidence status}\author{}\date{}
+\begin{document}\maketitle
+\section{Obtained evidence}
+No cluster results have been obtained or analyzed for this independent project.
+No accuracy, dispersion or latency benefit is claimed for TS-RAG or the
+validation mixture. Local synthetic verification checks implementation
+contracts only and is not forecasting evidence.
+
+\section{Scope and limits}
+The implemented comparison has four frozen Chronos controls, native TS-RAG
+with a 512-point Chronos-Bolt fallback, and a validation-weighted mixture with
+maximum-context Chronos-2. Its growing causal datastore admits every eligible
+historical date by default. These choices differ from Adaptime's historical
+datastore and fallback protocol; no historical result is imported as evidence.
+
+\section{Next evidence needed}
+Run the short-task remote smoke before the full 90-task comparison. Inspect
+grid agreement, fallback counts and reasons, validation support and frozen
+weights. Analyze the complete matched metric means, population variance/std
+and timing components before supporting a model or method decision.
+The no-validation mixture is explicitly Chronos-2 and provides no evidence
+of validation weighting.
+\end{document}

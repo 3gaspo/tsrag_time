@@ -3,6 +3,30 @@
 # Shared by direct TIME run scripts and scheduler wrappers.
 runtime_project_root="${PROJECT_ROOT:-${ROOT_DIR:?ROOT_DIR or PROJECT_ROOT must be set}}"
 
+# Project path settings apply before defaults; explicit submission overrides win.
+runtime_path_variables=(TIME_STORAGE_ROOT TIME_DATA_ROOT TIME_DATASET TIME_METADATA TIME_WEIGHTS
+    TIME_SEASONAL_SCOPE TIME_SEASONAL_ROOT TIME_SEASONAL_TASKS_ROOT
+    OUTPUTS_ROOT LOGS_ROOT TIME_OUTPUTS TIME_LOGS
+    HF_HOME HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE TORCH_HOME)
+declare -A runtime_path_overrides=()
+for runtime_path_variable in "${runtime_path_variables[@]}"; do
+    if [[ -v "$runtime_path_variable" ]]; then
+        runtime_path_overrides["$runtime_path_variable"]="${!runtime_path_variable}"
+    fi
+done
+if [ -f "$runtime_project_root/.env" ]; then
+    runtime_allexport=false
+    [[ "$-" == *a* ]] && runtime_allexport=true
+    set -a
+    source "$runtime_project_root/.env"
+    [ "$runtime_allexport" = true ] || set +a
+fi
+for runtime_path_variable in "${!runtime_path_overrides[@]}"; do
+    printf -v "$runtime_path_variable" '%s' "${runtime_path_overrides[$runtime_path_variable]}"
+    export "$runtime_path_variable"
+done
+unset runtime_path_variable runtime_path_variables runtime_path_overrides runtime_allexport
+
 TIME_STORAGE_ROOT="${TIME_STORAGE_ROOT:-$runtime_project_root}"
 TIME_DATA_ROOT="${TIME_DATA_ROOT:-$TIME_STORAGE_ROOT/datasets}"
 TIME_DATASET="${TIME_DATASET:-$TIME_DATA_ROOT/hf_dataset}"

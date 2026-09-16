@@ -1,0 +1,21 @@
+stage: prepare
+experiment_mode: full
+datasets: [all]
+terms: [short, medium, long]
+excluded_datasets: [Coastal_T_S/5T, current_velocity/20T, azure2019_D/5T, azure2019_I/5T]
+dataset_config: null
+seed: 0
+device: cuda
+batch_size: 32
+embedding_batch_size: 512
+t5_samples: 20
+# null uses TIME's per-dataset validation length; 0 disables weight estimation.
+validation_length: null
+# All historical dates by default. A candidate retains its observed 64-step future.
+datastore_stride: 1
+max_datastore_windows: null
+hydra:
+  run:
+    dir: ${oc.env:TIME_LOGS,logs}/hydra/${now:%Y%m%d_%H%M%S}_${stage}
+  job:
+    chdir: false

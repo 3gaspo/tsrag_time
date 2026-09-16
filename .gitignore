@@ -1,116 +1,7 @@
-# Byte-compiled / optimized / DLL files
+AGENTS.md
+.venv/
 __pycache__/
 *.py[cod]
-*$py.class
-
-# C extensions
-*.so
-
-# Distribution / packaging
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# PyInstaller
-*.manifest
-*.spec
-
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Unit test / coverage reports
-htmlcov/
-.tox/
-.nox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.py,cover
-.hypothesis/
-.pytest_cache/
-
-# Translations
-*.mo
-*.pot
-
-# Environments
-.env
-.venv
-env/
-venv/
-ENV/
-env.bak/
-venv.bak/
-
-# IDEs
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
-
-# Jupyter Notebook
-.ipynb_checkpoints
-
-
-# Keep directory structure
-!data/.gitkeep
-!results/.gitkeep
-
-# Model checkpoints
-*.pt
-*.pth
-*.ckpt
-
-# Logs
-*.log
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*.temp
-
-
-leaderboard_app/
-output/
-data/
-plot_analyze/
-*.txt
-lightning_logs/
-timesfm/
-hf_models/
-experiments/Kairos/
-granite-tsfm/
-local_tools/
-config/
-
-# Thesis project local artifacts
-AGENTS.md
-/FUTURE_WORK.md
-/PENDING_UPDATES.md
-/CLUSTER_STATUS.txt
-/docs/INTERNAL_WORKFLOW.md
-.venv/
 outputs/*
 !outputs/.gitkeep
 logs/*
@@ -119,3 +10,17 @@ datasets/*
 !datasets/.gitkeep
 weights/*
 !weights/.gitkeep
+FUTURE_WORK.md
+PENDING_UPDATES.md
+CLUSTER_STATUS.txt
+docs/IMPROVEMENTS.md
+docs/INTERNAL_WORKFLOW.md
+.env
+.secrets/
+.pytest_cache/
+*.egg-info/
+/archive/
+latex/*.aux
+latex/*.log
+latex/*.out
+latex/*.toc

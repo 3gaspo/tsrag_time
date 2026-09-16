@@ -1,0 +1,84 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=24mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\title{TS-RAG TIME: frozen forecasting and validation mixing}
+\author{}\date{}
+\begin{document}\maketitle
+\section{Question and controls}
+Does native retrieval improve Chronos-Bolt after controlling for input context,
+and can a small validation interval combine it with the stronger Chronos-2
+backbone? All models are frozen and evaluated as univariate median forecasts
+on the same official TIME windows. The controls are Chronos-T5-base at $L=512$,
+Chronos-Bolt-base at $L\in\{512,2048\}$, and Chronos-2 at $L=8192$.
+Here $L$ is the maximum number of historical observations admitted to each
+forecast invocation; an early window uses the available shorter history.
+
+\section{Native retrieval forecast}
+For one series $x_0,\ldots,x_{T-1}$ and a real query origin $t$, let
+$c_t=(x_{t-512},\ldots,x_{t-1})$ be its native history. The frozen
+Chronos-T5-base encoder maps it to an EOS representation $e_t\in\mathbb R^{768}$.
+For every candidate origin $s$, the same encoder embeds $c_s$. Eligible
+same-series candidates satisfy
+\[
+  \mathcal D_t=\{s: s\ge512,\ s+64\le t\}.
+\]
+The configurable stride restricts $s$ to $512+j\Delta$, where $j\ge0$ is an
+integer and $\Delta=1$ by default. An optional cap retains the most recent
+eligible candidates. FAISS IndexFlatL2 selects $K=10$ nearest embeddings.
+The released rule requests $K+1$ candidates and discards the last returned
+result; fewer than $11$ candidates triggers fallback.
+
+For neighbor $s_i$, fetch $r_i=(c_{s_i},x_{s_i},\ldots,x_{s_i+63})\in\mathbb R^{576}$.
+The released ARM normalizes the complete trajectory, then encodes only its
+64-point continuation with a shared MLP. Separately, Bolt's encoder and
+decoder process $c_t$ into the query hidden representation. Multihead
+attention and learned gates fuse that decoder representation with the $K$
+neighbor representations. A residual update and Bolt's output projection
+produce 64 points at each quantile; retain the median.
+Fusion is after the query decoder, not before it.
+
+For task horizon $H\le64$, crop one native forecast. For $H>64$, append each
+median chunk, retain the last 512 values, re-embed and retrieve, and repeat.
+The observed candidate cutoff remains $t$ throughout recursion: predicted
+future values never grant access to real observations after $t$.
+
+\section{Fallback and validation mixture}
+The TS-RAG forecast $R_t$ is replaced as one complete window by the independent
+Bolt-512 median $B_t$ for insufficient history/candidates, extraction or model
+errors, or non-finite predictions on required target steps. Preserve masks,
+counts and reasons; the fallback is part of the implemented method.
+
+Let $C_t$ denote the maximum-context Chronos-2 median. Validation dates lie
+strictly before the official test interval. For variate $v$, define
+\[
+ q_{tv}=\max\{\operatorname{std}(c_{tv}),10^{-8}\},\qquad
+ \ell_{tv}(F)=\frac{1}{|A_{tv}|}\sum_{h\in A_{tv}}
+       \left(\frac{F_{tvh}-x_{t+h,v}}{q_{tv}}\right)^2,
+\]
+where $A_{tv}$ contains finite observed target steps. Admit only finite paired
+scores. Average $\ell_{tv}$ over supported variates at each series/date.
+For $n$ usable dates, let $w$ count dates where TS-RAG has lower averaged
+loss, with a tie contributing one half. The Beta$(1,1)$-smoothed weight is
+\[
+ p=\frac{1+w}{2+n},\qquad M_t=(1-p)C_t+pR_t.
+\]
+Freeze $p$ before testing. With $n=0$, explicitly use $p=0$ and pure Chronos-2.
+This is a smoothed win frequency, not a fitted optimal ensemble weight.
+
+\section{Evaluation and attribution}
+The shared Seasonal Naive artifact fixes finite target support and eligible
+metric cells. All six methods use that same grid and TIME's median metrics.
+Task summaries report mean, population variance and standard deviation over
+finite series-window-variate cells; this dispersion is not across-run seed
+uncertainty. Reports retain coverage, fallback rates and pipeline timings.
+No benefit is claimed until new cluster results are obtained and analyzed.
+
+\section{Borrowed work}
+ARM and retrieval are source-adapted from
+\href{https://github.com/UConn-DSIS/TS-RAG/tree/73ac807789d2e61b8a3dfc8514e3fc947fe185cc}{TS-RAG revision 73ac807}.
+The local Bolt forecasting core is source-adapted from
+\href{https://github.com/amazon-science/chronos-forecasting/tree/7dc4435706a4454feb79df44ca9f33631f3027bf}{Chronos revision 7dc4435}.
+The causal datastore, rollout, fallback and validation mixture are
+project-specific. Training and alternate ARM augmentation paths are omitted.
+\end{document}

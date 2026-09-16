@@ -1,0 +1,150 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=24mm]{geometry}
+\usepackage{amsmath,amssymb,booktabs,hyperref}
+\hypersetup{colorlinks=true,urlcolor=blue,linkcolor=blue}
+\title{TS-RAG TIME: experiment guideline}
+\author{}\date{}
+\begin{document}\maketitle
+\section{Problem and hypotheses}
+Evaluate native TS-RAG on TIME while separating retrieval from context size
+and forecasting-backbone quality. Compare Bolt-512 with Bolt's maximum
+context to measure the context restriction; compare TS-RAG with Bolt-512 to
+measure the implemented retrieval wrapper, including fallback. Chronos-T5
+and Chronos-2 provide additional frozen controls. A validation mixture asks
+whether a pre-test win-frequency weight improves the stronger control.
+These are hypotheses, not experimentally supported conclusions.
+
+\section{Mathematical experiment}
+For a series of length $T$, official test interval length $J$ and horizon $H$,
+the official origins are $t_j=T-J+jH$, for $j=0,\ldots,\lfloor J/H\rfloor-1$.
+Rows are ordered by source item, variate, then origin, matching TIME's
+univariate evaluator. The six frozen median methods are:
+\begin{center}
+\begin{tabular}{ll}\toprule
+Method & Context / rule\\\midrule
+Chronos-T5-base & $L=512$, 20 forecast samples\\
+Chronos-Bolt-base & $L=512$\\
+Chronos-Bolt-base & $L=2048$\\
+Chronos-2 & $L=8192$, no covariates or cross-learning\\
+TS-RAG & $L=512$, $K=10$, Bolt-512 fallback\\
+Mixture & Frozen validation weight on Chronos-2 and TS-RAG\\\bottomrule
+\end{tabular}
+\end{center}
+Available history is capped at $L$. Bolt maintains this cap throughout its
+official autoregressive quantile rollout. T5 retains its official sampled
+rollout. TS-RAG uses its separate 64-step median rollout.
+
+\subsection{Datastore and native forecasting}
+At real query $t$, eligible candidates are same-series origins
+$s=512+j\Delta$ satisfying $s+64\le t$, with $\Delta=1$ by default. No
+fitting-derived boundary exists. An optional maximum retains the most recent
+eligible dates. Chronos-T5-base EOS embeddings have dimension 768.
+IndexFlatL2 requests 11 nearest candidates and retains the first 10,
+mirroring the released rule. Fetch 512 history plus 64 observed continuation
+points per neighbor. The ARM normalizes each full 576-point trajectory,
+encodes its 64-point future using a shared MLP, and combines these with the
+query Bolt decoder representation using attention and learned gates.
+The output projection emits 64 points per quantile.
+
+Crop when $H\le64$. Otherwise append each median chunk, retain the last 512
+points, re-embed, retrieve and repeat. Candidate eligibility stays anchored
+to the real $t$ in every chunk. Earlier test observations may be retrieved
+by later real queries once the full native continuation is observed.
+Missing query history, fewer than 11 eligible neighbors, recorded extraction
+or inference errors, and non-finite forecasts on required target steps use
+the independently computed Bolt-512 forecast for the entire window/variate.
+
+\subsection{Validation and mixing}
+The optional validation interval of length $V$ ends at $T-J$; origins use the
+same horizon stride as testing. Default $V$ is the dataset's configured TIME
+validation length. $V=0$ disables weight estimation. If $0<V<H$, or the
+interval leaves no observed prefix, validation is unavailable and the test
+interval remains unchanged. There is no training or fitting split.
+
+For each validation variate/date, let $c$ be the last 512 available history
+points and define the query scale
+\[
+ q=\max\{\operatorname{std}(c),10^{-8}\}.
+\]
+Divide the finite-step mean squared error by $q^2$.
+Require finite paired scores from Chronos-2 and the TS-RAG method, including
+its explicit fallback. Average over supported variates per series/date.
+With $n$ usable dates and $w$ TS-RAG wins (ties count one half), freeze
+$p=(1+w)/(2+n)$ and predict $(1-p)C+pR$, where $C$ and $R$ are Chronos-2 and
+TS-RAG medians. If $n=0$, use $p=0$ explicitly. An invalid combined test
+forecast falls back to Chronos-2 on that complete cell.
+
+\subsection{Datasets, randomness and evaluation}
+Consume prepared TIME saved-Arrow data using the official dataset settings.
+The full run includes all available short/medium/long terms except
+\texttt{Coastal\_T\_S/5T}, \texttt{current\_velocity/20T},
+\texttt{azure2019\_D/5T} and \texttt{azure2019\_I/5T}, giving 90 tasks.
+Explicit selection may change this scope. The remote test mode selects only
+\texttt{SG\_Weather/D}, short. A single seed (default 0) controls Python,
+NumPy and Torch randomness, including T5 forecast sampling; no independent
+component seeds exist. Prepared tensor consumers apply no CSV exclusion or
+missing-value policy again.
+
+The selected completed Seasonal Naive artifact defines finite target steps
+and metric cells requiring finite Seasonal MASE. Foundation controls and
+fallback predictions must be finite on required cells. All medians enter the
+standard TIME saver as a single $0.5$ quantile. Report MSE, MAE, RMSE, MAPE,
+sMAPE, MASE, ND and deterministic single-quantile CRPS, retaining finite/grid/
+total cell counts. Reject additional coverage loss relative to Seasonal.
+
+For finite task metric cells $a_1,\ldots,a_m$, report
+\[
+ \bar a=\frac1m\sum_i a_i,\qquad
+ \operatorname{var}(a)=\frac1m\sum_i(a_i-\bar a)^2,\qquad
+ \operatorname{std}(a)=\sqrt{\operatorname{var}(a)}.
+\]
+This is population dispersion, with ddof 0. Scaled MASE divides the model
+task mean/std by matched Seasonal mean, and its variance by the square of
+that mean. The separate MASE variance ratio divides model variance by
+Seasonal variance; an unavailable/zero denominator remains undefined.
+Overall reports include arithmetic task means and equal-dataset scaled means.
+
+\section{Implementing code and execution}
+\texttt{data/windows.py} owns references and causal candidates;
+\texttt{model\_loading/} owns official controls and strict ARM loading;
+\texttt{external\_models/tsrag/} owns source-adapted native computation;
+\texttt{proposal/mixture.py} owns the validation rule;
+\texttt{pipeline/workflow.py} composes stages;
+\texttt{evaluation/} and \texttt{results/} own metrics and reports.
+These paths are under \texttt{src/timebench/}.
+
+\begin{enumerate}
+\item Prepare datastore, validation and official test references.
+\item Compute and persist the four independent vanilla controls.
+\item Extract frozen T5 retrieval representations.
+\item Predict native TS-RAG with explicit Bolt-512 fallback.
+\item Estimate/freeze the validation weight and produce mixture medians.
+\item Evaluate all six methods on the selected Seasonal grid.
+\item Write matched comparison and source-manifest reports.
+\end{enumerate}
+Run \texttt{bash submit\_experiment.sh dgx} from the project root after the
+selected Seasonal store is complete. Hydra configuration is
+\begin{quote}\path{src/timebench/conf/experiment.yaml}\end{quote}
+Use \texttt{validation\_length=0} for no validation, and explicit
+\texttt{datasets=[...]} / \texttt{terms=[...]} overrides for a subset.
+Root experiment and Seasonal fronts source implementations under
+\texttt{src/slurm/}; one allocation runs the visible stages sequentially.
+
+Every task phase has a schema-1 plain scientific manifest allocated before
+expensive work. Exact completed phases are reusable; interrupted tasks restart
+from their beginning. Producer resolution embeds complete scientific
+configuration and the seed, while storage paths and source revisions are
+provenance. Completion follows successful owning \texttt{srun} and declared
+nonempty artifacts. No source, dataset or checkpoint file hashes exist.
+Canonical float32 predictions, fallback masks/reasons and weights live below
+\texttt{outputs/tsrag/}; logs live below \texttt{logs/}. Reports record all input
+evaluation, prediction and Seasonal manifests. Consumers must select equivalent
+completed computations and read canonical artifacts in place.
+
+Timings separate datastore extraction and query work. TS-RAG reuses cached
+Bolt-512 fallback forecasts; its measured inference time excludes computing
+that separate control. Mixture totals include both component times and mixing.
+These are pipeline measurements, not independent fresh-process latency.
+The new growing datastore and fallback invalidate direct reuse of Adaptime's
+historical TS-RAG forecasts: run the full current computation afresh.
+\end{document}
