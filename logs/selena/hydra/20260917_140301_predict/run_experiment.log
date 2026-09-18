@@ -1,0 +1,9 @@
+[2026-09-17 14:03:03,778][datasets][INFO] - PyTorch version 2.9.1 available.
+[2026-09-17 14:03:46,319][faiss.loader][INFO] - Loading faiss with AVX512 support.
+[2026-09-17 14:03:46,319][faiss.loader][INFO] - Could not load library with AVX512 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx512'")
+[2026-09-17 14:03:46,319][faiss.loader][INFO] - Loading faiss with AVX2 support.
+[2026-09-17 14:03:46,319][faiss.loader][INFO] - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+[2026-09-17 14:03:46,319][faiss.loader][INFO] - Loading faiss.
+[2026-09-17 14:03:47,381][faiss.loader][INFO] - Successfully loaded faiss.
