@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "validation_inference_seconds": 5.211063553579152,
+  "test_inference_seconds": 5.205096808262169
+}

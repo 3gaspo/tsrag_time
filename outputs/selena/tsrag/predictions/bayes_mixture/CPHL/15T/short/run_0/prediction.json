@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "method": "bayes_mixture",
+  "tsrag_weight": 0.4132231404958678,
+  "validation_dates": 240,
+  "tsrag_wins_with_half_ties": 99.0,
+  "prior": [
+    1,
+    1
+  ],
+  "score": "per_date_mean_variate_msse",
+  "status": "estimated",
+  "fallback_method": "chronos_bolt_max",
+  "test_inference_seconds": 5.254677659831941,
+  "mix_only_seconds": 4.284083843231201e-05,
+  "nonfinite_fallback_count": 0
+}
