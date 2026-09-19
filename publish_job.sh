@@ -134,6 +134,7 @@ done
 
 sample_paths=()
 oversize_exclusions=()
+oversize_paths=()
 for selected_path in "${paths[@]}"; do
     while IFS= read -r -d '' file; do
         relative="${file#"$project_root"/}"
@@ -170,11 +171,21 @@ for selected_path in "${paths[@]}"; do
             fi
         } > "$sample_file"
         sample_paths+=("$sample_relative")
+        oversize_paths+=("$relative")
         oversize_exclusions+=(":(exclude,literal)$relative")
         echo "Replacing oversized artifact ($file_bytes bytes) with $sample_relative"
     done < <(find "$project_root/$selected_path" -type f -print0)
 done
-publish_paths=("${paths[@]}" "${sample_paths[@]}")
+declare -A oversize_lookup=()
+for oversize_path in "${oversize_paths[@]}"; do
+    oversize_lookup["$oversize_path"]=1
+done
+publish_paths=()
+for selected_path in "${paths[@]}"; do
+    [ -z "${oversize_lookup[$selected_path]+x}" ] || continue
+    publish_paths+=("$selected_path")
+done
+publish_paths+=("${sample_paths[@]}")
 publish_pathspec="$(mktemp)"
 trap 'rm -f -- "$publish_pathspec"' EXIT
 printf '%s\0' "${publish_paths[@]}" "${exclusions[@]}" "${oversize_exclusions[@]}" > "$publish_pathspec"
