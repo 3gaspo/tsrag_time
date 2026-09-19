@@ -231,6 +231,9 @@ for selected_path in "${paths[@]}"; do
     done < <(find "$project_root/$selected_path" -type f -print0)
 done
 publish_paths=("${paths[@]}" "${sample_paths[@]}")
+publish_pathspec="$(mktemp)"
+trap 'rm -f -- "$publish_pathspec"' EXIT
+printf '%s\0' "${publish_paths[@]}" "${exclusions[@]}" "${oversize_exclusions[@]}" > "$publish_pathspec"
 
 if [ -n "$job_id" ]; then
     echo "Publishing job $job_id logs and $publish_size TIME artifacts:"
@@ -238,9 +241,9 @@ else
     echo "Publishing DGX and synchronized Selena logs plus $publish_size TIME artifacts:"
 fi
 printf '  %s\n' "${paths[@]}"
-git add -v -f -- "${publish_paths[@]}" "${exclusions[@]}" "${oversize_exclusions[@]}"
-if ! git diff --cached --quiet -- "${publish_paths[@]}" "${exclusions[@]}" "${oversize_exclusions[@]}"; then
-    git commit --only -m "$message" -- "${publish_paths[@]}" "${exclusions[@]}" "${oversize_exclusions[@]}"
+git add -v -f --pathspec-from-file="$publish_pathspec" --pathspec-file-nul
+if ! git diff --cached --quiet --pathspec-from-file="$publish_pathspec" --pathspec-file-nul; then
+    git commit --only -m "$message" --pathspec-from-file="$publish_pathspec" --pathspec-file-nul
 else
     echo "No new artifact changes; pushing existing local commits."
 fi
