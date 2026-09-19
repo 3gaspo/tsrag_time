@@ -105,69 +105,13 @@ fi
 if [ "$publish_size" = full ]; then
     [ ! -d outputs ] || paths+=(outputs)
 elif [ -d outputs ]; then
+    selection_file="$(mktemp)"
+    python3 "$project_root/src/timebench/pipeline/artifact_selection.py" paths "$project_root/outputs" \
+        --size "$publish_size" --max-bytes "${PUBLISH_MAX_FILE_BYTES:-100000000}" > "$selection_file"
     while IFS= read -r -d '' artifact; do
         paths+=("${artifact#"$project_root"/}")
-    done < <(
-        if [ "$publish_size" = detailed ]; then
-            find "$project_root/outputs" -type f \( \
-                -name foundation_model_summary.csv -o \
-                -name foundation_model_summary.md -o \
-                -name foundation_model_report_manifest.json -o \
-                -name mase_vs_features.svg -o \
-                -name mase_vs_features_data.csv -o \
-                -name mase_vs_features_correlations.csv -o \
-                -name SELECTED_RUNS.json -o \
-                -path '*/manifest_history/*.json' -o \
-                -name manifest.json -o \
-                -name model_manifest.json -o \
-                -name result_manifest.json -o \
-                -name selection.json -o \
-                -name comparison_summary.json -o \
-                -name time_summary_manifest.json -o \
-                -name time_summary.json -o \
-                -name time_tasks.csv -o \
-                -name audit_manifest.json -o \
-                -name config.json -o \
-                -name metrics_summary.json -o \
-                -name report_manifest.json -o \
-                -name comparison.csv -o \
-                -name metrics.npz -o \
-                -name task_summary.csv -o \
-                -name dataset_summary.csv -o \
-                -name window_events.csv -o \
-                -name nonfinite_positions.csv -o \
-                -name full.csv -o \
-                -name full_dataset.csv -o \
-                -name dataset_features_full.csv \) -print0
-        else
-            find "$project_root/outputs" -type f \( \
-                -name foundation_model_summary.csv -o \
-                -name foundation_model_summary.md -o \
-                -name foundation_model_report_manifest.json -o \
-                -name mase_vs_features.svg -o \
-                -name mase_vs_features_data.csv -o \
-                -name mase_vs_features_correlations.csv -o \
-                -name SELECTED_RUNS.json -o \
-                -path '*/manifest_history/*.json' -o \
-                -name manifest.json -o \
-                -name model_manifest.json -o \
-                -name result_manifest.json -o \
-                -name selection.json -o \
-                -name comparison_summary.json -o \
-                -name time_summary_manifest.json -o \
-                -name time_summary.json -o \
-                -name time_tasks.csv -o \
-                -name audit_manifest.json -o \
-                -name config.json -o \
-                -name metrics_summary.json -o \
-                -name report_manifest.json -o \
-                -name comparison.csv -o \
-                -name task_summary.csv -o \
-                -name dataset_summary.csv -o \
-                -name full_dataset.csv -o \
-                -name dataset_features_full.csv \) -print0
-        fi
-    )
+    done < "$selection_file"
+    rm -f -- "$selection_file"
 fi
 
 exclusions=(
@@ -242,10 +186,9 @@ else
 fi
 printf '  %s\n' "${paths[@]}"
 git add -v -f --pathspec-from-file="$publish_pathspec" --pathspec-file-nul
-if ! git diff --cached --quiet --pathspec-from-file="$publish_pathspec" --pathspec-file-nul; then
+if ! git diff --cached --quiet; then
     git commit --only -m "$message" --pathspec-from-file="$publish_pathspec" --pathspec-file-nul
 else
     echo "No new artifact changes; pushing existing local commits."
 fi
 git push origin main
-
