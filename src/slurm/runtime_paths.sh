@@ -73,3 +73,11 @@ export HF_HOME HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE TORCH_
 echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] TS-RAG paths: project=$runtime_project_root outputs=$TIME_OUTPUTS logs=$TIME_LOGS"
 
 mkdir -p "$TIME_DATA_ROOT" "$TIME_METADATA" "$TIME_WEIGHTS" "$TIME_OUTPUTS" "$TIME_LOGS"
+
+# One compute-node resource snapshot per Slurm job, including helper jobs.
+if [ -n "${SLURM_JOB_ID:-}" ] && [ "${TIME_RESOURCES_LOGGED_JOB:-}" != "$SLURM_JOB_ID" ]; then
+    export TIME_RESOURCES_LOGGED_JOB="$SLURM_JOB_ID"
+    srun --ntasks=1 uv run --no-sync python \
+        "$runtime_project_root/src/timebench/pipeline/runtime_resources.py" || \
+        echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] resources probe failed; diagnostics unavailable" >&2
+fi

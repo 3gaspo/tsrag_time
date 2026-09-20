@@ -147,13 +147,21 @@ override. `TIME_RUN_CONFLICT_POLICY=overwrite_exact|overwrite_path|new`,
 
 Scheduler launchers enforce project-owned artifact roots, ignoring inherited or
 copied artifact-path settings while preserving shared data/weight settings.
-Artifacts live under `outputs/tsrag/{data,extractions,predictions,evaluations,reports}`.
+Scientific stage artifacts live under
+`outputs/tsrag/{data,extractions,predictions,evaluations}`. Launch-exact reports
+live under `outputs/reports/tsrag/<launch-id>/`; their `performance/` bundle
+contains task/domain/timing tables and matched PNG/PDF figures.
 Canonical `predictions/<method>/<dataset>/<term>/run_n/test.npy` files retain
 float32 medians. Evaluation runs contain standard TIME predictions, metric
 arrays, and compact summaries. TS-RAG fallback masks/reasons and mixture weights
 are persisted. Reports include mean, population variance, standard deviation,
 finite-value counts, scaled MASE, and the matched Seasonal MASE variance ratio.
 An unavailable or zero Seasonal variance leaves that ratio undefined.
+
+Fallback counts, rates, and aggregate reason counts in comparison artifacts are
+test-only because test is the evaluated split. Validation fallback remains
+available only in its split-specific mask and per-row reason artifact for mixture
+diagnosis; it is not included in reported fallback totals.
 
 Every TS-RAG variant falls back to Bolt-max (2,048 points) for insufficient history/retrieval, extraction or
 inference errors, and non-finite native predictions. A fallback
@@ -167,10 +175,16 @@ fresh-process latency measurements.
 
 `sync_code_to_selena.sh`, `sync_results_to_dgx.sh`, `clear_selena_artifacts.sh`, and
 `publish_job.sh` retain project-scoped cluster operations. Lightweight transfer
-includes reports and compact lifecycle/metric metadata; `--size detailed` adds
-metric arrays and fallback reasons; `--size full` includes canonical predictions
-and embedding binaries. Consumers should select scientifically equivalent
-completed manifests and read canonical results in place.
+includes reports and compact lifecycle/metric metadata, including aggregate
+test fallback causes and mixture support in `prediction.json`/`weight.json`;
+`--size detailed` adds metric arrays and per-row fallback reasons; `--size full`
+includes canonical predictions and embedding binaries. Consumers should select
+scientifically equivalent completed manifests and read canonical results in place.
+
+Every scheduled allocation logs a compute-node resource snapshot before its
+scientific stages: Slurm/job identity, visible and inventoried GPUs, free/total
+GPU memory, host RAM and exposed cgroup limits. Model loaders separately record
+the device actually selected for each backbone.
 
 ## Documentation maintenance
 

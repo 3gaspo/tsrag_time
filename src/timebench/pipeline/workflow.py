@@ -375,7 +375,7 @@ class Workflow:
                         except Exception as exception:
                             task_error = {'type': type(exception).__name__, 'message': str(exception)}
                     files = []
-                    timing, counts, reason_counts = {}, {}, {}
+                    timing, counts, reason_counts_by_split = {}, {}, {}
                     for split in ('validation', 'test'):
                         refs = self.refs(data, split)
                         base = np.load(fallback / f'{split}.npy', mmap_mode='r')
@@ -383,6 +383,7 @@ class Workflow:
                         values[:] = base
                         mask = np.zeros(len(refs), dtype=bool)
                         reasons = []
+                        reason_counts = {}
                         targets, cells = self.support(task, split, windows, refs)
                         retrieval = None
                         if task_error is None:
@@ -420,11 +421,13 @@ class Workflow:
                         write_json(run.run_dir / f'{split}_fallback_reasons.json', reasons)
                         counts[split] = {'all_rows': int(mask.sum()), 'eligible_rows': int((mask & cells).sum()),
                                          'grid_rows': int(cells.sum()), 'total_rows': len(refs)}
+                        reason_counts_by_split[split] = reason_counts
                         files.extend([f'{split}.npy', f'{split}_fallback.npy', f'{split}_fallback_reasons.json'])
                     write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method, 'context_limit': 512, 'retrieval': options,
                                                                'alignment_period': task.alignment_period,
                                                                'fallback_method': 'chronos_bolt_max', 'task_error': task_error,
-                                                               'fallback_counts': counts, 'fallback_reasons': reason_counts,
+                                                               'fallback_counts': counts, 'fallback_reason_split': 'test',
+                                                               'fallback_reasons': reason_counts_by_split['test'],
                                                                'datastore_preprocessing_seconds': metadata['representation_seconds'][options['representation']],
                                                                'fallback_source_test_inference_seconds': json.loads((fallback / 'prediction.json').read_text())['test_inference_seconds'],
                                                                'timing_policy': 'measured_query_work_with_precomputed_bolt_max_fallback', **timing})
@@ -505,7 +508,7 @@ class Workflow:
         inputs = [(task, method, self.evaluation(task, method), self.prediction(task, method))
                   for task in self.tasks for method in self.methods()]
         launch = os.getenv('TIME_LAUNCH_ID', 'manual')
-        build_report(inputs, self.root / 'reports' / launch, self.config)
+        build_report(inputs, self.root.parent / 'reports' / 'tsrag' / launch, self.config)
 
     def run(self, stage):
         log(f'stage={stage} tasks={len(self.tasks)} seed={self.seed} device={self.device} Slurm={os.getenv("SLURM_JOB_ID")}')

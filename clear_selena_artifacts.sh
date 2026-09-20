@@ -58,9 +58,9 @@ else
         exit 1
     fi
     TIME_STORAGE_ROOT="${TIME_STORAGE_ROOT:-/scratch/users/$nni}"
-    TIME_SCRATCH_ROOT="${TIME_SCRATCH_ROOT:-$TIME_STORAGE_ROOT/codes/$PROJECT_NAME}"
-    OUTPUTS_ROOT="${OUTPUTS_ROOT:-${TIME_OUTPUTS:-$TIME_SCRATCH_ROOT/outputs}}"
-    LOGS_ROOT="${LOGS_ROOT:-${TIME_LOGS:-$TIME_SCRATCH_ROOT/logs}}"
+    TIME_SCRATCH_ROOT="/scratch/users/$nni/codes/$PROJECT_NAME"
+    OUTPUTS_ROOT="$TIME_SCRATCH_ROOT/outputs"
+    LOGS_ROOT="$TIME_SCRATCH_ROOT/logs"
     artifact_roots=(
         "$LOGS_ROOT"
         "$OUTPUTS_ROOT"

@@ -34,7 +34,7 @@ fi
 SELENA_HOST="${TIME_SELENA_HOST:-$nni@selena.hpc.edf.fr}"
 DESTINATION="${TIME_SELENA_CODE_ROOT:-$SELENA_HOST:~/codes/$PROJECT_NAME/}"
 SCRATCH_STORAGE_ROOT="${TIME_SELENA_STORAGE_ROOT:-/scratch/users/$nni}"
-SCRATCH_PROJECT_ROOT="${TIME_SELENA_SCRATCH_ROOT:-$SCRATCH_STORAGE_ROOT/codes/$PROJECT_NAME}"
+SCRATCH_PROJECT_ROOT="/scratch/users/$nni/codes/$PROJECT_NAME"
 
 echo "Synchronizing $PROJECT_NAME code from DGX to Selena..."
 rsync -rlptz --delete-delay --itemize-changes --partial --info=progress2 \

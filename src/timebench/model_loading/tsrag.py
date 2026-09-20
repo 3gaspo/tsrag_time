@@ -61,6 +61,8 @@ def load_tsrag(
         raise FileNotFoundError(f"Chronos-Bolt checkpoint directory not found: {base}")
     checkpoint_file = _checkpoint_file(Path(checkpoint))
     torch_device = torch.device(device)
+    from timebench.pipeline.runtime_resources import log
+    log("model_device", model="tsrag", device=str(torch_device))
 
     config = AutoConfig.from_pretrained(str(base), local_files_only=True)
     model = ChronosBoltModelForForecastingWithRetrieval.from_pretrained(

@@ -76,6 +76,8 @@ The TS-RAG forecast $R_t$ is replaced as one complete window by the independent
 Bolt-max ($L=2048$) median $B_t$ for insufficient history/candidates, extraction or model
 errors, or non-finite native predictions. Preserve masks,
 counts and reasons; the fallback is part of the implemented method.
+Comparison reports aggregate fallback counts, rates and causes on test alone;
+validation fallback artifacts remain separate diagnostics for the frozen mixture.
 
 Let $C_t$ denote the maximum-context Chronos-2 median. Validation dates lie
 strictly before the official test interval. For variate $v$, define

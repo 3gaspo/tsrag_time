@@ -183,6 +183,10 @@ shared dataset and weight settings. Reports include retrieval axes, alignment
 periods and fallback methods, and record all input
 evaluation, prediction and Seasonal manifests. Consumers must select equivalent
 completed computations and read canonical artifacts in place.
+Reported fallback counts, rates and aggregate causes use the test split only,
+which is the evaluated split. Validation masks and per-row reasons remain
+split-specific diagnostics for mixture estimation and are excluded from those
+reported totals.
 
 Timings separate datastore extraction and query work. TS-RAG reuses cached
 Bolt-max fallback forecasts; its measured inference time excludes computing

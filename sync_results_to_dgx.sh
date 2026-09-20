@@ -18,23 +18,21 @@ nni="$(sed -n '1p' "${TIME_NNI_FILE:-$HOME/codes/.secrets/nni}" | tr -d '[:space
 nni="${nni,,}"
 [[ "$nni" =~ ^[a-z][a-z0-9_-]*$ ]] || { echo 'invalid NNI' >&2; exit 2; }
 host="${TIME_SELENA_HOST:-$nni@selena.hpc.edf.fr}"
-source_root="${TIME_SELENA_RESULTS_ROOT:-$host:/scratch/users/$nni/codes/$PROJECT_NAME}"
+source_root="$host:/scratch/users/$nni/codes/$PROJECT_NAME"
 mkdir -p "$PROJECT_ROOT/outputs/selena" "$PROJECT_ROOT/logs/selena"
 filters=()
 if [ "$size" != full ]; then
-    filters=('--include=*/' '--include=/tsrag/reports/***' '--include=manifest.json'
-             '--include=SELECTED_RUNS.json' '--include=*/manifest_history/*.json'
-             '--include=config.json' '--include=metrics_summary.json' '--include=prediction.json'
-             '--include=extraction.json' '--include=prepared.json' '--include=weight.json')
-    if [ "$size" = detailed ]; then
-        filters+=('--include=metrics.npz' '--include=*fallback_reasons.json')
-    fi
-    filters+=('--exclude=*')
+    filter_text="$(python3 "$PROJECT_ROOT/src/timebench/pipeline/artifact_selection.py" filters --size "$size")"
+    mapfile -t filters <<< "$filter_text"
 fi
-rsync -rlptz --partial --prune-empty-dirs "${filters[@]}" "$source_root/outputs/" "$PROJECT_ROOT/outputs/selena/"
+SIZE_OPTIONS=()
+if [ "$size" = lightweight ]; then
+    SIZE_OPTIONS=(--max-size="${PUBLISH_MAX_FILE_BYTES:-100000000}" --exclude="*.pt" --exclude="*.npy" --exclude="*.cbm")
+fi
+rsync -rlptz "${SIZE_OPTIONS[@]}" --partial --prune-empty-dirs "${filters[@]}" "$source_root/outputs/" "$PROJECT_ROOT/outputs/selena/"
 log_filters=()
 if [ -n "$job_id" ]; then
     log_filters=('--include=*/' "--include=*_${job_id}.out" "--include=*_${job_id}.err" '--exclude=*')
 fi
-rsync -rlptz --partial --prune-empty-dirs "${log_filters[@]}" "$source_root/logs/" "$PROJECT_ROOT/logs/selena/"
+rsync -rlptz "${SIZE_OPTIONS[@]}" --partial --prune-empty-dirs "${log_filters[@]}" "$source_root/logs/" "$PROJECT_ROOT/logs/selena/"
 echo "Pulled $PROJECT_NAME Selena artifacts ($size) into its DGX checkout."

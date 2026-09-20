@@ -10,6 +10,7 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "Apache-2.0"}
 dependencies = [
+    "matplotlib>=3.9,<4",
     "chronos-forecasting==2.3.1",
     "datasets>=2.17.1,<4",
     "einops>=0.8.0,<1",

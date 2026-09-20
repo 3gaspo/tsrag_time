@@ -286,6 +286,9 @@ class Contract(unittest.TestCase):
                     prediction = workflow.rag(task, method)
                     np.testing.assert_array_equal(np.load(prediction/'test.npy'), np.load(bolt/'test.npy'))
                     self.assertTrue(np.load(prediction/'test_fallback.npy').all())
+                    metadata = json.loads((prediction/'prediction.json').read_text())
+                    self.assertEqual(metadata['fallback_reason_split'], 'test')
+                    self.assertEqual(sum(metadata['fallback_reasons'].values()), metadata['fallback_counts']['test']['all_rows'])
                 np.testing.assert_array_equal(np.load(rag/'test.npy'), np.load(bolt/'test.npy'))
                 self.assertTrue(np.load(rag/'test_fallback.npy').all())
                 summary = json.loads((workflow.evaluation(task, 'tsrag')/'metrics_summary.json').read_text())
@@ -296,11 +299,15 @@ class Contract(unittest.TestCase):
                 workflow.vanilla()
                 self.assertEqual(len(before), len(list(workflow.root.rglob('run_0/manifest.json'))))
                 self.assertFalse(list(workflow.root.rglob('run_1')))
-                report = json.loads((workflow.root/'reports/synthetic/report_manifest.json').read_text())
+                report = json.loads((workflow.root.parent/'reports/tsrag/synthetic/report_manifest.json').read_text())
                 self.assertEqual(len(report['inputs']), 21)
-                aggregate = json.loads((workflow.root/'reports/synthetic/comparison_summary.json').read_text())
+                aggregate = json.loads((workflow.root.parent/'reports/tsrag/synthetic/comparison_summary.json').read_text())
                 self.assertEqual(aggregate['tsrag']['pooled_fallback_rate'], 1.)
                 self.assertEqual(aggregate['tsrag']['mean_task_fallback_rate'], 1.)
+                self.assertEqual(aggregate['tsrag']['fallback_split'], 'test')
+                rag_metadata = json.loads((rag/'prediction.json').read_text())
+                self.assertEqual(sum(aggregate['tsrag']['fallback_reasons'].values()),
+                                 rag_metadata['fallback_counts']['test']['all_rows'])
                 self.assertEqual(load_manifest(rag)['status'], 'completed')
                 # The scheduler completion contract remains deferred until after srun.
                 with patch.dict(os.environ, {'TSRAG_DEFER_COMPLETION': '1'}):
@@ -326,6 +333,7 @@ class Contract(unittest.TestCase):
         distribution = {'chronos': 'chronos-forecasting', 'datasets': 'datasets',
                         'einops': 'einops', 'faiss': 'faiss-cpu', 'gluonts': 'gluonts',
                         'hydra': 'hydra-core', 'numpy': 'numpy', 'omegaconf': 'omegaconf',
+                        'matplotlib': 'matplotlib',
                         'packaging': 'packaging', 'pandas': 'pandas', 'pyarrow': 'pyarrow',
                         'dotenv': 'python-dotenv', 'yaml': 'PyYAML', 'toolz': 'toolz',
                         'torch': 'torch', 'transformers': 'transformers'}

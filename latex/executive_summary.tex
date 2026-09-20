@@ -1,26 +1,107 @@
 \documentclass[11pt,a4paper]{article}
-\usepackage[margin=25mm]{geometry}
-\usepackage{hyperref}
-\title{TS-RAG TIME: evidence status}\author{}\date{}
-\begin{document}\maketitle
-\section{Obtained evidence}
-No cluster results have been obtained or analyzed for this independent project.
-No accuracy, dispersion or latency benefit is claimed for TS-RAG or the
-validation mixture. Local synthetic verification checks implementation
-contracts only and is not forecasting evidence.
+\usepackage[margin=24mm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,amssymb,booktabs}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{7pt}
+\title{TS-RAG TIME: completed default comparison}
+\author{}\date{18 September 2026}
+\begin{document}
+\begin{center}
+{\Large\bfseries TS-RAG TIME: completed default comparison}\\[5pt]
+19 September 2026
+\end{center}
+\section*{Main findings}
+On 90 matched TIME tasks, default TS-RAG has 12.31\% higher arithmetic mean
+task MASE than maximum-context Chronos-2. The frozen validation mixture has
+0.24\% higher mean MASE. This comparison establishes no aggregate accuracy
+benefit for retrieval or mixing. TS-RAG uses maximum-context Chronos-Bolt
+fallback on 42.75\% of scored rows. Newly published compact metadata shows
+the mixture's validation support, but its aggregate reason counts combine
+validation and test and are not eligible evaluation evidence.
 
-\section{Scope and limits}
-The implemented comparison has four frozen Chronos controls, native TS-RAG
-with a 512-point Chronos-Bolt fallback, and a validation-weighted mixture with
-maximum-context Chronos-2. Its growing causal datastore admits every eligible
-historical date by default. These choices differ from Adaptime's historical
-datastore and fallback protocol; no historical result is imported as evidence.
+\section{Question and performed protocol}
+Does retrieval improve a frozen model beyond the effect of context length,
+and can validation mixing improve the stronger control?
+For observed history $x$ and future $y\in\mathbb R^H$, with horizon $H$,
+each method produces a median point forecast $\widehat y$.
+The controls are Chronos-T5-base at 512 observations, Chronos-Bolt-base at
+512 and 2,048, and Chronos-2 at 8,192. History is capped at these lengths;
+controls are univariate without covariates. T5 uses 20 forecast samples.
+Seed zero is used once.
 
-\section{Next evidence needed}
-Run the short-task remote smoke before the full 90-task comparison. Inspect
-grid agreement, fallback counts and reasons, validation support and frozen
-weights. Analyze the complete matched metric means, population variance/std
-and timing components before supporting a model or method decision.
-The no-validation mixture is explicitly Chronos-2 and provides no evidence
-of validation weighting.
+Default TS-RAG retrieves ten neighbors using T5 representations across all
+items and variates (measured channels) in the same dataset. Complete
+512-point histories and 64-point continuations must be observed by the real
+query date. The released mixture-of-experts adaptation module emits
+64-point chunks. Longer horizons roll forward while neighbor eligibility
+stays anchored to the real query date. Date-phase alignment and query-scale
+normalization are disabled. Unavailable retrieval or invalid native
+forecasts use the independent 2,048-context Bolt forecast for the entire
+window/variate.
+
+Validation precedes test. With $w$ TS-RAG wins in $n$ usable paired
+validation trials (ties count one half), freeze $p=(1+w)/(2+n)$ before test.
+No usable validation gives $p=0$. The mixture is
+$(1-p)\widehat y_{\rm Chronos2}+p\widehat y_{\rm TS\text{-}RAG}$.
+Test retrieval admits observed validation history under the same causal rule.
+
+\section{Evaluation and accuracy}
+MASE divides window mean absolute error by mean absolute seasonal difference
+over finite historical pairs in the observed prefix. Task means average
+finite item/window/variate values; the table equally averages 90 tasks.
+Lower is better. All six methods have finite MASE on the same 67,502 declared
+cells; the report selects 540 completed evaluations.
+\begin{center}\begin{tabular}{lrr}\toprule
+Method & Mean task MASE & Inference seconds\\\midrule
+Chronos-T5, 512 & 1.497300 & 4,875.84\\
+Chronos-Bolt, 512 & 1.213402 & 84.77\\
+Chronos-Bolt, 2,048 & 1.167905 & 251.32\\
+Chronos-2, 8,192 & 1.069230 & 236.76\\
+TS-RAG & 1.200871 & 18,115.12\\
+Frozen mixture & 1.071780 & 18,351.90\\\bottomrule
+\end{tabular}\end{center}
+\section{Paired comparisons and fallback}
+TS-RAG wins eight tasks and loses 82 against Chronos-2. The mixture wins
+36 and loses 54. Against Bolt-max, TS-RAG has 2.82\% higher mean MASE,
+with 19 wins, 52 losses and 19 ties. Increasing Bolt's context alone improves
+its mean relative to Bolt-512; retrieval does not beat Bolt-max on this mean.
+
+TS-RAG falls back on 28,860 of 67,502 scored rows (42.75\%).
+Fallback occurs in 49 tasks: 19 have complete and 30 partial fallback;
+41 have none. Full-fallback task means match Bolt-max. Complete coverage
+does not establish native TS-RAG success on every row. No task-level errors
+are reported.
+
+The published aggregate cause counts combine validation and test, although only
+test is evaluated. They are therefore excluded from scientific conclusions.
+The corrected artifact contract reports aggregate fallback causes on test alone
+while retaining validation masks and per-row reasons as separate mixture
+diagnostics. Test-only cause totals require a new run under that contract.
+
+Frozen TS-RAG mixture weights range from 0.0455 to 0.7143, with mean 0.3454.
+All 90 weights are estimated from at least one usable validation date.
+Validation support totals 27,914 dates, ranges from 1 to 14,868 per task,
+and averages 310.16. The wide support range means task weights have very
+different estimation precision; the present study does not quantify it.
+
+\section{Cost and evidence limits}
+TS-RAG additionally records 55,578.80 seconds of datastore preprocessing.
+Its inference total reuses computed Bolt-max fallback forecasts; mixture
+totals include both components and mixing. These are recorded pipeline
+costs, not independent fresh-process latency. They support no speed benefit.
+
+The completed report's selected manifests, compact MASE means and population
+dispersion agree. The inspected publication now contains all 90 preparation,
+90 extraction, 540 prediction and 90 mixture-weight records. Aggregate
+calibration support extends the mixture diagnosis without changing the accuracy
+result; the phase-combined fallback causes do not.
+
+Raw predictions, metric arrays, shared Seasonal masks and per-row reason
+arrays have not been independently audited. Test-only cause totals and
+native-only accuracy on a common support are not yet reported. One seed
+provides no across-run uncertainty or significance
+claim. Population variance/std describes finite metric cells within a task.
+Conclusions apply only to the default retrieval settings; the implemented
+16-cell retrieval ablation has not been executed.
 \end{document}
