@@ -1,4 +1,8 @@
 {
+  "error": {
+    "message": "launch selena_3506764 ended before task completion",
+    "type": "InterruptedLaunch"
+  },
   "experiment": "tsrag",
   "experiment_config": {
     "seed": 0
@@ -287,6 +291,6 @@
   },
   "schema_version": 1,
   "started_at": "2026-09-21T07:51:42.967168+00:00",
-  "status": "running",
-  "updated_at": "2026-09-21T07:51:42.967168+00:00"
+  "status": "interrupted",
+  "updated_at": "2026-09-21T08:11:25.611415+00:00"
 }
