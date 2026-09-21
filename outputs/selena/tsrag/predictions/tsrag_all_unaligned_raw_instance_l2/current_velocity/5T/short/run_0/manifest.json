@@ -1,8 +1,4 @@
 {
-  "error": {
-    "message": "launch selena_3506764 ended before task completion",
-    "type": "InterruptedLaunch"
-  },
   "experiment": "tsrag",
   "experiment_config": {
     "seed": 0
@@ -48,11 +44,23 @@
         },
         "slurm_array_task_id": null,
         "slurm_job_id": "3506764"
+      },
+      {
+        "action": "resume",
+        "launch_id": "selena_3512119",
+        "launched_at": "2026-09-21T15:41:06.538228+00:00",
+        "resumed_from": {
+          "launch_id": "selena_3506764",
+          "launched_at": "2026-09-21T09:44:21.765167+00:00",
+          "slurm_job_id": "3506764"
+        },
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3512119"
       }
     ],
-    "launch_id": "selena_3506764",
-    "launched_at": "2026-09-21T09:44:21.765167+00:00",
-    "slurm_job_id": "3506764"
+    "launch_id": "selena_3512119",
+    "launched_at": "2026-09-21T15:41:06.538228+00:00",
+    "slurm_job_id": "3512119"
   },
   "model_config": {
     "backbone": "chronos_bolt",
@@ -302,7 +310,7 @@
     "embedding_batch_size": 512
   },
   "schema_version": 1,
-  "started_at": "2026-09-21T09:44:21.765167+00:00",
-  "status": "interrupted",
-  "updated_at": "2026-09-21T09:50:35.177439+00:00"
+  "started_at": "2026-09-21T15:41:06.538228+00:00",
+  "status": "running",
+  "updated_at": "2026-09-21T15:41:06.538228+00:00"
 }

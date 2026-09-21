@@ -30,6 +30,6 @@
   "datastore_preprocessing_seconds": 1.9207983566448092,
   "fallback_source_test_inference_seconds": 3.389469750225544,
   "timing_policy": "measured_query_work_with_precomputed_bolt_max_fallback",
-  "validation_inference_seconds": 52.01975566521287,
-  "test_inference_seconds": 61.898587577044964
+  "validation_inference_seconds": 51.72025844827294,
+  "test_inference_seconds": 61.50731259584427
 }
