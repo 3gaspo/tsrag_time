@@ -1,0 +1,284 @@
+{
+  "error": {
+    "message": "launch selena_3506764 ended before task completion",
+    "type": "InterruptedLaunch"
+  },
+  "experiment": "tsrag",
+  "experiment_config": {
+    "seed": 0
+  },
+  "identity": {
+    "dataset": "EWELD_Load",
+    "frequency": "15T",
+    "method": "tsrag_all_unaligned_raw_instance_l2",
+    "model": "chronos_bolt",
+    "target_mode": "univariate",
+    "term": "medium"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3506764",
+        "launched_at": "2026-09-21T05:16:22.637531+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3506764"
+      }
+    ],
+    "launch_id": "selena_3506764",
+    "launched_at": "2026-09-21T05:16:22.637531+00:00",
+    "slurm_job_id": "3506764"
+  },
+  "model_config": {
+    "backbone": "chronos_bolt",
+    "checkpoint": "released_moe_arm",
+    "context_length": 512,
+    "fallback": "chronos_bolt_max",
+    "method": "tsrag",
+    "minimum_overlap_fraction": 0.8,
+    "native_horizon": 64,
+    "point_forecast": "median",
+    "retrieval": {
+      "aligned": false,
+      "query_scale": false,
+      "representation": "instance_l2",
+      "scope": "all"
+    },
+    "retrieval_encoder": "instance_normalized_512_lookback",
+    "source_commit": "73ac807789d2e61b8a3dfc8514e3fc947fe185cc",
+    "top_k": 10
+  },
+  "pipeline_config": {
+    "covariates": "none",
+    "datastore_policy": "growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query",
+    "dependencies": {
+      "data": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "identity": {
+          "dataset": "EWELD_Load",
+          "frequency": "15T",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "medium"
+        },
+        "model_config": {
+          "method": "shared",
+          "target_mode": "univariate"
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "datastore_policy": "growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query",
+          "dependencies": {},
+          "target_mode": "univariate",
+          "task": {
+            "alignment_period": 672,
+            "dataset": "EWELD_Load/15T",
+            "datastore_stride": 1,
+            "max_datastore_windows": null,
+            "prediction_length": 96,
+            "seasonality": 96,
+            "term": "medium",
+            "test_length": 1344,
+            "validation_length": 1344
+          }
+        },
+        "schema_version": 1
+      },
+      "extraction": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "identity": {
+          "dataset": "EWELD_Load",
+          "frequency": "15T",
+          "method": "tsrag",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "medium"
+        },
+        "model_config": {
+          "context_length": 512,
+          "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+          "method": "retrieval_representations",
+          "representations": [
+            "instance_l2",
+            "t5"
+          ],
+          "t5_checkpoint": "chronos-t5-base"
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "datastore_policy": "growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query",
+          "dependencies": {
+            "data": {
+              "experiment_config": {
+                "seed": 0
+              },
+              "identity": {
+                "dataset": "EWELD_Load",
+                "frequency": "15T",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "medium"
+              },
+              "model_config": {
+                "method": "shared",
+                "target_mode": "univariate"
+              },
+              "pipeline_config": {
+                "covariates": "none",
+                "datastore_policy": "growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query",
+                "dependencies": {},
+                "target_mode": "univariate",
+                "task": {
+                  "alignment_period": 672,
+                  "dataset": "EWELD_Load/15T",
+                  "datastore_stride": 1,
+                  "max_datastore_windows": null,
+                  "prediction_length": 96,
+                  "seasonality": 96,
+                  "term": "medium",
+                  "test_length": 1344,
+                  "validation_length": 1344
+                }
+              },
+              "schema_version": 1
+            }
+          },
+          "representations": [
+            "instance_l2",
+            "t5"
+          ],
+          "t5_query_scaled_candidates": "encoded_at_query_time",
+          "target_mode": "univariate",
+          "task": {
+            "alignment_period": 672,
+            "dataset": "EWELD_Load/15T",
+            "datastore_stride": 1,
+            "max_datastore_windows": null,
+            "prediction_length": 96,
+            "seasonality": 96,
+            "term": "medium",
+            "test_length": 1344,
+            "validation_length": 1344
+          }
+        },
+        "schema_version": 1
+      },
+      "fallback": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "identity": {
+          "dataset": "EWELD_Load",
+          "frequency": "15T",
+          "method": "chronos_bolt_max",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "medium"
+        },
+        "model_config": {
+          "backbone": "chronos_bolt",
+          "checkpoint": "chronos-bolt-base",
+          "context_length": 2048,
+          "method": "vanilla",
+          "point_forecast": "median"
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "datastore_policy": "growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query",
+          "dependencies": {
+            "data": {
+              "experiment_config": {
+                "seed": 0
+              },
+              "identity": {
+                "dataset": "EWELD_Load",
+                "frequency": "15T",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "medium"
+              },
+              "model_config": {
+                "method": "shared",
+                "target_mode": "univariate"
+              },
+              "pipeline_config": {
+                "covariates": "none",
+                "datastore_policy": "growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query",
+                "dependencies": {},
+                "target_mode": "univariate",
+                "task": {
+                  "alignment_period": 672,
+                  "dataset": "EWELD_Load/15T",
+                  "datastore_stride": 1,
+                  "max_datastore_windows": null,
+                  "prediction_length": 96,
+                  "seasonality": 96,
+                  "term": "medium",
+                  "test_length": 1344,
+                  "validation_length": 1344
+                }
+              },
+              "schema_version": 1
+            }
+          },
+          "target_mode": "univariate",
+          "task": {
+            "alignment_period": 672,
+            "dataset": "EWELD_Load/15T",
+            "datastore_stride": 1,
+            "max_datastore_windows": null,
+            "prediction_length": 96,
+            "seasonality": 96,
+            "term": "medium",
+            "test_length": 1344,
+            "validation_length": 1344
+          }
+        },
+        "schema_version": 1
+      }
+    },
+    "target_mode": "univariate",
+    "task": {
+      "alignment_period": 672,
+      "dataset": "EWELD_Load/15T",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 96,
+      "seasonality": 96,
+      "term": "medium",
+      "test_length": 1344,
+      "validation_length": 1344
+    }
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/EWELD_Load/15T",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "upstream_manifests": {
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/shared/EWELD_Load/15T/medium/run_0/manifest.json",
+      "extraction": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/extractions/tsrag/EWELD_Load/15T/medium/run_0/manifest.json",
+      "fallback": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/EWELD_Load/15T/medium/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-21T05:16:22.637531+00:00",
+  "status": "interrupted",
+  "updated_at": "2026-09-21T06:28:33.008550+00:00"
+}
