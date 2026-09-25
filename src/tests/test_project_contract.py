@@ -292,7 +292,7 @@ class Contract(unittest.TestCase):
                     self.assertTrue(np.load(prediction/'fallback.npy').all())
                     metadata = json.loads((prediction/'prediction.json').read_text())
                     self.assertEqual(metadata['fallback_reason_split'], 'test')
-                    self.assertEqual(sum(metadata['fallback_reasons'].values()), metadata['fallback_counts']['test']['all_rows'])
+                    self.assertEqual(sum(metadata['fallback_reasons'].values()), metadata['fallback_counts']['test']['eligible_rows'])
                 np.testing.assert_array_equal(np.load(rag/'prediction.npy'), np.load(bolt/'prediction.npy'))
                 self.assertTrue(np.load(rag/'fallback.npy').all())
                 summary = json.loads((workflow.evaluation(task, 'tsrag')/'metrics_summary.json').read_text())
@@ -311,7 +311,7 @@ class Contract(unittest.TestCase):
                 self.assertEqual(aggregate['tsrag']['fallback_split'], 'test')
                 rag_metadata = json.loads((rag/'prediction.json').read_text())
                 self.assertEqual(sum(aggregate['tsrag']['fallback_reasons'].values()),
-                                 rag_metadata['fallback_counts']['test']['all_rows'])
+                                 rag_metadata['fallback_counts']['test']['eligible_rows'])
                 self.assertEqual(load_manifest(rag)['status'], 'completed')
                 # The scheduler completion contract remains deferred until after srun.
                 with patch.dict(os.environ, {'TSRAG_DEFER_COMPLETION': '1'}):

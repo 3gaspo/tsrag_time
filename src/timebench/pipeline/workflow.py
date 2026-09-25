@@ -11,6 +11,7 @@ import random
 import numpy as np
 
 from timebench.data.windows import Task, Windows, write_prepared, CONTEXT_LENGTH, NATIVE_HORIZON
+from timebench.evaluation.fallback import summarize_fallbacks
 from timebench.evaluation.grid import EVALUATION_GRID_DEFINITION, flatten_univariate_grid, load_evaluation_grid
 from timebench.evaluation.timing import EvaluationTimer
 from timebench.evaluation.validation import validation_window_mask
@@ -563,9 +564,7 @@ class Workflow:
                             {'row': int(row), 'reason': reason, 'reused': True}
                             for row, reason in sorted(reused_reasons.items())
                         ]
-                        reason_counts = {}
-                        for reason in reused_reasons.values():
-                            reason_counts[reason] = reason_counts.get(reason, 0) + 1
+                        reasons_by_row = dict(reused_reasons)
                         targets, cells = self.support(task, split, windows, refs)
                         retrieval = None
                         if task_error is None and (~reused).any():
@@ -598,15 +597,18 @@ class Workflow:
                                     reasons.append({'row': row, 'type': type(exception).__name__, 'message': str(exception)})
                             if reason:
                                 mask[row] = True
-                                reason_counts[reason] = reason_counts.get(reason, 0) + 1
+                                reasons_by_row[row] = reason
                                 if reason != 'inference_error':
                                     reasons.append({'row': row, 'reason': reason})
                         inference_seconds = timer.stop()
                         values.flush()
                         np.save(run.run_dir / 'fallback.npy', mask, allow_pickle=False)
                         write_json(run.run_dir / 'fallback_reasons.json', reasons)
-                        counts = {'all_rows': int(mask.sum()), 'eligible_rows': int((mask & cells).sum()),
-                                  'grid_rows': int(cells.sum()), 'total_rows': len(refs)}
+                        fallback_summary = summarize_fallbacks(mask, cells, reasons_by_row)
+                        counts = {'all_rows': fallback_summary['all_fallback_rows'],
+                                  'eligible_rows': fallback_summary['fallback_count'],
+                                  'grid_rows': fallback_summary['evaluated_rows'],
+                                  'total_rows': fallback_summary['total_rows']}
                         prepared = json.loads((data / 'prepared.json').read_text(encoding='utf-8'))
                         usable_ticks = np.unique(windows.ticks(refs)[cells]) if len(refs) else []
                         write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method,
@@ -614,7 +616,7 @@ class Workflow:
                             'alignment_period': task.alignment_period,
                             'fallback_method': 'chronos_bolt_max', 'task_error': task_error,
                             'fallback_counts': {split: counts}, 'fallback_reason_split': split,
-                            'fallback_reasons': reason_counts,
+                            'fallback_reasons': fallback_summary['fallback_reasons'],
                             'reused_rows': int(reused.sum()),
                             'newly_inferred_rows': int((~reused).sum()),
                             'reuse_sources': reuse_sources,

@@ -38,6 +38,8 @@ def build_report(inputs, destination, config):
                'task_error': json.dumps(pred['task_error']) if pred.get('task_error') else '',
                'datastore_preprocessing_seconds': pred.get('datastore_preprocessing_seconds', 0)}
         row['fallback_rate'] = row['fallback_count'] / row['fallback_grid_rows'] if row['fallback_grid_rows'] else None
+        if row['fallback_split'] == 'test' and sum(json.loads(row['fallback_reasons']).values()) != row['fallback_count']:
+            raise ValueError(f'{task.dataset}/{task.term}/{method}: fallback reasons do not match evaluated fallbacks')
         for metric, values in summary['metrics'].items():
             expected = seasonal['metrics'][metric]['finite_values']
             if values['finite_values'] < expected:
