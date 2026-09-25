@@ -1,7 +1,6 @@
 """Stage orchestration over independent, exact-configuration TIME task runs."""
 
 from datetime import datetime, timezone
-from itertools import product
 from pathlib import Path
 from time import perf_counter
 import json
@@ -54,15 +53,18 @@ def seed_run(seed):
 def retrieval_methods(config):
     base = dict(config['retrieval'])
     methods = {'tsrag': base}
-    axis_names = ('scope', 'aligned', 'query_scale', 'representation')
     if config['ablation']:
-        axes = config['retrieval_grid']
-        for values in product(*(axes[name] for name in axis_names)):
-            options = dict(zip(axis_names, values))
-            if options != base:
-                scope, aligned, scale, representation = values
-                name = f'tsrag_{scope}_{"aligned" if aligned else "unaligned"}_{"query_scale" if scale else "raw"}_{representation}'
-                methods[name] = options
+        suffixes = {
+            ('scope', 'same_series'): 'same_series',
+            ('aligned', True): 'aligned',
+            ('representation', 'instance_l2'): 'inst_l2',
+            ('query_scale', True): 'query_scale',
+        }
+        for axis, value in config['retrieval_axes'].items():
+            key = (axis, value)
+            if axis not in base or key not in suffixes or base[axis] == value:
+                raise ValueError(f'Unsupported one-axis retrieval ablation: {axis}={value}')
+            methods[f'tsrag_{suffixes[key]}'] = {**base, axis: value}
     return methods
 
 
@@ -76,6 +78,10 @@ class Workflow:
         self.root = outputs_root() / 'tsrag'
         self.storage = dataset_storage_root()
         self.weights = weights_root()
+        self.vanilla_predictions_path = (
+            Path(config['vanilla_predictions_path']).expanduser().resolve()
+            if config.get('vanilla_predictions_path') else None
+        )
         self.seed = int(config['seed'])
         self.device = config['device']
         self.batch_size = int(config['batch_size'])
@@ -213,7 +219,8 @@ class Workflow:
             }
         elif phase.startswith('predictions/'):
             pipe.update(split=split, covariates='none',
-                        validation_support='finite_context_and_future' if split == 'validation' else None)
+                        validation_support='finite_context_and_future' if split == 'validation' else None,
+                        prediction_artifact_contract='vanilla_reuse_nan_counts_retrieval_provenance')
             model = self.model_config(method)
             experiment['seed'] = self.seed
         elif phase == 'selections':
@@ -224,6 +231,7 @@ class Workflow:
             )
         if phase == 'evaluations':
             pipe['evaluation_grid'] = EVALUATION_GRID_DEFINITION
+            pipe['nan_policy'] = 'omit_nan_predictions_report_counts_reject_infinity'
         return {'model_config': model, 'pipeline_config': pipe,
                 'experiment_config': experiment}
 
@@ -288,7 +296,7 @@ class Workflow:
         return np.load(data / f'{split}_references.npy', mmap_mode='r')
 
     def reuse_prediction_rows(self, task, split, method, current_run, refs, values,
-                              fallback=None):
+                              fallback=None, provenance=None, nan_counts=None):
         """Reuse exact item/channel/origin rows from completed split or legacy runs."""
         reused = np.zeros(len(refs), dtype=bool)
         sources = []
@@ -333,6 +341,20 @@ class Workflow:
                 continue
             source_refs = np.load(refs_path, mmap_mode='r', allow_pickle=False)
             predictions = np.load(prediction_path, mmap_mode='r', allow_pickle=False)
+            provenance_path = manifest_path.parent / 'retrieval_provenance.npy'
+            if provenance is not None and not provenance_path.is_file():
+                continue
+            nan_counts_path = manifest_path.parent / 'produced_nan_counts.npy'
+            if nan_counts is not None and not nan_counts_path.is_file():
+                continue
+            source_provenance = (
+                np.load(provenance_path, mmap_mode='r', allow_pickle=False)
+                if provenance is not None else None
+            )
+            source_nan_counts = (
+                np.load(nan_counts_path, mmap_mode='r', allow_pickle=False)
+                if nan_counts is not None else None
+            )
             fallback_path = manifest_path.parent / 'fallback.npy'
             if not fallback_path.is_file():
                 fallback_path = manifest_path.parent / f'{split}_fallback.npy'
@@ -353,6 +375,10 @@ class Workflow:
                 if destination is None or reused[destination]:
                     continue
                 values[destination] = predictions[source_index]
+                if source_provenance is not None:
+                    provenance[destination] = source_provenance[source_index]
+                if source_nan_counts is not None:
+                    nan_counts[destination] = source_nan_counts[source_index]
                 if source_fallback is not None:
                     fallback[destination] = source_fallback[source_index]
                     if source_fallback[source_index]:
@@ -393,6 +419,7 @@ class Workflow:
 
     def vanilla(self):
         from timebench.model_loading.foundation import Forecaster
+        from timebench.pipeline.vanilla_reuse import load_vanilla_test_rows
 
         # One backbone at a time; Bolt's two context controls share a loaded checkpoint.
         for alias in ('chronos_bolt', 'chronos_t5', 'chronos2'):
@@ -413,9 +440,33 @@ class Workflow:
                             prediction = np.lib.format.open_memmap(run.run_dir / 'prediction.npy', mode='w+', dtype=np.float32,
                                                                   shape=(len(refs), task.prediction_length))
                             prediction[:] = np.nan
-                            reused, reuse_sources, _ = self.reuse_prediction_rows(
-                                task, split, method, run, refs, prediction
-                            )
+                            reused = np.zeros(len(refs), dtype=bool)
+                            reuse_sources = []
+                            external_vanilla = None
+                            if split == 'test':
+                                external_rows, external_vanilla = load_vanilla_test_rows(
+                                    self.vanilla_predictions_path,
+                                    backbone=alias,
+                                    target_mode='univariate',
+                                    dataset=task.dataset,
+                                    term=task.term,
+                                    context_length=limit,
+                                    prediction_length=task.prediction_length,
+                                    test_length=task.test_length,
+                                    references=refs,
+                                )
+                                if external_rows is not None:
+                                    prediction[:] = external_rows
+                                    reused[:] = True
+                                    reuse_sources.append({
+                                        'manifest': external_vanilla['manifest'],
+                                        'rows': int(len(refs)),
+                                        'kind': 'evaluating_tsfms_canonical_vanilla',
+                                    })
+                            if not reused.all():
+                                reused, reuse_sources, _ = self.reuse_prediction_rows(
+                                    task, split, method, run, refs, prediction
+                                )
                             if model is None and (~reused).any():
                                 model = Forecaster(alias, self.weights, self.device)
                             timer = EvaluationTimer()
@@ -439,12 +490,15 @@ class Workflow:
                             inference_seconds = timer.stop()
                             prediction.flush()
                             targets, cells = self.support(task, split, windows, refs)
-                            if np.any(cells & ~np.all(~targets | np.isfinite(prediction), axis=-1)):
-                                raise ValueError(f'Non-finite {method} on required {split} support')
+                            if np.any(cells & np.any(targets & np.isinf(prediction), axis=-1)):
+                                raise ValueError(f'Infinite {method} on required {split} support')
                             np.save(run.run_dir / 'context_length.npy',
                                     np.minimum(refs[:, 2], limit), allow_pickle=False)
                             prepared = json.loads((data / 'prepared.json').read_text(encoding='utf-8'))
                             usable_ticks = np.unique(windows.ticks(refs)[cells]) if len(refs) else []
+                            required = targets & cells[:, None]
+                            prediction_nan_values = int((required & np.isnan(prediction)).sum())
+                            prediction_values = int(required.sum())
                             write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method,
                                 'split': split, 'context_limit': limit,
                                 'context_policy': 'all_available_history_capped_at_limit',
@@ -452,6 +506,12 @@ class Workflow:
                                 'reused_rows': int(reused.sum()),
                                 'newly_inferred_rows': int((~reused).sum()),
                                 'reuse_sources': reuse_sources,
+                                'external_vanilla': external_vanilla,
+                                'prediction_nan_values': prediction_nan_values,
+                                'produced_nan_values': prediction_nan_values,
+                                'prediction_values': prediction_values,
+                                'prediction_nan_rate': (prediction_nan_values / prediction_values
+                                                        if prediction_values else None),
                                 'validation_counts': ({**prepared['counts'], 'usable_rows': int(cells.sum()),
                                                        'usable_dates': int(len(usable_ticks))}
                                                       if split == 'validation' else None)})
@@ -524,7 +584,9 @@ class Workflow:
 
     def predict(self):
         from timebench.external_models.tsrag.retriever import TSRAGRetriever
-        from timebench.external_models.tsrag.inference import CausalRetriever, forecast_query
+        from timebench.external_models.tsrag.inference import (
+            CausalRetriever, forecast_query, summarize_retrieval_provenance,
+        )
         from timebench.model_loading.tsrag import load_tsrag
 
         loaded = encoder = None
@@ -549,8 +611,11 @@ class Workflow:
                         values = np.lib.format.open_memmap(run.run_dir / 'prediction.npy', mode='w+', dtype=np.float32, shape=base.shape)
                         values[:] = base
                         mask = np.zeros(len(refs), dtype=bool)
+                        provenance_rows = np.zeros((len(refs), 4), dtype=np.float64)
+                        produced_nan_counts = np.zeros(len(refs), dtype=np.int64)
                         reused, reuse_sources, reused_reasons = self.reuse_prediction_rows(
-                            task, split, method, run, refs, values, mask
+                            task, split, method, run, refs, values, mask,
+                            provenance_rows, produced_nan_counts
                         )
                         if task_error is None and (~reused).any():
                             try:
@@ -584,9 +649,12 @@ class Workflow:
                                       else 'extraction_or_model_error' if task_error else None)
                             if reason is None:
                                 try:
-                                    forecast, reason = forecast_query(loaded, encoder, retrieval, windows, reference,
-                                                                      embeddings[row] if embeddings is not None else None,
-                                                                      task.prediction_length, self.device)
+                                    (forecast, reason, provenance_rows[row],
+                                     produced_nan_counts[row]) = forecast_query(
+                                        loaded, encoder, retrieval, windows, reference,
+                                        embeddings[row] if embeddings is not None else None,
+                                        task.prediction_length, self.device,
+                                    )
                                     if reason is None:
                                         if cells[row] and not np.all(~targets[row] | np.isfinite(forecast)):
                                             reason = 'nonfinite_prediction'
@@ -603,6 +671,10 @@ class Workflow:
                         inference_seconds = timer.stop()
                         values.flush()
                         np.save(run.run_dir / 'fallback.npy', mask, allow_pickle=False)
+                        np.save(run.run_dir / 'retrieval_provenance.npy', provenance_rows,
+                                allow_pickle=False)
+                        np.save(run.run_dir / 'produced_nan_counts.npy', produced_nan_counts,
+                                allow_pickle=False)
                         write_json(run.run_dir / 'fallback_reasons.json', reasons)
                         fallback_summary = summarize_fallbacks(mask, cells, reasons_by_row)
                         counts = {'all_rows': fallback_summary['all_fallback_rows'],
@@ -620,6 +692,8 @@ class Workflow:
                             'reused_rows': int(reused.sum()),
                             'newly_inferred_rows': int((~reused).sum()),
                             'reuse_sources': reuse_sources,
+                            'produced_nan_values': int(produced_nan_counts.sum()),
+                            'retrieval_provenance': summarize_retrieval_provenance(provenance_rows),
                             'validation_counts': ({**prepared['counts'], 'usable_rows': int(cells.sum()),
                                                    'usable_dates': int(len(usable_ticks))}
                                                   if split == 'validation' else None),
@@ -627,9 +701,12 @@ class Workflow:
                             'fallback_source_inference_seconds': json.loads((fallback / 'prediction.json').read_text())['inference_seconds'],
                             'inference_seconds': inference_seconds,
                             'timing_policy': 'measured_query_work_with_precomputed_bolt_max_fallback'})
-                        self.finish(run, ['prediction.npy', 'fallback.npy', 'fallback_reasons.json', 'prediction.json'])
+                        self.finish(run, ['prediction.npy', 'fallback.npy', 'retrieval_provenance.npy',
+                                          'produced_nan_counts.npy',
+                                          'fallback_reasons.json', 'prediction.json'])
 
     def mix(self):
+        from timebench.external_models.tsrag.inference import summarize_retrieval_provenance
         from timebench.proposal.mixture import estimate_weight, mix
 
         for task in self.tasks:
@@ -669,16 +746,28 @@ class Workflow:
                 prediction = mix(c2_test, rag_test, weight['tsrag_weight'])
                 inference_seconds = timer.stop()
                 targets, cells = self.support(task, 'test', windows, self.refs(data, 'test'))
+                produced_nan_values = int(
+                    (targets & cells[:, None] & np.isnan(prediction)).sum()
+                )
                 invalid = cells & ~np.all(~targets | np.isfinite(prediction), axis=-1)
                 prediction[invalid] = np.load(fallback / 'prediction.npy', mmap_mode='r')[invalid]
                 np.save(run.run_dir / 'prediction.npy', prediction, allow_pickle=False)
                 np.save(run.run_dir / 'fallback.npy', invalid, allow_pickle=False)
+                provenance_rows = (
+                    np.asarray(np.load(rag / 'retrieval_provenance.npy', mmap_mode='r')).copy()
+                    if weight['tsrag_weight'] else np.zeros((len(prediction), 4), dtype=np.float64)
+                )
+                np.save(run.run_dir / 'retrieval_provenance.npy', provenance_rows,
+                        allow_pickle=False)
                 component_seconds = sum(json.loads((path / 'prediction.json').read_text())['inference_seconds'] for path in (c2, rag))
                 write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': 'bayes_mixture', **weight,
                                                            'fallback_method': 'chronos_bolt_max',
+                                                           'produced_nan_values': produced_nan_values,
+                                                           'retrieval_provenance': summarize_retrieval_provenance(provenance_rows),
                                                            'split': 'test', 'inference_seconds': component_seconds + inference_seconds,
                                                            'mix_only_seconds': inference_seconds, 'nonfinite_fallback_count': int(invalid.sum())})
-                self.finish(run, ['prediction.npy', 'fallback.npy', 'prediction.json'])
+                self.finish(run, ['prediction.npy', 'fallback.npy', 'retrieval_provenance.npy',
+                                  'prediction.json'])
 
     def methods(self):
         return [*CONTROLS, *self.rag_methods, 'bayes_mixture']

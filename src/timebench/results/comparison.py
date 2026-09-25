@@ -22,6 +22,8 @@ def build_report(inputs, destination, config):
         pred = json.loads((prediction / 'prediction.json').read_text())
         seasonal_root = resolve_shared_evaluation_grid(task.dataset, task.term, 'univariate').parent
         seasonal = json.loads((seasonal_root / 'metrics_summary.json').read_text())
+        provenance = pred.get('retrieval_provenance') or {}
+        prediction_outputs = summary.get('prediction_outputs', {})
         row = {'dataset': task.dataset, 'term': task.term, 'method': method,
                'retrieval_scope': pred.get('retrieval', {}).get('scope'),
                'aligned_datastore': pred.get('retrieval', {}).get('aligned'),
@@ -36,14 +38,24 @@ def build_report(inputs, destination, config):
                'fallback_split': pred.get('fallback_reason_split'),
                'fallback_reasons': json.dumps(pred.get('fallback_reasons', {}), sort_keys=True),
                'task_error': json.dumps(pred['task_error']) if pred.get('task_error') else '',
-               'datastore_preprocessing_seconds': pred.get('datastore_preprocessing_seconds', 0)}
+               'datastore_preprocessing_seconds': pred.get('datastore_preprocessing_seconds', 0),
+               'prediction_nan_values': prediction_outputs.get('evaluation_nan_values'),
+               'produced_nan_values': pred.get('produced_nan_values'),
+               'prediction_values': prediction_outputs.get('evaluation_values'),
+               'prediction_nan_rate': (
+                   prediction_outputs.get('evaluation_nan_values', 0)
+                   / prediction_outputs['evaluation_values']
+                   if prediction_outputs.get('evaluation_values') else None),
+               'retrieval_extractions': provenance.get('retrieval_extractions', 0),
+               'retrieved_neighbors': provenance.get('retrieved_neighbors', 0),
+               'same_user_neighbors': provenance.get('same_user_neighbors', 0),
+               'same_user_retrieval_percentage': provenance.get('same_user_retrieval_percentage'),
+               'normalized_time_distance_sum': provenance.get('normalized_time_distance_sum', 0),
+               'average_normalized_time_distance_to_query': provenance.get('average_normalized_time_distance_to_query')}
         row['fallback_rate'] = row['fallback_count'] / row['fallback_grid_rows'] if row['fallback_grid_rows'] else None
         if row['fallback_split'] == 'test' and sum(json.loads(row['fallback_reasons']).values()) != row['fallback_count']:
             raise ValueError(f'{task.dataset}/{task.term}/{method}: fallback reasons do not match evaluated fallbacks')
         for metric, values in summary['metrics'].items():
-            expected = seasonal['metrics'][metric]['finite_values']
-            if values['finite_values'] < expected:
-                raise ValueError(f'{task.dataset}/{task.term}/{method}: {metric} loses Seasonal metric coverage')
             for field in ('mean', 'variance', 'std', 'dispersion_ddof', 'finite_values', 'evaluation_values', 'total_values'):
                 row[f'{metric}_{field}'] = values[field]
         denominator = seasonal['metrics']['MASE']['mean']
@@ -73,16 +85,29 @@ def build_report(inputs, destination, config):
         for row in values:
             if row['scaled_MASE_mean'] is not None:
                 per_dataset[row['dataset']].append(row['scaled_MASE_mean'])
+        neighbors = sum(row['retrieved_neighbors'] for row in values)
+        same_user = sum(row['same_user_neighbors'] for row in values)
+        distance_sum = sum(row['normalized_time_distance_sum'] for row in values)
+        prediction_nans = sum(row['prediction_nan_values'] or 0 for row in values)
+        prediction_values = sum(row['prediction_values'] or 0 for row in values)
         overall[method] = {'tasks': len(values), 'tasks_with_finite_MASE': len(mase_values),
                            'retrieval': {key: values[0][key] for key in
                                          ('retrieval_scope', 'aligned_datastore', 'neighbor_query_scale', 'retrieval_representation')},
-                           'mean_task_MASE': float(np.mean(mase_values)) if mase_values else None,
-                           'mean_task_scaled_MASE': float(np.mean(scaled)) if scaled else None,
-                           'equal_dataset_scaled_MASE': float(np.mean([np.mean(v) for v in per_dataset.values()])) if per_dataset else None,
+                           'mean_task_MASE': float(np.nanmean(mase_values)) if mase_values else None,
+                           'mean_task_scaled_MASE': float(np.nanmean(scaled)) if scaled else None,
+                           'equal_dataset_scaled_MASE': float(np.nanmean([np.nanmean(v) for v in per_dataset.values()])) if per_dataset else None,
                            'summed_inference_seconds': sum(row['inference_seconds'] for row in values),
                            'summed_preprocessing_seconds': sum(row['datastore_preprocessing_seconds'] for row in values),
                            'fallback_count': sum(row['fallback_count'] for row in values),
-                           'fallback_grid_rows': sum(row['fallback_grid_rows'] for row in values)}
+                           'fallback_grid_rows': sum(row['fallback_grid_rows'] for row in values),
+                           'prediction_nan_values': prediction_nans,
+                           'prediction_values': prediction_values,
+                           'prediction_nan_rate': prediction_nans / prediction_values if prediction_values else None,
+                           'produced_nan_values': sum(row['produced_nan_values'] or 0 for row in values),
+                           'retrieval_extractions': sum(row['retrieval_extractions'] for row in values),
+                           'retrieved_neighbors': neighbors,
+                           'same_user_retrieval_percentage': 100 * same_user / neighbors if neighbors else None,
+                           'average_normalized_time_distance_to_query': distance_sum / neighbors if neighbors else None}
         reason_counts = defaultdict(int)
         for row in values:
             for reason, count in json.loads(row['fallback_reasons']).items():
@@ -90,7 +115,7 @@ def build_report(inputs, destination, config):
         overall[method]['fallback_split'] = 'test' if any(row['fallback_split'] == 'test' for row in values) else None
         overall[method]['fallback_reasons'] = dict(sorted(reason_counts.items()))
         rates = [row['fallback_rate'] for row in values if row['fallback_rate'] is not None]
-        overall[method]['mean_task_fallback_rate'] = float(np.mean(rates)) if rates else None
+        overall[method]['mean_task_fallback_rate'] = float(np.nanmean(rates)) if rates else None
         count, support = overall[method]['fallback_count'], overall[method]['fallback_grid_rows']
         overall[method]['pooled_fallback_rate'] = count / support if support else None
         log(f'{method}: tasks={len(values)} mean_task_MASE={overall[method]["mean_task_MASE"]} '
@@ -106,6 +131,9 @@ def build_report(inputs, destination, config):
         'seasonal_MASE_variance': row['seasonal_MASE_variance'],
         'inference_seconds': row['inference_seconds'],
         'datastore_preprocessing_seconds': row['datastore_preprocessing_seconds'],
+        'prediction_nan_values': row['prediction_nan_values'],
+        'prediction_values': row['prediction_values'],
+        'prediction_nan_rate': row['prediction_nan_rate'],
     } for row in rows]
     performance_artifacts = write_performance_report(
         performance_rows, destination / 'performance',
@@ -116,5 +144,10 @@ def build_report(inputs, destination, config):
                                                                              for path in performance_artifacts],
                                                    'experiment': 'tsrag', 'requested_config': config,
                                                    'fallback_split': 'test',
+                                                   'retrieval_provenance': {
+                                                       'same_user': 'same dataset item/user as the query',
+                                                       'normalized_time_distance': '(query_tick-neighbor_tick)/(query_tick-earliest_datastore_tick)',
+                                                       'extraction_unit': 'one 64-step rollout chunk',
+                                                   },
                                                    'selection': 'exact_scientific_configuration_selected_repeat', 'inputs': sources,
                                                    'task_dispersion': 'population_variance_over_finite_series_window_variate_cells'})

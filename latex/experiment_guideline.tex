@@ -59,14 +59,16 @@ Missing query history, fewer than 11 eligible neighbors, recorded extraction
 or inference errors, and non-finite native forecasts use
 the independently computed Bolt-max ($L=2048$) forecast for the entire window/variate.
 
-\subsection{Retired retrieval grid}
-The former full-factorial plan crossed four binary axes. Scope compared all dataset items and variates with the
-query's own item and variate. Date alignment and query-scale normalization are
-each off or on. Representation compares T5 EOS with IN lookback L2 at $L=512$.
-
-The grid contained 16 TS-RAG cells. The default uses all variates, no alignment,
-released neighbor normalization and T5. Each cell uses Bolt-max fallback.
-The four vanilla controls and default mixture give 21 method labels per task.
+\subsection{One-axis retrieval ablation}
+The former 16-cell factorial schedule is retired. Its replacement compares
+released TS-RAG with four variants, each changing exactly one setting:
+\texttt{tsrag\_same\_series} restricts scope to the query item/variate;
+\texttt{tsrag\_aligned} requires query-calendar-phase alignment;
+\texttt{tsrag\_inst\_l2} replaces T5 EOS retrieval with IN-lookback L2; and
+\texttt{tsrag\_query\_scale} aligns neighbor trajectories to query scale.
+Every other setting remains the released default and every method uses Bolt-max
+fallback. The ablation therefore contains five TS-RAG labels per task, including
+the shared baseline. It does not estimate interactions between axes.
 
 Aligned dates satisfy the same calendar phase as the query modulo the dataset's
 observation-count alignment period. Copy Adaptime's periods, with TIME seasonality
@@ -83,7 +85,7 @@ query's Bolt normalization instead of their own full-trajectory normalization.
 L2 selection caches instance-normalized lookbacks and uses squared finite-overlap
 distance scaled by $512/m$, requiring an overlap fraction of at least 0.8,
 matching Adaptime. It invokes no T5 selector. Alignment to query scale preserves
-IN L2 rankings but changes fusion, so retain these cells in the full factorial grid.
+IN L2 rankings but changes fusion in the query-scale variant.
 
 \subsection{Validation and mixing}
 The optional validation interval of length $V$ ends at the first test origin.
@@ -163,10 +165,10 @@ Use \texttt{validation\_length=0} for no validation, and explicit
 \texttt{datasets=[...]} / \texttt{terms=[...]} overrides for a subset.
 Experiment and Seasonal launchers live under \texttt{scripts/}; they submit
 the root Slurm fronts and delegate implementations to \texttt{src/slurm/}.
-The former 16-cell submission path is disabled because job 3506764 never
-completed its first new cell and the schedule is too long. Select a smaller
-replacement grid before re-enabling an ablation launcher. Historical interrupted
-manifests are not reusable evidence for that future contract.
+The former 16-cell job 3506764 never completed its first new cell and must not
+be resumed. The ablation launcher now executes released TS-RAG and the four
+one-axis variants. Historical interrupted factorial manifests are not reusable
+evidence for this contract.
 One allocation runs the visible stages sequentially.
 
 All Selena fronts request one GPU, partition \texttt{an}, QoS
@@ -177,8 +179,8 @@ eight CPUs, 80\,GB memory and 23 hours; cluster requeue remains enabled.
 Every task phase has a schema-1 plain scientific manifest allocated before
 expensive work. Fully written tasks become \texttt{computed}; the successful
 owning \texttt{srun} finalizes them as \texttt{completed}. Later failure
-preserves computed tasks and restarts only interrupted work. Split- and
-representation-specific producers use compact dependency references containing
+preserves computed tasks and restarts only interrupted work. Producers for
+each split and representation use compact dependency references containing
 only their actual scientific inputs. No source, dataset or checkpoint file
 hashes exist.
 Canonical float32 predictions, fallback masks/reasons and weights live below

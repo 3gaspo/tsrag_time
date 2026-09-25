@@ -44,16 +44,23 @@ median chunk, retain the last 512 values, re-embed and retrieve, and repeat.
 The observed candidate cutoff remains $t$ throughout recursion: predicted
 future values never grant access to real observations after $t$.
 
-\section{Retired full-factorial retrieval grid}
-The former plan kept the native $L=512$, $K=10$ and 64-point continuation fixed while crossing
-four binary choices: all dataset items/variates versus the query's own item/variate;
-unaligned versus query-calendar-phase-aligned dates; released neighbor
-normalization versus query-scale alignment; and T5 EOS versus IN-lookback L2.
-The $2^4=16$ cells included the default all/unaligned/released/T5 configuration.
-Its cluster execution never completed the first new cell and the schedule is
-too long for the current study. It is not a current experiment contract. A
-smaller replacement grid must be selected before another ablation is enabled.
-Date-phase periods count observations and follow Adaptime's dataset protocol.
+\section{One-axis retrieval ablation}
+The retired $2^4$ factorial schedule was too long and never completed its first
+new cell. Its replacement keeps native $L=512$, $K=10$, the 64-point
+continuation and every released default fixed while changing one setting at a
+time:
+\begin{center}
+\begin{tabular}{ll}\toprule
+Label & Only change\\\midrule
+\texttt{tsrag\_same\_series} & query item/variate only\\
+\texttt{tsrag\_aligned} & query calendar phase required\\
+\texttt{tsrag\_inst\_l2} & IN-lookback L2 replaces T5 EOS\\
+\texttt{tsrag\_query\_scale} & neighbor aligned to query scale\\\bottomrule
+\end{tabular}
+\end{center}
+Released \texttt{tsrag} is the shared baseline. Axis interactions are not
+tested. Date-phase periods count observations and follow Adaptime's dataset
+protocol.
 
 For neighbor lookback mean/std $(\mu_i,\sigma_i)$ and query statistics
 $(\mu_q,\sigma_q)$, with standard deviations floored at $10^{-8}$, align the full
@@ -72,7 +79,7 @@ For the alternative distance, cache lookback instance normalization:
 Rank by squared L2 over finite overlapping coordinates, multiplying by $512/m$
 for $m$ observed overlaps and requiring at least $\lceil0.8\cdot512\rceil$.
 This selection uses no T5. Affine query-scale alignment preserves IN L2 rankings,
-while the normalization axis still changes fusion. Keep all factorial cells.
+while the query-scale variant still changes fusion.
 
 \section{Fallback and validation mixture}
 The TS-RAG forecast $R_t$ is replaced as one complete window by the independent
@@ -101,7 +108,7 @@ This is a smoothed win frequency, not a fitted optimal ensemble weight.
 
 \section{Evaluation and attribution}
 The shared Seasonal Naive artifact fixes finite target support and eligible
-metric cells. Every future replacement ablation must use that same grid and
+metric cells. Every ablation variant uses that same grid and
 TIME's median metrics.
 Task summaries report mean, population variance and standard deviation over
 finite series-window-variate cells; this dispersion is not across-run seed
@@ -115,5 +122,6 @@ The local Bolt forecasting core is source-adapted from
 \href{https://github.com/amazon-science/chronos-forecasting/tree/7dc4435706a4454feb79df44ca9f33631f3027bf}{Chronos revision 7dc4435}.
 Lookback IN, overlap L2, query-scale alignment and date periods are narrowed
 from Adaptime revision 33e75400. Calendar-causal datastore construction, rollout,
-fallback, factorial orchestration and validation mixing are project-specific. Training and alternate ARM augmentation paths are omitted.
+fallback, one-axis orchestration and validation mixing are project-specific.
+Training and alternate ARM augmentation paths are omitted.
 \end{document}

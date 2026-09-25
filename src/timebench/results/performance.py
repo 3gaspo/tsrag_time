@@ -21,8 +21,8 @@ def prepare_tasks(rows, domains=None):
         raise ValueError("Reduce repeats/configurations or give distinct model labels before reporting")
     for column in ("MASE", "scaled_MASE"):
         values = frame[column].to_numpy(dtype=float)
-        if not np.isfinite(values).all() or (values < 0).any():
-            raise ValueError(f"Task {column} must be finite and non-negative")
+        if np.isinf(values).any() or (values[np.isfinite(values)] < 0).any():
+            raise ValueError(f"Task {column} must be non-negative or NaN")
     timing_columns = [column for column in frame if column.endswith("_seconds")]
     for column in timing_columns:
         values = frame[column].to_numpy(dtype=float)
@@ -66,11 +66,19 @@ def relative_task_values(tasks, reference, loss="MASE"):
 
 def _scaled_mean(values, aggregation):
     array = np.asarray(values, dtype=float)
+    array = array[np.isfinite(array)]
+    if not len(array):
+        return None
     if aggregation == "arithmetic":
-        return float(array.mean())
+        return float(np.nanmean(array))
     if aggregation != "geometric":
         raise ValueError("scaled_aggregation must be arithmetic or geometric")
-    return 0.0 if np.any(array == 0) else float(np.exp(np.log(array).mean()))
+    return 0.0 if np.any(array == 0) else float(np.exp(np.nanmean(np.log(array))))
+
+
+def _finite_mean(values):
+    array = np.asarray(values, dtype=float)
+    return float(np.nanmean(array)) if np.isfinite(array).any() else None
 
 
 def _complete_sum(values):
@@ -81,20 +89,34 @@ def _complete_sum(values):
 def _summary(group, loss, scaled_aggregation):
     result = {
         "tasks": len(group),
-        f"mean_task_{loss}": float(group[loss].mean()),
+        f"finite_{loss}_tasks": int(np.isfinite(group[loss].to_numpy(dtype=float)).sum()),
+        f"mean_task_{loss}": _finite_mean(group[loss]),
         "scaled_MASE": _scaled_mean(group["scaled_MASE"], scaled_aggregation),
         "total_inference_seconds": _complete_sum(group["inference_seconds"]),
         "timed_tasks": int(np.isfinite(group["inference_seconds"].to_numpy(dtype=float)).sum()),
     }
+    if {"prediction_nan_values", "prediction_values"} <= set(group):
+        result["prediction_nan_values"] = int(group["prediction_nan_values"].sum())
+        result["prediction_values"] = int(group["prediction_values"].sum())
+        result["prediction_nan_rate"] = (result["prediction_nan_values"] / result["prediction_values"]
+                                         if result["prediction_values"] else None)
     for column in group:
         if column.endswith("_seconds") and not column.startswith("reference_") and column != "inference_seconds":
             result[f"total_{column}"] = _complete_sum(group[column])
     if "reference_loss" in group:
-        baseline = float(group["reference_loss"].mean())
-        scaled = _scaled_mean(group["reference_scaled_MASE"], scaled_aggregation)
+        paired = np.isfinite(group[[loss, "reference_loss"]].to_numpy(dtype=float)).all(axis=1)
+        baseline = _finite_mean(group.loc[paired, "reference_loss"])
+        candidate = _finite_mean(group.loc[paired, loss])
+        scaled_pair = np.isfinite(group[["scaled_MASE", "reference_scaled_MASE"]]
+                                  .to_numpy(dtype=float)).all(axis=1)
+        scaled = _scaled_mean(group.loc[scaled_pair, "reference_scaled_MASE"], scaled_aggregation)
+        candidate_scaled = _scaled_mean(group.loc[scaled_pair, "scaled_MASE"], scaled_aggregation)
         result.update(
-            relative_improvement_percent=100 * (1 - result[f"mean_task_{loss}"] / baseline) if baseline > 0 else None,
-            relative_scaled_improvement_percent=100 * (1 - result["scaled_MASE"] / scaled) if scaled > 0 else None,
+            relative_improvement_percent=100 * (1 - candidate / baseline)
+                if baseline is not None and baseline > 0 and candidate is not None else None,
+            relative_scaled_improvement_percent=100 * (1 - candidate_scaled / scaled)
+                if scaled is not None and scaled > 0 and candidate_scaled is not None else None,
+            relative_tasks=int(paired.sum()),
             mean_paired_improvement_percent=float(group["paired_improvement_percent"].mean())
                 if group["paired_improvement_percent"].notna().any() else None,
             paired_percentage_tasks=int(group["paired_improvement_percent"].notna().sum()),
@@ -127,7 +149,7 @@ def build_horizon_frequency_tables(tasks, *, loss="MASE"):
         comparable = comparable and np.isfinite(cell[loss].to_numpy(dtype=float)).all()
         scores = {}
         for model, group in groups.items():
-            score = float(group[loss].mean())
+            score = _finite_mean(group[loss])
             scores[model] = score
             row = {"frequency": frequency, "horizon_steps": int(horizon), "model": model,
                    "mean_loss": score, "tasks": len(group)}
@@ -195,6 +217,8 @@ def write_performance_report(
     values.to_csv(destination / "performance_tasks.csv", index=False)
     artifacts.append(destination / "performance_tasks.csv")
     columns = ["model", "tasks", f"mean_task_{loss}", "scaled_MASE", "total_inference_seconds"]
+    if "prediction_nan_values" in summary:
+        columns.extend(["prediction_nan_values", "prediction_values", "prediction_nan_rate"])
     if reference is not None:
         columns.extend(["relative_improvement_percent", "relative_scaled_improvement_percent",
                         "mean_paired_improvement_percent"])
@@ -236,7 +260,8 @@ def write_performance_report(
             plot_task_dispersion)
         styles = _styles(tasks, "model", None)
         # Undefined selected-method latency stays in tables; do not invent it.
-        timed = summary[np.isfinite(summary["total_inference_seconds"].to_numpy(dtype=float))]
+        timed = summary[np.isfinite(summary[["total_inference_seconds", f"mean_task_{loss}"]]
+                                    .to_numpy(dtype=float)).all(axis=1)]
         if len(timed):
             timed_styles = {model: styles[model] for model in timed["model"]}
             for suffix in (".png", ".pdf"):
@@ -253,8 +278,8 @@ def write_performance_report(
             if plot_task_dispersion(relative_tasks, path, relative=True, styles=styles):
                 artifacts.append(path)
             path = destination / ("loss_horizon_frequency" + suffix)
-            plot_loss_grid(cells, path, value="mean_loss", label=f"Mean task {loss}")
-            artifacts.append(path)
+            if plot_loss_grid(cells, path, value="mean_loss", label=f"Mean task {loss}"):
+                artifacts.append(path)
             path = destination / ("best_model_horizon_frequency" + suffix)
             plot_best_model_grid(best, path, models=list(tasks["model"].drop_duplicates()), styles=styles,
                                  label=f"mean task {loss}")

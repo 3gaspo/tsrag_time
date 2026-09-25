@@ -105,14 +105,15 @@ cutoff stays at the real query date. `datastore_stride` and
 
 The completed default is cross-user and cross-variate retrieval within the selected dataset,
 without date alignment or query-scale normalization, using T5 EOS representations.
-The former full-factorial plan computed all **16 combinations** of:
+The retired full-factorial plan crossed four binary axes. The replacement
+ablation changes each axis separately from released TS-RAG:
 
-| Axis | Values |
+| Method label | Only change from released default |
 |---|---|
-| Retrieval scope | All items/variates; same item and variate |
-| Date alignment | Disabled; same calendar phase as query |
-| Neighbor normalization | Released full-trajectory IN; align to query scale before retrieval and fusion |
-| Retrieval representation | T5 EOS; instance-normalized L2 over 512 lookback points |
+| `tsrag_same_series` | restrict retrieval to the query item and variate |
+| `tsrag_aligned` | require the query's calendar phase |
+| `tsrag_inst_l2` | replace T5 EOS retrieval with instance-normalized lookback L2 |
+| `tsrag_query_scale` | align retrieved trajectories to the query scale before retrieval and fusion |
 
 Date alignment uses the observation-count periods copied from Adaptime's dataset
 protocol, including multiplied sampling frequencies. Calendar eligibility requires
@@ -124,15 +125,14 @@ the query's mean/std. T5 cells encode aligned candidates per query because these
 representations depend on query scale. During fusion, aligned neighbors use the
 query's Bolt normalization rather than their own 576-point normalization.
 
-L2 cells select neighbors without T5. They cache IN lookbacks and compute squared
+The instance-L2 variant selects neighbors without T5. It caches IN lookbacks and computes squared
 L2 on finite overlap, rescaled to 512 coordinates, with Adaptime's default minimum
 overlap fraction of 0.8. Affine alignment leaves IN L2 rankings unchanged while
-changing fusion. The resulting 16-cell, 21-method schedule was too long: job
-3506764 never completed the first new cell, and no ablation result exists.
-That grid is retired. `scripts/submit_ablation.sh` remains an ordinary
-submission front, but its configured grid must be redesigned and documented
-before the next intentional ablation submission. The interrupted manifests are
-historical recovery evidence only.
+changing fusion. The old 16-cell schedule was too long: job 3506764 never
+completed the first new cell, and no ablation result exists. It is retired.
+`scripts/submit_ablation.sh` now runs released `tsrag` plus the four independent
+variants above; interactions between axes are deliberately not tested. The
+interrupted factorial manifests are historical recovery evidence only.
 
 ## Outputs and cluster operations
 
@@ -203,8 +203,7 @@ owns borrowed ARM/retrieval and native inference; `proposal/` owns the mixture;
 `pipeline/` owns orchestration/manifests; `results/` owns reports; `conf/` and
 `scripts/` own configuration and entry points. `src/slurm/` owns scheduler shells.
 Root-level `scripts/` contains the concise experiment and Seasonal launchers;
-the ablation launcher remains functional while its smaller replacement grid is
-future design work.
+the ablation launcher runs the four configured one-axis variants.
 
 `src/scripts/build_docs.py --render all` builds the three PDFs with pdfLaTeX;
 `--render protocol` updates only the method and experiment PDFs.

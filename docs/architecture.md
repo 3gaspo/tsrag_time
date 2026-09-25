@@ -61,7 +61,7 @@ The local Bolt core is adapted from
 Default MoE forward computation and full-neighbor normalization are retained;
 the explicit query-scale ablation changes neighbor normalization only. Training and
 alternate ARM paths are narrowed away. Causal datastore admission, rollout,
-fallback, lifecycle, ablation grid and the Bayesian-style mixture are project-specific.
+fallback, lifecycle, one-axis ablation and the Bayesian-style mixture are project-specific.
 Date-period settings, lookback IN, finite-overlap L2 and affine query-scale
 alignment are narrowed from Adaptime; no fitting/training boundary was imported.
 Scheduler runtimes derive artifact roots from the owning project, so another

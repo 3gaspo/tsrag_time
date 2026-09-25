@@ -43,22 +43,22 @@ requested exact configuration and its selected repeat, record every evaluation
 and source manifest, and reject additional metric-coverage loss relative to
 the selected Seasonal baseline.
 
-## Retired retrieval grid
+## One-axis retrieval ablation
 
-The former 16-cell grid configured by `retrieval_grid` in Hydra crossed:
+The former 16-cell factorial grid is retired. The current `retrieval_axes`
+configuration compares four independent changes with released TS-RAG:
 
-| Setting | Grid values | Main default |
-|---|---|---|
-| `scope` | `all`, `same_series` | `all` |
-| `aligned` | `false`, `true` | `false` |
-| `query_scale` | `false`, `true` | `false` |
-| `representation` | `t5`, `instance_l2` | `t5` |
+| Method label | Changed setting |
+|---|---|
+| `tsrag_same_series` | `scope=same_series` |
+| `tsrag_aligned` | `aligned=true` |
+| `tsrag_inst_l2` | `representation=instance_l2` |
+| `tsrag_query_scale` | `query_scale=true` |
 
-Selena job 3506764 never completed the first new grid cell. The schedule is too
-long for the current study and is retired. `scripts/submit_ablation.sh` remains
-a normal submission front; its stored 16-cell configuration documents the
-historical attempt and must be replaced by a deliberately chosen smaller grid
-before the next intentional submission.
+Selena job 3506764 never completed the first new factorial cell. That schedule
+is too long and must not be resumed. `scripts/submit_ablation.sh` is the normal
+front for the four one-axis variants. Each keeps every unspecified setting at
+the released default, so no interaction between axes is estimated.
 
 All items and variates are pooled within the selected dataset. Same-series
 retrieval means the query's own item and variate. Alignment uses Adaptime's
@@ -71,8 +71,8 @@ than full-neighbor normalization. L2 cells use cached IN lookbacks of length
 512, with finite-overlap distances and `minimum_overlap_fraction=0.8`, and do
 not invoke T5 selection. The normalization axis still changes their fusion.
 
-Every cell falls back to Bolt-max (2,048 points). The four vanilla controls and
-default TS-RAG mixture give 21 method labels per task. Main and grid executions
+Every variant falls back to Bolt-max (2,048 points). The ablation contains five
+TS-RAG methods per task: the released default plus four variants. Main and ablation executions
 reuse exact matching prepared data, caches and default predictions. Reports
 identify every axis, alignment period and fallback method.
 

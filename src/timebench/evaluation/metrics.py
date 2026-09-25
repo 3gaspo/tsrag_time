@@ -22,9 +22,9 @@ def summarize_metric_values(values: np.ndarray, evaluation_values: int) -> dict:
     values = np.asarray(values)
     finite = values[np.isfinite(values)]
     return {
-        "mean": float(np.mean(finite)) if finite.size else None,
-        "std": float(np.std(finite, dtype=np.float64, ddof=0)) if finite.size else None,
-        "variance": float(np.var(finite, dtype=np.float64, ddof=0)) if finite.size else None,
+        "mean": float(np.nanmean(finite)) if finite.size else None,
+        "std": float(np.nanstd(finite, dtype=np.float64, ddof=0)) if finite.size else None,
+        "variance": float(np.nanvar(finite, dtype=np.float64, ddof=0)) if finite.size else None,
         "dispersion_ddof": 0,
         "finite_values": int(finite.size),
         "evaluation_values": int(evaluation_values),
@@ -154,6 +154,9 @@ def compute_per_window_metrics_from_quantiles(
         raise ValueError("quantile_levels must include 0.5 for median-based metrics")
     median_idx = quantile_levels.index(0.5)
 
+    if np.isinf(ground_truth).any() or np.isinf(context).any():
+        raise ValueError("Ground truth and context may contain NaNs, never infinities")
+
     target_mask = (
         np.isfinite(ground_truth)
         if target_mask is None
@@ -200,71 +203,60 @@ def compute_per_window_metrics_from_quantiles(
 
                 valid_mask = target_mask[s, w, v]
 
-                # Filter to valid timesteps only
-                gt = np.asarray(gt[valid_mask], dtype=np.float64)
-                median_pred = np.asarray(median_pred[valid_mask], dtype=np.float64)
-                q_preds = np.asarray(
-                    q_preds[:, valid_mask], dtype=np.float64
-                )  # (num_quantiles, valid_len)
-                if not np.isfinite(q_preds).all():
+                if np.isinf(q_preds[:, valid_mask]).any():
                     raise ValueError(
-                        "non-finite forecast on shared evaluation grid at "
+                        "infinite forecast on shared evaluation grid at "
                         f"series={s}, window={w}, variate={v}"
                     )
 
-                # Compute error using median forecast
-                error = gt - median_pred
-                abs_error = np.abs(error)
+                # Median metrics average over finite produced values only.
+                median_valid = valid_mask & np.isfinite(median_pred)
+                if np.any(median_valid):
+                    median_gt = np.asarray(gt[median_valid], dtype=np.float64)
+                    median_values = np.asarray(median_pred[median_valid], dtype=np.float64)
+                    error = median_gt - median_values
+                    abs_error = np.abs(error)
+                    mse[s, w, v] = np.nanmean(error ** 2)
+                    mae[s, w, v] = np.nanmean(abs_error)
+                    rmse[s, w, v] = np.sqrt(mse[s, w, v])
 
-                # MSE (using median forecast, aligned with GluonTS MSE[0.5])
-                mse[s, w, v] = np.mean(error ** 2)
+                    nonzero_target = np.abs(median_gt) > 0
+                    if np.any(nonzero_target):
+                        mape[s, w, v] = np.nanmean(
+                            abs_error[nonzero_target] / np.abs(median_gt[nonzero_target])
+                        )
 
-                # MAE (using median forecast)
-                mae[s, w, v] = np.mean(abs_error)
-
-                # RMSE (sqrt of MSE)
-                rmse[s, w, v] = np.sqrt(mse[s, w, v])
-
-                # MAPE (using median forecast, returns fraction not percentage)
-                nonzero_target = np.abs(gt) > 0
-                if np.any(nonzero_target):
-                    mape[s, w, v] = np.mean(
-                        abs_error[nonzero_target] / np.abs(gt[nonzero_target])
+                    smape_denominator = np.abs(median_gt) + np.abs(median_values)
+                    smape_vals = np.divide(
+                        2 * abs_error,
+                        smape_denominator,
+                        out=np.zeros_like(abs_error),
+                        where=smape_denominator > 0,
                     )
-
-                # sMAPE (using median forecast, range [0, 2])
-                smape_denominator = np.abs(gt) + np.abs(median_pred)
-                smape_vals = np.divide(
-                    2 * abs_error,
-                    smape_denominator,
-                    out=np.zeros_like(abs_error),
-                    where=smape_denominator > 0,
-                )
-                smape[s, w, v] = np.mean(smape_vals)
-
-                # MASE (Mean Absolute Scaled Error, using median forecast)
-                seasonal_error = seasonal_naive_scale(ctx, seasonality)
-                mase[s, w, v] = mae[s, w, v] / seasonal_error
-
-                # ND (Normalized Deviation, using median forecast)
-                abs_label_sum = np.sum(np.abs(gt))
-                if abs_label_sum > 0:
-                    nd[s, w, v] = np.sum(abs_error) / abs_label_sum
-                else:
-                    nd[s, w, v] = np.nan
+                    smape[s, w, v] = np.nanmean(smape_vals)
+                    seasonal_error = seasonal_naive_scale(ctx, seasonality)
+                    mase[s, w, v] = mae[s, w, v] / seasonal_error
+                    abs_label_sum = np.nansum(np.abs(median_gt))
+                    if abs_label_sum > 0:
+                        nd[s, w, v] = np.nansum(abs_error) / abs_label_sum
 
                 # CRPS (MeanWeightedSumQuantileLoss) from provided quantiles
-                if abs_label_sum > 0:
-                    weighted_quantile_losses = []
-                    for q, q_pred in zip(quantile_levels, q_preds):
-                        q_error = gt - q_pred
-                        indicator = (q_pred >= gt).astype(float)
-                        q_loss = 2 * np.abs(q_error * (indicator - q))
-                        weighted_ql = np.sum(q_loss) / abs_label_sum
-                        weighted_quantile_losses.append(weighted_ql)
-                    crps[s, w, v] = np.mean(weighted_quantile_losses)
-                else:
-                    crps[s, w, v] = np.nan
+                weighted_quantile_losses = []
+                for q, q_pred in zip(quantile_levels, q_preds):
+                    quantile_valid = valid_mask & np.isfinite(q_pred)
+                    if not np.any(quantile_valid):
+                        continue
+                    quantile_gt = np.asarray(gt[quantile_valid], dtype=np.float64)
+                    quantile_values = np.asarray(q_pred[quantile_valid], dtype=np.float64)
+                    abs_label_sum = np.nansum(np.abs(quantile_gt))
+                    if abs_label_sum <= 0:
+                        continue
+                    q_error = quantile_gt - quantile_values
+                    indicator = (quantile_values >= quantile_gt).astype(float)
+                    q_loss = 2 * np.abs(q_error * (indicator - q))
+                    weighted_quantile_losses.append(np.nansum(q_loss) / abs_label_sum)
+                if weighted_quantile_losses:
+                    crps[s, w, v] = np.nanmean(weighted_quantile_losses)
 
     return {
         "MSE": mse,

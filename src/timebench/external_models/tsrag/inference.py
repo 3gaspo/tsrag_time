@@ -12,6 +12,28 @@ from timebench.data.windows import CONTEXT_LENGTH, NATIVE_HORIZON
 TOP_K = 10
 
 
+def summarize_retrieval_provenance(rows):
+    rows = np.asarray(rows, dtype=np.float64)
+    totals = rows.sum(axis=0) if len(rows) else np.zeros(4, dtype=np.float64)
+    extractions, neighbors, same_user, distance_sum = totals
+    return {
+        'retrieval_extractions': int(extractions),
+        'retrieved_neighbors': int(neighbors),
+        'same_user_neighbors': int(same_user),
+        'same_user_retrieval_percentage': (
+            float(100 * same_user / neighbors) if neighbors else None
+        ),
+        'normalized_time_distance_sum': float(distance_sum),
+        'average_normalized_time_distance_to_query': (
+            float(distance_sum / neighbors) if neighbors else None
+        ),
+        'same_user_definition': 'same dataset item/user as the query',
+        'normalized_time_distance_definition': (
+            '(query_tick-neighbor_tick)/(query_tick-earliest_datastore_tick)'
+        ),
+    }
+
+
 def instance_normalize(values):
     values = np.asarray(values, dtype=np.float32)
     loc = np.nanmean(values, axis=-1, keepdims=True)
@@ -118,18 +140,30 @@ class CausalRetriever:
 def forecast_query(loaded, encoder, retrieval, windows, reference, initial_representation, horizon, device):
     import torch
 
+    provenance = np.zeros(4, dtype=np.float64)
+    produced_nan_values = 0
     history = windows.histories([reference], CONTEXT_LENGTH)[0]
     if len(history) < CONTEXT_LENGTH:
-        return None, 'insufficient_query_history'
+        return None, 'insufficient_query_history', provenance, produced_nan_values
     current = np.asarray(history, dtype=np.float32)[None]
     representation = initial_representation[None] if initial_representation is not None else None
     chunks = []
     remaining = horizon
     while remaining:
+        provenance[0] += 1
         found = retrieval.search(reference, representation, current)
         if found is None:
-            return None, 'insufficient_causal_datastore'
+            return None, 'insufficient_causal_datastore', provenance, produced_nan_values
         distances, neighbors = found
+        neighbor_ids = neighbors.reshape(-1)
+        neighbor_refs = retrieval.references[neighbor_ids]
+        provenance[1] += len(neighbor_ids)
+        provenance[2] += np.sum(neighbor_refs[:, 0] == int(reference[0]))
+        query_tick = float(windows.ticks(np.asarray(reference)[None])[0])
+        earliest = float(np.min(retrieval.ticks))
+        provenance[3] += np.sum(
+            (query_tick - retrieval.ticks[neighbor_ids]) / max(query_tick - earliest, 1.0)
+        )
         sequences = windows.sequences(retrieval.references[neighbors.reshape(-1)]).reshape(1, TOP_K, CONTEXT_LENGTH + NATIVE_HORIZON)
         if retrieval.options['query_scale']:
             sequences = query_scaled_neighbors(current[:, None], sequences)
@@ -141,8 +175,11 @@ def forecast_query(loaded, encoder, retrieval, windows, reference, initial_repre
         native = output.quantile_preds[:, loaded.median_index].detach().float().cpu().numpy()
         if native.shape != (1, NATIVE_HORIZON):
             raise ValueError(f'Unexpected native TS-RAG shape: {native.shape}')
-        if not np.isfinite(native).all():
-            return None, 'nonfinite_prediction'
+        if np.isinf(native).any():
+            raise ValueError('TS-RAG produced an infinite forecast')
+        produced_nan_values += int(np.isnan(native).sum())
+        if produced_nan_values:
+            return None, 'nonfinite_prediction', provenance, produced_nan_values
         take = min(remaining, NATIVE_HORIZON)
         chunks.append(native[0, :take])
         remaining -= take
@@ -150,6 +187,9 @@ def forecast_query(loaded, encoder, retrieval, windows, reference, initial_repre
             current = np.concatenate((current, native), axis=-1)[:, -CONTEXT_LENGTH:]
             if retrieval.options['representation'] == 't5':
                 representation = encoder.representation(torch.from_numpy(current[:, None])).detach().float().cpu().numpy()
-                if not np.isfinite(representation).all():
-                    return None, 'nonfinite_rollout_embedding'
-    return np.concatenate(chunks), None
+                if np.isinf(representation).any():
+                    raise ValueError('TS-RAG produced an infinite rollout embedding')
+                produced_nan_values += int(np.isnan(representation).sum())
+                if produced_nan_values:
+                    return None, 'nonfinite_rollout_embedding', provenance, produced_nan_values
+    return np.concatenate(chunks), None, provenance, produced_nan_values

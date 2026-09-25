@@ -4,6 +4,7 @@ datasets: [all]
 terms: [short, medium, long]
 excluded_datasets: [Coastal_T_S/5T, current_velocity/20T, azure2019_D/5T, azure2019_I/5T]
 dataset_config: null
+vanilla_predictions_path: null  # Evaluating TSFMs outputs/foundation_models/inference
 seed: 0
 device: cuda
 batch_size: 32
@@ -14,18 +15,18 @@ validation_length: null
 # All historical dates by default. A candidate retains its observed 64-step future.
 datastore_stride: 1
 max_datastore_windows: null
-# The ablation runs the complete 2 x 2 x 2 x 2 grid below.
+# The ablation compares four independent one-setting changes with released TS-RAG.
 ablation: false
 retrieval:
   scope: all
   aligned: false
   query_scale: false
   representation: t5
-retrieval_grid:
-  scope: [all, same_series]
-  aligned: [false, true]
-  query_scale: [false, true]
-  representation: [t5, instance_l2]
+retrieval_axes:
+  scope: same_series
+  aligned: true
+  representation: instance_l2
+  query_scale: true
 # Same missing-coordinate policy as Adaptime's lookback L2 retrieval.
 minimum_overlap_fraction: 0.8
 alignment_period: null

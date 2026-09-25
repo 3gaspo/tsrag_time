@@ -5,7 +5,6 @@ from types import SimpleNamespace
 from unittest.mock import patch
 import ast
 import json
-from itertools import product
 import os
 import re
 import subprocess
@@ -31,8 +30,8 @@ from timebench.proposal.mixture import estimate_weight
 
 
 OPTIONS = {'scope': 'all', 'aligned': False, 'query_scale': False, 'representation': 't5'}
-GRID = {'scope': ['all', 'same_series'], 'aligned': [False, True],
-        'query_scale': [False, True], 'representation': ['t5', 'instance_l2']}
+AXES = {'scope': 'same_series', 'aligned': True,
+        'representation': 'instance_l2', 'query_scale': True}
 
 
 class ArrayIndex:
@@ -160,17 +159,26 @@ class Contract(unittest.TestCase):
             def search(self, reference, representation, context):
                 cutoffs.append(int(reference[2]))
                 return np.zeros((1, 10), dtype=np.float32), np.arange(10)[None]
-        prediction, reason = forecast_query(model, Encoder(), Retrieval(), windows, (0, 0, 700), np.zeros(768), 130, 'cpu')
+        retrieval = Retrieval()
+        retrieval.ticks = windows.ticks(retrieval.references)
+        prediction, reason, provenance, produced_nans = forecast_query(
+            model, Encoder(), retrieval, windows, (0, 0, 700), np.zeros(768), 130, 'cpu')
         self.assertIsNone(reason)
+        self.assertEqual(produced_nans, 0)
+        self.assertEqual(provenance[0], 3)
         self.assertEqual(len(prediction), 130)
         self.assertEqual(lengths, [512, 512, 512])
         self.assertEqual(cutoffs, [700, 700, 700])
 
-    def test_factorial_grid_and_cross_variate_calendar_alignment(self):
-        methods = retrieval_methods({'retrieval': OPTIONS, 'retrieval_grid': GRID, 'ablation': True})
-        self.assertEqual(len(methods), 16)
-        expected = set(product(GRID['scope'], GRID['aligned'], GRID['query_scale'], GRID['representation']))
-        self.assertEqual({tuple(option[key] for key in GRID) for option in methods.values()}, expected)
+    def test_one_axis_ablation_and_cross_variate_calendar_alignment(self):
+        methods = retrieval_methods({'retrieval': OPTIONS, 'retrieval_axes': AXES, 'ablation': True})
+        self.assertEqual(methods, {
+            'tsrag': OPTIONS,
+            'tsrag_same_series': {**OPTIONS, 'scope': 'same_series'},
+            'tsrag_aligned': {**OPTIONS, 'aligned': True},
+            'tsrag_inst_l2': {**OPTIONS, 'representation': 'instance_l2'},
+            'tsrag_query_scale': {**OPTIONS, 'query_scale': True},
+        })
         self.assertEqual(retrieval_methods({'retrieval': OPTIONS, 'ablation': False}), {'tsrag': OPTIONS})
         task = Task('synthetic/15T', 'short', 4, 8, 0, 2, alignment_period=7)
         target = SyntheticWindows(task, '.').source[0]['target']
@@ -250,9 +258,10 @@ class Contract(unittest.TestCase):
             workflow = Workflow.__new__(Workflow)
             task = Task('synthetic/D', 'short', 4, 8, 8, 2)
             workflow.config = {'t5_samples': 20, 'embedding_batch_size': 16, 'minimum_overlap_fraction': 0.8,
-                               'ablation': True, 'retrieval': OPTIONS, 'retrieval_grid': GRID}
+                               'ablation': True, 'retrieval': OPTIONS, 'retrieval_axes': AXES}
             workflow.rag_methods = retrieval_methods(workflow.config)
             workflow.root, workflow.storage, workflow.weights = root/'tsrag', root/'datasets', root/'weights'
+            workflow.vanilla_predictions_path = None
             workflow.tasks, workflow.seed, workflow.device, workflow.batch_size = [task], 0, 'cpu', 2
             grid = root/'seasonal'/'run_0'/'evaluation_grid.npz'
             grid.parent.mkdir(parents=True)
@@ -266,7 +275,7 @@ class Contract(unittest.TestCase):
                                     inference_seconds=0, create_evaluation_grid=True)
             (grid.parent/'manifest.json').write_text('{}')
             def query(*args, **kwargs):
-                return np.full(4, np.nan, dtype=np.float32), None
+                return np.full(4, np.nan, dtype=np.float32), None, np.zeros(4), 4
             with patch.dict(os.environ, {'TIME_LAUNCH_ID': 'synthetic', 'TSRAG_DEFER_COMPLETION': '0'}), \
                  patch('timebench.pipeline.workflow.Windows', SyntheticWindows), \
                  patch('timebench.model_loading.foundation.Forecaster', SyntheticForecaster), \
@@ -304,7 +313,7 @@ class Contract(unittest.TestCase):
                 self.assertEqual(len(before), len(list(workflow.root.rglob('run_0/manifest.json'))))
                 self.assertFalse(list(workflow.root.rglob('run_1')))
                 report = json.loads((workflow.root.parent/'reports/tsrag/synthetic/report_manifest.json').read_text())
-                self.assertEqual(len(report['inputs']), 21)
+                self.assertEqual(len(report['inputs']), len(workflow.methods()))
                 aggregate = json.loads((workflow.root.parent/'reports/tsrag/synthetic/comparison_summary.json').read_text())
                 self.assertEqual(aggregate['tsrag']['pooled_fallback_rate'], 1.)
                 self.assertEqual(aggregate['tsrag']['mean_task_fallback_rate'], 1.)

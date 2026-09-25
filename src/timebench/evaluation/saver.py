@@ -232,6 +232,30 @@ def save_window_predictions(
             grid_path, ground_truth=ground_truth
         )
 
+    if np.isinf(predictions_quantiles).any():
+        raise ValueError("Infinite forecast values cannot be evaluated")
+    prediction_nan = np.isnan(predictions_quantiles)
+    evaluated_positions = (
+        target_mask[:, :, None, :, :]
+        & evaluation_mask[:, :, None, :, None]
+    )
+    evaluated_positions = np.broadcast_to(
+        evaluated_positions, predictions_quantiles.shape
+    )
+    prediction_outputs = {
+        "total_values": int(predictions_quantiles.size),
+        "nan_values": int(prediction_nan.sum()),
+        "nan_rate": float(prediction_nan.mean()),
+        "cells_with_nan": int(prediction_nan.any(axis=(2, 4)).sum()),
+        "total_cells": int(num_series * num_windows * num_variates),
+        "evaluation_values": int(evaluated_positions.sum()),
+        "evaluation_nan_values": int((prediction_nan & evaluated_positions).sum()),
+    }
+    prediction_outputs["evaluation_nan_rate"] = (
+        prediction_outputs["evaluation_nan_values"] / prediction_outputs["evaluation_values"]
+        if prediction_outputs["evaluation_values"] else None
+    )
+
     # Save quantiles to npz file
     # Use float16 to reduce storage (sufficient for visualization purposes)
     # Apply dynamic scaling to prevent float16 overflow (max ~65504)
@@ -289,6 +313,7 @@ def save_window_predictions(
         "context_length": context_len,
         "metric_names": list(metrics.keys()),
         "prediction_scale_factor": prediction_scale_factor,  # For float16 overflow prevention
+        "prediction_outputs": prediction_outputs,
         "metrics_summary_file": "metrics_summary.json",
         "evaluation_grid": {
             "definition": EVALUATION_GRID_DEFINITION,
@@ -326,6 +351,7 @@ def save_window_predictions(
         "dataset_config": ds_config,
         "aggregation": "mean over the shared Seasonal Naive MASE evaluation grid",
         "evaluation_grid": config["evaluation_grid"],
+        "prediction_outputs": prediction_outputs,
         "metrics": metric_summaries,
     }
     if launch_id:
