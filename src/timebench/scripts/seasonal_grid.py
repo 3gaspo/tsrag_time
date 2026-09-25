@@ -16,8 +16,10 @@ def main(config):
     from timebench.evaluation.saver import save_window_predictions
     from timebench.evaluation.timing import EvaluationTimer
     from timebench.pipeline.runs import allocate_run
+    from timebench.pipeline.runtime_resources import log_selected_device
     from timebench.data.windows import Windows
 
+    log_selected_device('cpu', stage='forecast', model='seasonal_naive')
     resolved = OmegaConf.to_container(config, resolve=True)
     if resolved['dataset_config'] is None:
         resolved['dataset_config'] = str(Path(__file__).parents[1] / 'config/datasets.yaml')

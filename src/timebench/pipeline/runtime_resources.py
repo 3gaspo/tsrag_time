@@ -14,6 +14,16 @@ def log(event, **values):
     print(f"[{stamp}] resources {event} " + json.dumps(values, sort_keys=True), flush=True)
 
 
+def log_selected_device(device, *, stage, component=None, model=None):
+    """Record the device actually selected by a scientific or helper stage."""
+    values = {"stage": str(stage), "device": str(device)}
+    if component is not None:
+        values["component"] = str(component)
+    if model is not None:
+        values["model"] = str(model)
+    log("selected_device", **values)
+
+
 def memory_snapshot():
     """Distinguish host RAM availability from a job's cgroup memory headroom."""
     fields = {}
@@ -25,8 +35,10 @@ def memory_snapshot():
             if line.startswith(("MemTotal:", "MemAvailable:"))
         }
     result = {key + "_MiB": value / 2**20 for key, value in fields.items()}
+    result.update(cgroup_status="unavailable", cgroup_reason="/proc/self/cgroup is absent")
     membership = Path("/proc/self/cgroup")
     if membership.exists():
+        result["cgroup_reason"] = "no exposed memory controller or readable limit"
         for line in membership.read_text().splitlines():
             _, controllers, group = line.split(":", 2)
             if controllers == "":
@@ -41,15 +53,18 @@ def memory_snapshot():
             if not limit_path.exists() or not usage_path.exists():
                 continue
             limit = limit_path.read_text().strip()
-            if limit != "max":
-                limit, usage = int(limit), int(usage_path.read_text())
-                # Huge v1 sentinel limits do not represent a finite job budget.
-                if limit < 2**60:
-                    result.update(
-                        cgroup_limit_MiB=limit / 2**20,
-                        cgroup_used_MiB=usage / 2**20,
-                        cgroup_headroom_MiB=max(0, limit - usage) / 2**20,
-                    )
+            if limit == "max":
+                result.update(cgroup_status="unlimited", cgroup_reason="memory.max is unlimited")
+                break
+            limit, usage = int(limit), int(usage_path.read_text())
+            if limit >= 2**60:
+                result.update(cgroup_status="unlimited", cgroup_reason="memory limit is a v1 unlimited sentinel")
+                break
+            result.update(cgroup_status="finite", cgroup_reason="",
+                          cgroup_limit_MiB=limit / 2**20,
+                          cgroup_used_MiB=usage / 2**20,
+                          cgroup_headroom_MiB=max(0, limit - usage) / 2**20)
+            break
     return result
 
 

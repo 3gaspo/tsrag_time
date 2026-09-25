@@ -17,10 +17,10 @@ def main():
         return
     for path in args.root.rglob('stage_ready.json'):
         manifest = load_manifest(path.parent)
-        if manifest['status'] != 'running' or manifest['launch']['launch_id'] != args.launch:
+        if manifest['status'] != 'computed' or manifest['launch']['launch_id'] != args.launch:
             continue
         ready = json.loads(path.read_text())
-        RunHandle(path.parent, manifest, 'resume').complete(ready['required_artifacts'])
+        RunHandle(path.parent, manifest, 'finalize').complete(ready['required_artifacts'])
         path.unlink()
 
 

@@ -14,7 +14,7 @@ from typing import Any, Mapping, Sequence
 
 SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
-VALID_STATUSES = {"running", "interrupted", "completed"}
+VALID_STATUSES = {"running", "interrupted", "computed", "completed"}
 CONFLICT_POLICIES = ("overwrite_exact", "overwrite_path", "new")
 CONFIG_POLICIES = ("error", "distinct", "latest", "average")
 REPEAT_POLICIES = ("selected", "latest", "distinct", "average")
@@ -82,6 +82,15 @@ def load_manifest(path_or_run: str | Path) -> dict[str, Any]:
     return manifest
 
 
+def manifest_reference(path_or_run: str | Path) -> dict[str, Any]:
+    """Compact dependency identity without recursively embedding its config."""
+    path = Path(path_or_run)
+    run_dir = path if path.is_dir() else path.parent
+    manifest = load_manifest(run_dir)
+    return {"identity": manifest["identity"], "run": run_dir.name,
+        "completed_at": manifest.get("completed_at")}
+
+
 @dataclass
 class RunHandle:
     """One allocated run that becomes completed only after artifact validation."""
@@ -93,18 +102,22 @@ class RunHandle:
 
     @property
     def should_run(self) -> bool:
-        return self.action != "skip"
+        return self.action not in {"skip", "finalize"}
 
     def __enter__(self) -> "RunHandle":
         return self
 
-    def complete(self, required_artifacts: Sequence[str]) -> None:
-        if self.action == "skip":
-            self._completed = True
-            return
-        artifacts = [str(value) for value in required_artifacts]
+    def _artifacts(self, required_artifacts: Sequence[str] | None) -> list[str]:
+        artifacts = [
+            str(value)
+            for value in (
+                required_artifacts
+                if required_artifacts is not None
+                else self.manifest.get("required_artifacts", [])
+            )
+        ]
         if not artifacts:
-            raise ManifestError(f"Completed run has no required artifacts: {self.run_dir}")
+            raise ManifestError(f"Run has no required artifacts: {self.run_dir}")
         missing = [
             name
             for name in artifacts
@@ -113,10 +126,32 @@ class RunHandle:
         ]
         if missing:
             raise ManifestError(
-                f"Run cannot be completed with missing or empty artifacts: {missing}"
+                f"Run has missing or empty required artifacts: {missing}"
             )
+        return artifacts
+
+    def compute(self, required_artifacts: Sequence[str]) -> None:
+        """Preserve finished computation before a separate final check."""
+        if self.action in {"skip", "finalize"}:
+            self._completed = True
+            return
+        artifacts = self._artifacts(required_artifacts)
+        self.manifest["required_artifacts"] = artifacts
+        self.manifest["status"] = "computed"
+        self.manifest.pop("error", None)
+        self.manifest["computed_at"] = _now()
+        self.manifest["updated_at"] = self.manifest["computed_at"]
+        _write_manifest(self.run_dir / MANIFEST_NAME, self.manifest)
+        self._completed = True
+
+    def complete(self, required_artifacts: Sequence[str] | None = None) -> None:
+        if self.action == "skip":
+            self._completed = True
+            return
+        artifacts = self._artifacts(required_artifacts)
         self.manifest["required_artifacts"] = artifacts
         self.manifest["status"] = "completed"
+        self.manifest.pop("error", None)
         self.manifest["completed_at"] = _now()
         self.manifest["updated_at"] = self.manifest["completed_at"]
         _write_manifest(self.run_dir / MANIFEST_NAME, self.manifest)
@@ -126,7 +161,10 @@ class RunHandle:
     def __exit__(self, error_type, error, traceback) -> bool:
         if self.action == "skip":
             return False
-        if error_type is not None or not self._completed:
+        if (
+            self.manifest.get("status") not in {"computed", "completed"}
+            and (error_type is not None or not self._completed)
+        ):
             self.manifest["status"] = "interrupted"
             self.manifest["updated_at"] = _now()
             if error_type is not None:
@@ -420,6 +458,38 @@ def allocate_run(
         and manifest.get("identity") == dict(identity)
         and _scientific_config(manifest) == scientific
     ]
+    computed = [
+        (path, manifest)
+        for path, manifest in exact
+        if manifest["status"] == "computed"
+        and (run_index is None or _run_index(path) == run_index)
+    ]
+    if computed and policy == "overwrite_exact" and not force:
+        target, manifest = max(computed, key=lambda item: _run_index(item[0]))
+        launched_at = _now()
+        attempt = _attempt("finalize", launched_at)
+        previous_launch = dict(manifest.get("launch", {}))
+        attempt["computed_by"] = {
+            "launch_id": previous_launch.get("launch_id"),
+            "slurm_job_id": previous_launch.get("slurm_job_id"),
+            "computed_at": manifest.get("computed_at"),
+        }
+        manifest["launch"] = {
+            "launch_id": attempt["launch_id"],
+            "slurm_job_id": attempt["slurm_job_id"],
+            "launched_at": launched_at,
+            "action": "finalize",
+            "attempts": [*previous_launch.get("attempts", []), attempt],
+        }
+        manifest["updated_at"] = launched_at
+        _write_manifest(target / MANIFEST_NAME, manifest)
+        print(
+            "TIME run allocation "
+            f"action=finalize run={target} launch_id={attempt['launch_id']} "
+            f"slurm_job_id={attempt['slurm_job_id']} launched_at={launched_at}",
+            flush=True,
+        )
+        return RunHandle(target, manifest, "finalize", _completed=True)
     strict_reuse = reuse_from or os.environ.get("TIME_REUSE_FROM") or None
     optional_reuse = (
         None

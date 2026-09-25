@@ -4,8 +4,6 @@
 |---|---|---|
 | `experiment.slurm` | Retrieval benefit, context restriction, stronger backbone, and validation mixing | prepare, vanilla, extract, predict, mix, evaluate, report |
 | `experiment_selena.slurm` | Same scientific experiment on the overflow execution surface | same stages |
-| `ablation.slurm` | Full factorial retrieval-scope, alignment, normalization and representation grid | same seven stages |
-| `ablation_selena.slurm` | Same 16-cell ablation on the overflow execution surface | same stages |
 | `seasonal_naive.slurm` | Produce the common finite-support grid and matched scaling baseline | Seasonal forecast/evaluation |
 | `seasonal_naive_selena.slurm` | Same Seasonal producer on the overflow execution surface | same stage |
 
@@ -45,10 +43,9 @@ requested exact configuration and its selected repeat, record every evaluation
 and source manifest, and reject additional metric-coverage loss relative to
 the selected Seasonal baseline.
 
-## Retrieval grid
+## Retired retrieval grid
 
-`bash scripts/submit_ablation.sh dgx` runs the complete 16-cell grid configured
-by `retrieval_grid` in Hydra:
+The former 16-cell grid configured by `retrieval_grid` in Hydra crossed:
 
 | Setting | Grid values | Main default |
 |---|---|---|
@@ -56,6 +53,12 @@ by `retrieval_grid` in Hydra:
 | `aligned` | `false`, `true` | `false` |
 | `query_scale` | `false`, `true` | `false` |
 | `representation` | `t5`, `instance_l2` | `t5` |
+
+Selena job 3506764 never completed the first new grid cell. The schedule is too
+long for the current study and is retired. `scripts/submit_ablation.sh` remains
+a normal submission front; its stored 16-cell configuration documents the
+historical attempt and must be replaced by a deliberately chosen smaller grid
+before the next intentional submission.
 
 All items and variates are pooled within the selected dataset. Same-series
 retrieval means the query's own item and variate. Alignment uses Adaptime's

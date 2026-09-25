@@ -97,10 +97,14 @@ class Contract(unittest.TestCase):
         windows = SyntheticWindows(task, '.')
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            write_prepared(windows, root)
-            refs = np.load(root/'datastore_references.npy')
-            validation = np.load(root/'validation_references.npy')
-            test = np.load(root/'test_references.npy')
+            validation_root, test_root = root/'validation', root/'test'
+            validation_root.mkdir()
+            test_root.mkdir()
+            write_prepared(windows, validation_root, 'validation')
+            write_prepared(windows, test_root, 'test')
+            refs = np.load(test_root/'datastore_references.npy')
+            validation = np.load(validation_root/'validation_references.npy')
+            test = np.load(test_root/'test_references.npy')
             # Select on validation first, then query the same observed series at test time.
             vectors = np.arange(len(refs), dtype=np.float32)[:, None]
             with patch('timebench.external_models.tsrag.retriever.TSRAGIndex', ArrayIndex):
@@ -126,7 +130,7 @@ class Contract(unittest.TestCase):
             no_validation = root/'no_validation'
             no_validation.mkdir()
             write_prepared(SyntheticWindows(Task('synthetic/D', 'short', 10, 100, 0, 2,
-                                                 datastore_stride=7, max_datastore_windows=13), '.'), no_validation)
+                                                 datastore_stride=7, max_datastore_windows=13), '.'), no_validation, 'test')
             np.testing.assert_array_equal(refs, np.load(no_validation/'datastore_references.npy'))
 
     def test_causal_dates_and_rollout(self):
@@ -280,17 +284,17 @@ class Contract(unittest.TestCase):
                 workflow.mix()
                 workflow.evaluate()
                 workflow.report()
-                rag = workflow.rag(task)
-                bolt = workflow.raw(task, 'chronos_bolt_max')
+                rag = workflow.rag(task, 'test')
+                bolt = workflow.raw(task, 'test', 'chronos_bolt_max')
                 for method in workflow.rag_methods:
-                    prediction = workflow.rag(task, method)
-                    np.testing.assert_array_equal(np.load(prediction/'test.npy'), np.load(bolt/'test.npy'))
-                    self.assertTrue(np.load(prediction/'test_fallback.npy').all())
+                    prediction = workflow.rag(task, 'test', method)
+                    np.testing.assert_array_equal(np.load(prediction/'prediction.npy'), np.load(bolt/'prediction.npy'))
+                    self.assertTrue(np.load(prediction/'fallback.npy').all())
                     metadata = json.loads((prediction/'prediction.json').read_text())
                     self.assertEqual(metadata['fallback_reason_split'], 'test')
                     self.assertEqual(sum(metadata['fallback_reasons'].values()), metadata['fallback_counts']['test']['all_rows'])
-                np.testing.assert_array_equal(np.load(rag/'test.npy'), np.load(bolt/'test.npy'))
-                self.assertTrue(np.load(rag/'test_fallback.npy').all())
+                np.testing.assert_array_equal(np.load(rag/'prediction.npy'), np.load(bolt/'prediction.npy'))
+                self.assertTrue(np.load(rag/'fallback.npy').all())
                 summary = json.loads((workflow.evaluation(task, 'tsrag')/'metrics_summary.json').read_text())
                 self.assertIsNotNone(summary['metrics']['MASE']['variance'])
                 self.assertEqual(summary['metrics']['MASE']['dispersion_ddof'], 0)
@@ -314,7 +318,7 @@ class Contract(unittest.TestCase):
                     with workflow.allocate(task, 'test_completion', 'shared') as pending:
                         (pending.run_dir/'payload.txt').write_text('ready')
                         workflow.finish(pending, ['payload.txt'])
-                    self.assertEqual(load_manifest(pending.run_dir)['status'], 'running')
+                    self.assertEqual(load_manifest(pending.run_dir)['status'], 'computed')
                     from timebench.scripts.finalize_stage import main
                     with patch.object(sys, 'argv', ['finalize', str(workflow.root), 'synthetic']):
                         main()
@@ -348,6 +352,10 @@ class Contract(unittest.TestCase):
         for name in ('submit_experiment.sh', 'submit_seasonal_naive.sh', 'submit_ablation.sh'):
             self.assertTrue((ROOT/'scripts'/name).is_file())
             self.assertFalse((ROOT/name).exists())
+        ablation = (ROOT/'scripts/submit_ablation.sh').read_text()
+        self.assertIn('src/slurm/submit_experiment.sh', ablation)
+        self.assertIn('TSRAG_EXPERIMENT_FAMILY=ablation', ablation)
+        self.assertNotIn('exit 2', ablation)
         required = ('--gres=gpu:1', '--partition=an', '--qos=an_preemptable', '--exclusive',
                     '--wckey=P12CU:DATASCIENCE', '--ntasks=1')
         for front in ROOT.glob('*_selena.slurm'):

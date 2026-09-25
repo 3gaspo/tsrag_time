@@ -19,8 +19,8 @@ class Forecaster:
         if alias not in MODEL_ALIASES:
             raise ValueError(f'Expected one of {MODEL_ALIASES}')
         self.alias = alias
-        from timebench.pipeline.runtime_resources import log
-        log("model_device", model=alias, device=str(device))
+        from timebench.pipeline.runtime_resources import log_selected_device
+        log_selected_device(device, stage="forecast", model=alias)
         self.supports_covariates = alias == 'chronos2'
         self.pipeline = BaseChronosPipeline.from_pretrained(
             str(Path(weights) / CHECKPOINTS[alias]), device_map=device, local_files_only=True)

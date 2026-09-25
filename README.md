@@ -79,7 +79,11 @@ bash scripts/submit_experiment.sh dgx 'datasets=[SG_Weather/D]' 'terms=[short]'
 bash scripts/submit_experiment.sh dgx validation_length=0
 ```
 
-Default validation uses TIME's configured interval immediately before testing.
+Validation dates step backward by `H` from the first official test date, keep
+the test grid's phase, and are capped by both `validation_length/H` and the
+number of test dates. A validation row is usable only when its 512-point
+lookback and H-point future each contain a finite value. Requested, available
+and usable date/row counts are saved for every task and model.
 The mixture estimates a Beta(1,1)-smoothed probability that TS-RAG has lower
 per-date mean-variate MSSE than Chronos-2, counting ties as half wins. With
 no usable validation dates it uses pure Chronos-2. Validation length never
@@ -97,11 +101,11 @@ dates may enter later queries' datastores. During long-horizon rollout the
 cutoff stays at the real query date. `datastore_stride` and
 `max_datastore_windows` explicitly restrict this pool when supplied.
 
-## Retrieval ablation
+## Retrieval-ablation redesign
 
-The default is cross-user and cross-variate retrieval within the selected dataset,
+The completed default is cross-user and cross-variate retrieval within the selected dataset,
 without date alignment or query-scale normalization, using T5 EOS representations.
-The ablation computes all **16 combinations** of:
+The former full-factorial plan computed all **16 combinations** of:
 
 | Axis | Values |
 |---|---|
@@ -123,25 +127,24 @@ query's Bolt normalization rather than their own 576-point normalization.
 L2 cells select neighbors without T5. They cache IN lookbacks and compute squared
 L2 on finite overlap, rescaled to 512 coordinates, with Adaptime's default minimum
 overlap fraction of 0.8. Affine alignment leaves IN L2 rankings unchanged while
-changing fusion; these combinations remain in the full grid.
-
-```bash
-bash scripts/submit_ablation.sh dgx
-```
-
-The ablation includes the four vanilla controls and the default TS-RAG mixture,
-giving 21 method labels per task. Main and ablation executions share exact matching
-prepared data, extraction caches and default predictions. Comparison CSV/JSON
-reports identify every cell's retrieval settings, alignment period and fallback.
+changing fusion. The resulting 16-cell, 21-method schedule was too long: job
+3506764 never completed the first new cell, and no ablation result exists.
+That grid is retired. `scripts/submit_ablation.sh` remains an ordinary
+submission front, but its configured grid must be redesigned and documented
+before the next intentional ablation submission. The interrupted manifests are
+historical recovery evidence only.
 
 ## Outputs and cluster operations
 
 One allocation executes `prepare,vanilla,extract,predict,mix,evaluate,report` in
-order. Launchers under `scripts/` submit the experiment, ablation and Seasonal root Slurm fronts and source
+order. Launchers under `scripts/` submit the default experiment and Seasonal root Slurm fronts and source
 `src/slurm/` implementations. Each stage allocates
-schema-1 `run_n` manifests before work; completion occurs after successful
-`srun`. Restarting the launcher skips exact completed tasks and recomputes
-interrupted tasks from their beginning. `STAGES` is a comma-separated recovery
+schema-1 `run_n` manifests before work. Each fully written task becomes
+`computed`; after a successful `srun`, the finalizer advances those exact tasks
+to `completed`. A later failure preserves computed work, and a recovery launch
+finalizes it without forecasting again. Downstream stages and reports still
+require completed producers. Restarting recomputes only interrupted tasks.
+`STAGES` is a comma-separated recovery
 override. `TIME_RUN_CONFLICT_POLICY=overwrite_exact|overwrite_path|new`,
 `TIME_SKIP_COMPLETED`, and `TIME_FORCE_RERUN` retain the shared lifecycle controls.
 
@@ -151,8 +154,11 @@ Scientific stage artifacts live under
 `outputs/tsrag/{data,extractions,predictions,evaluations}`. Launch-exact reports
 live under `outputs/reports/tsrag/<launch-id>/`; their `performance/` bundle
 contains task/domain/timing tables and matched PNG/PDF figures.
-Canonical `predictions/<method>/<dataset>/<term>/run_n/test.npy` files retain
-float32 medians. Evaluation runs contain standard TIME predictions, metric
+Data, extraction and prediction caches are split by `validation` versus `test`;
+extractions are also split by representation. Canonical
+`predictions/test/<method>/<dataset>/<term>/run_n/prediction.npy` files retain
+float32 medians. Mixture calibration is a separate
+`selections/bayes_mixture/.../weight.json` producer. Evaluation runs contain standard TIME predictions, metric
 arrays, and compact summaries. TS-RAG fallback masks/reasons and mixture weights
 are persisted. Reports include mean, population variance, standard deviation,
 finite-value counts, scaled MASE, and the matched Seasonal MASE variance ratio.
@@ -160,7 +166,7 @@ An unavailable or zero Seasonal variance leaves that ratio undefined.
 
 Fallback counts, rates, and aggregate reason counts in comparison artifacts are
 test-only because test is the evaluated split. Validation fallback remains
-available only in its split-specific mask and per-row reason artifact for mixture
+available only in its split-specific `fallback.npy` mask and per-row reason artifact for mixture
 diagnosis; it is not included in reported fallback totals.
 
 Every TS-RAG variant falls back to Bolt-max (2,048 points) for insufficient history/retrieval, extraction or
@@ -171,7 +177,10 @@ on the selected grid. The mixture also uses Bolt-max if its combined output is i
 Recorded timings separate datastore preprocessing and query inference.
 TS-RAG reuses the already computed Bolt-max fallback; mixture inference totals
 include both components and mixing. These are pipeline timings, not independent
-fresh-process latency measurements.
+fresh-process latency measurements. Equivalent completed prediction rows are
+reused by exact `(item, channel, origin)` reference, with reused/new counts in
+`prediction.json`; validation changes therefore do not invalidate unchanged raw
+test forecasts.
 
 `sync_code_to_selena.sh`, `sync_results_to_dgx.sh`, `clear_selena_artifacts.sh`, and
 `publish_job.sh` retain project-scoped cluster operations. Lightweight transfer
@@ -183,8 +192,8 @@ scientifically equivalent completed manifests and read canonical results in plac
 
 Every scheduled allocation logs a compute-node resource snapshot before its
 scientific stages: Slurm/job identity, visible and inventoried GPUs, free/total
-GPU memory, host RAM and exposed cgroup limits. Model loaders separately record
-the device actually selected for each backbone.
+GPU memory, host RAM, and explicit cgroup available/unavailable state. Every
+learned or CPU-only stage separately records the device it actually selected.
 
 ## Documentation maintenance
 
@@ -193,7 +202,9 @@ All implementation and tests are under `src/`: `data/` owns windows;
 owns borrowed ARM/retrieval and native inference; `proposal/` owns the mixture;
 `pipeline/` owns orchestration/manifests; `results/` owns reports; `conf/` and
 `scripts/` own configuration and entry points. `src/slurm/` owns scheduler shells.
-Root-level `scripts/` contains the concise experiment, ablation and Seasonal launchers.
+Root-level `scripts/` contains the concise experiment and Seasonal launchers;
+the ablation launcher remains functional while its smaller replacement grid is
+future design work.
 
 `src/scripts/build_docs.py --render all` builds the three PDFs with pdfLaTeX;
 `--render protocol` updates only the method and experiment PDFs.

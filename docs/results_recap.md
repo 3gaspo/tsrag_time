@@ -25,7 +25,8 @@ TS-RAG uses Bolt-max on 28,860 scored rows (42.75%). Fallback occurs in 49
 tasks, including 19 with complete fallback; 41 have none. No task-level errors
 are reported. The published aggregate reason counts combine validation and test,
 so they are excluded from evaluation findings. The corrected contract reports
-test reasons alone; its reason distribution requires the planned ablation run.
+test reasons alone; its reason distribution requires a future current-contract
+prediction/report run, not resumption of the retired 16-cell grid.
 
 Frozen TS-RAG mixture weights range from 0.0455 to 0.7143, with mean 0.3454.
 All 90 are estimated: usable validation dates total 27,914 and range from 1 to
@@ -34,7 +35,8 @@ Inference totals reuse pipeline components and are not independent fresh-process
 latency measurements.
 
 The retrieval setting is all items/variates, unaligned, without query-scale
-normalization, using T5 representations. The 16-cell ablation is not covered.
+normalization, using T5 representations. The unfinished 16-cell attempt produced
+no result and is retired; a smaller replacement grid remains to be designed.
 One seed provides no across-run uncertainty; population dispersion describes
 within-task metric cells. All 810 compact preparation, extraction, prediction
 and weight records are now published. Raw predictions, metric arrays, shared

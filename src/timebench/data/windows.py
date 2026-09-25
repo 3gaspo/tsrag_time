@@ -68,13 +68,27 @@ class Windows:
         for item in range(len(self.source)):
             target = self.target(item)
             end = target.shape[-1]
-            interval = self.task.test_length
             if split == 'validation':
-                end -= self.task.test_length
-                interval = self.task.validation_length
+                test_start = end - self.task.test_length
+                test_count = len(query_origins(
+                    target.shape[-1], self.task.test_length,
+                    self.task.prediction_length,
+                ))
+                count = min(
+                    test_count,
+                    self.task.validation_length // self.task.prediction_length,
+                )
+                origins = test_start - self.task.prediction_length * np.arange(
+                    count, 0, -1, dtype=np.int64
+                )
+                origins = origins[origins > 0]
+            elif split == 'test':
+                origins = query_origins(
+                    target.shape[-1], self.task.test_length,
+                    self.task.prediction_length,
+                )
             elif split != 'test':
                 raise ValueError(split)
-            origins = query_origins(target.shape[-1], interval, self.task.prediction_length, stop=end)
             for channel in range(len(target)):
                 rows.extend((item, channel, int(origin)) for origin in origins)
         return np.asarray(rows, dtype=np.int64).reshape(-1, 3)
@@ -90,6 +104,8 @@ class Windows:
 
     def datastore(self, split_references):
         """Union through testing, including validation; filter at each real query."""
+        if not len(split_references):
+            return np.empty((0, 3), dtype=np.int64)
         rows = []
         last_tick = int(self.ticks(split_references).max())
         for item in range(len(self.source)):
@@ -108,22 +124,37 @@ class Windows:
                            for item, channel, origin in references], dtype=np.float32)
 
 
-def write_prepared(windows, destination):
+def write_prepared(windows, destination, split):
     destination = Path(destination)
-    files = []
-    query_rows = []
-    for split in ('validation', 'test'):
-        refs = windows.references(split)
-        np.save(destination / f'{split}_references.npy', refs, allow_pickle=False)
-        files.append(f'{split}_references.npy')
-        query_rows.append(refs)
-    datastore = windows.datastore(np.concatenate(query_rows))
+    refs = windows.references(split)
+    np.save(destination / f'{split}_references.npy', refs, allow_pickle=False)
+    datastore = windows.datastore(refs)
     np.save(destination / 'datastore_references.npy', datastore, allow_pickle=False)
-    files.append('datastore_references.npy')
+    requested_dates = 0
+    requested_rows = 0
+    for item in range(len(windows.source)):
+        target = windows.target(item)
+        test_count = len(query_origins(
+            target.shape[-1], windows.task.test_length,
+            windows.task.prediction_length,
+        ))
+        item_dates = (
+            min(test_count, windows.task.validation_length // windows.task.prediction_length)
+            if split == 'validation'
+            else test_count
+        )
+        requested_dates += item_dates
+        requested_rows += item_dates * len(target)
+    available_dates = len(np.unique(refs[:, (0, 2)], axis=0)) if len(refs) else 0
     (destination / 'prepared.json').write_text(json.dumps({
-        'schema_version': 1, 'task': windows.task.config(),
+        'schema_version': 1, 'task': windows.task.config(), 'split': split,
         'source_path': str(windows.source_path),
-        'counts': {'validation': len(query_rows[0]), 'test': len(query_rows[1]), 'datastore': len(datastore)},
+        'counts': {'requested_dates': int(requested_dates),
+                   'requested_rows': int(requested_rows),
+                   'available_dates': int(available_dates),
+                   'available_rows': int(len(refs)),
+                   'datastore_rows': int(len(datastore))},
         'datastore_policy': 'cross_variate_calendar_causal_complete_64_step_future_before_real_query',
+        'validation_schedule': 'walk_backward_from_first_test_origin_at_stride_H',
     }, indent=2))
-    return [*files, 'prepared.json']
+    return [f'{split}_references.npy', 'datastore_references.npy', 'prepared.json']

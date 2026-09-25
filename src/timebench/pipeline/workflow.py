@@ -13,10 +13,12 @@ import numpy as np
 from timebench.data.windows import Task, Windows, write_prepared, CONTEXT_LENGTH, NATIVE_HORIZON
 from timebench.evaluation.grid import EVALUATION_GRID_DEFINITION, flatten_univariate_grid, load_evaluation_grid
 from timebench.evaluation.timing import EvaluationTimer
+from timebench.evaluation.validation import validation_window_mask
 from timebench.model_loading.foundation import CONTEXT_LIMITS, CHECKPOINTS
 from timebench.paths import dataset_storage_root, outputs_root, weights_root
 from timebench.pipeline.evaluation_grid import resolve_shared_evaluation_grid
-from timebench.pipeline.runs import allocate_run, load_manifest, select_completed_runs
+from timebench.pipeline.runs import (allocate_run, load_manifest, manifest_reference,
+    select_completed_runs)
 
 SOURCE_REVISIONS = {'adaptime': '33e75400d8c64414e4e13567c4e899803908bc44',
                     'improved_time': '541a2802cd2a35d39156aef4c37de6964d112786'}
@@ -162,24 +164,67 @@ class Workflow:
     def path(self, task, phase, method):
         return self.root / phase / method / task.dataset / task.term
 
+    def dependency_reference(self, path):
+        return manifest_reference(path)
+
     def science(self, task, phase, method, dependencies):
-        pipe = {'task': task.config(), 'target_mode': 'univariate', 'covariates': 'none',
-                'datastore_policy': 'growing_cross_variate_calendar_causal_complete_64_step_future_before_real_query',
-                'dependencies': {name: {key: load_manifest(path)[key] for key in
-                                       ('schema_version', 'identity', 'model_config', 'pipeline_config', 'experiment_config')}
-                                 for name, path in dependencies.items()}}
+        split = phase.rpartition('/')[2] if '/' in phase else None
+        pipe = {
+            'phase': phase,
+            'method': method,
+            'task': {
+                'dataset': task.dataset,
+                'term': task.term,
+                'prediction_length': task.prediction_length,
+                'test_length': task.test_length,
+                'seasonality': task.seasonality,
+            },
+            'target_mode': 'univariate',
+            'dependencies': {
+                name: self.dependency_reference(path)
+                for name, path in dependencies.items()
+            },
+        }
+        model = {'component': phase, 'method': method}
+        experiment = {}
+        if phase.startswith('data/'):
+            pipe.update(
+                split=split,
+                datastore_stride=task.datastore_stride,
+                max_datastore_windows=task.max_datastore_windows,
+                datastore_policy='calendar_causal_complete_64_step_future_before_real_query',
+            )
+            if split == 'validation':
+                pipe.update(
+                    validation_length=task.validation_length,
+                    validation_stride=task.prediction_length,
+                    validation_schedule='walk_backward_from_first_test_origin_at_stride_H',
+                )
+        elif phase.startswith('extractions/'):
+            pipe.update(split=split, representation=method,
+                        validation_support='finite_context_and_future' if split == 'validation' else None)
+            model = {
+                'method': 'retrieval_representation',
+                'representation': method,
+                'context_length': CONTEXT_LENGTH,
+                'checkpoint': 'chronos-t5-base' if method == 't5' else None,
+                'instance_normalization': 'lookback_nanmean_nanstd_eps_1e-8',
+            }
+        elif phase.startswith('predictions/'):
+            pipe.update(split=split, covariates='none',
+                        validation_support='finite_context_and_future' if split == 'validation' else None)
+            model = self.model_config(method)
+            experiment['seed'] = self.seed
+        elif phase == 'selections':
+            pipe.update(
+                validation_support='finite_context_and_future',
+                rule='beta_1_1_per_date_mean_variate_msse_win_frequency',
+                no_validation_fallback='chronos2_max',
+            )
         if phase == 'evaluations':
             pipe['evaluation_grid'] = EVALUATION_GRID_DEFINITION
-        if phase == 'extractions':
-            pipe['representations'] = sorted({'instance_l2'} | {options['representation'] for options in self.rag_methods.values()})
-            pipe['t5_query_scaled_candidates'] = 'encoded_at_query_time'
-        model = self.model_config(method)
-        if phase == 'extractions':
-            model = {'method': 'retrieval_representations', 'representations': pipe['representations'],
-                     'context_length': CONTEXT_LENGTH, 't5_checkpoint': 'chronos-t5-base',
-                     'instance_normalization': 'lookback_nanmean_nanstd_eps_1e-8'}
         return {'model_config': model, 'pipeline_config': pipe,
-                'experiment_config': {'seed': self.seed}}
+                'experiment_config': experiment}
 
     def allocate(self, task, phase, method, dependencies=None):
         dependencies = dependencies or {}
@@ -188,6 +233,7 @@ class Workflow:
                             runtime_config={'device': self.device, 'batch_size': self.batch_size,
                                             'embedding_batch_size': int(self.config['embedding_batch_size'])},
                             provenance={'source_revisions': SOURCE_REVISIONS, 'dataset_path': str(self.storage / task.dataset),
+                                        'task_config': task.config(),
                                         'upstream_manifests': {name: str(Path(path) / 'manifest.json') for name, path in dependencies.items()}})
 
     def resolve(self, task, phase, method, dependencies=None):
@@ -202,32 +248,123 @@ class Workflow:
     def finish(self, run, files):
         if os.getenv('TSRAG_DEFER_COMPLETION') == '1':
             write_json(run.run_dir / 'stage_ready.json', {'required_artifacts': files})
-            run._completed = True  # Owning srun must return successfully before finalization.
+            run.compute(files)
         else:
             run.complete(files)
 
-    def prepared(self, task):
-        return self.resolve(task, 'data', 'shared')
+    def prepared(self, task, split):
+        return self.resolve(task, f'data/{split}', 'shared')
 
-    def raw(self, task, method):
-        data = self.prepared(task)
-        return self.resolve(task, 'predictions', method, {'data': data})
+    def raw(self, task, split, method):
+        data = self.prepared(task, split)
+        return self.resolve(task, f'predictions/{split}', method, {'data': data})
 
-    def extraction(self, task):
-        data = self.prepared(task)
-        return self.resolve(task, 'extractions', 'tsrag', {'data': data})
+    def extraction(self, task, split, representation):
+        data = self.prepared(task, split)
+        return self.resolve(task, f'extractions/{split}', representation, {'data': data})
 
-    def rag(self, task, method='tsrag'):
-        deps = {'data': self.prepared(task), 'extraction': self.extraction(task), 'fallback': self.raw(task, 'chronos_bolt_max')}
-        return self.resolve(task, 'predictions', method, deps)
+    def rag(self, task, split, method='tsrag'):
+        representation = self.rag_methods[method]['representation']
+        deps = {'data': self.prepared(task, split),
+                'extraction': self.extraction(task, split, representation),
+                'fallback': self.raw(task, split, 'chronos_bolt_max')}
+        return self.resolve(task, f'predictions/{split}', method, deps)
+
+    def mixture_weight(self, task):
+        deps = {'data': self.prepared(task, 'validation'),
+                'chronos2': self.raw(task, 'validation', 'chronos2_max'),
+                'tsrag': self.rag(task, 'validation')}
+        return self.resolve(task, 'selections', 'bayes_mixture', deps)
 
     def mixture(self, task):
-        deps = {'data': self.prepared(task), 'chronos2': self.raw(task, 'chronos2_max'), 'tsrag': self.rag(task),
-                'fallback': self.raw(task, 'chronos_bolt_max')}
-        return self.resolve(task, 'predictions', 'bayes_mixture', deps)
+        deps = {'data': self.prepared(task, 'test'), 'weight': self.mixture_weight(task),
+                'chronos2': self.raw(task, 'test', 'chronos2_max'),
+                'tsrag': self.rag(task, 'test'),
+                'fallback': self.raw(task, 'test', 'chronos_bolt_max')}
+        return self.resolve(task, 'predictions/test', 'bayes_mixture', deps)
 
     def refs(self, data, split):
         return np.load(data / f'{split}_references.npy', mmap_mode='r')
+
+    def reuse_prediction_rows(self, task, split, method, current_run, refs, values,
+                              fallback=None):
+        """Reuse exact item/channel/origin rows from completed split or legacy runs."""
+        reused = np.zeros(len(refs), dtype=bool)
+        sources = []
+        reused_reasons = {}
+        current = current_run.manifest
+        roots = (
+            self.path(task, f'predictions/{split}', method),
+            self.path(task, 'predictions', method),
+        )
+        manifests = sorted(
+            {path for root in roots for path in root.glob('run_*/manifest.json')},
+            key=lambda path: (path.parent.parent.as_posix(), path.parent.name),
+            reverse=True,
+        )
+        destinations = {tuple(map(int, row)): index for index, row in enumerate(refs)}
+        for manifest_path in manifests:
+            if manifest_path.parent == current_run.run_dir:
+                continue
+            manifest = load_manifest(manifest_path)
+            metadata_path = manifest_path.parent / 'prediction.json'
+            if (
+                manifest.get('status') != 'completed'
+                or manifest.get('identity') != current.get('identity')
+                or manifest.get('model_config') != current.get('model_config')
+                or manifest.get('experiment_config') != current.get('experiment_config')
+                or not metadata_path.is_file()
+            ):
+                continue
+            metadata = json.loads(metadata_path.read_text(encoding='utf-8'))
+            if metadata.get('method') != method:
+                continue
+            recorded_split = metadata.get('split', metadata.get('fallback_reason_split'))
+            if recorded_split is not None and recorded_split != split:
+                continue
+            recorded = manifest.get('provenance', {}).get('upstream_manifests', {}).get('data')
+            data_run = Path(recorded).parent if recorded else None
+            refs_path = data_run / f'{split}_references.npy' if data_run else None
+            prediction_path = manifest_path.parent / 'prediction.npy'
+            if not prediction_path.is_file():
+                prediction_path = manifest_path.parent / f'{split}.npy'
+            if not refs_path or not refs_path.is_file() or not prediction_path.is_file():
+                continue
+            source_refs = np.load(refs_path, mmap_mode='r', allow_pickle=False)
+            predictions = np.load(prediction_path, mmap_mode='r', allow_pickle=False)
+            fallback_path = manifest_path.parent / 'fallback.npy'
+            if not fallback_path.is_file():
+                fallback_path = manifest_path.parent / f'{split}_fallback.npy'
+            source_fallback = (
+                np.load(fallback_path, mmap_mode='r', allow_pickle=False)
+                if fallback is not None and fallback_path.is_file()
+                else None
+            )
+            reason_path = manifest_path.parent / 'fallback_reasons.json'
+            reason_rows = {}
+            if source_fallback is not None and reason_path.is_file():
+                for entry in json.loads(reason_path.read_text(encoding='utf-8')):
+                    if 'row' in entry:
+                        reason_rows[int(entry['row'])] = entry.get('reason', 'inference_error')
+            copied = 0
+            for source_index, reference in enumerate(source_refs):
+                destination = destinations.get(tuple(map(int, reference)))
+                if destination is None or reused[destination]:
+                    continue
+                values[destination] = predictions[source_index]
+                if source_fallback is not None:
+                    fallback[destination] = source_fallback[source_index]
+                    if source_fallback[source_index]:
+                        reused_reasons[destination] = reason_rows.get(
+                            source_index, 'reused_fallback'
+                        )
+                reused[destination] = True
+                copied += 1
+            if copied:
+                sources.append({'manifest': str(manifest_path), 'rows': copied})
+            if reused.all():
+                break
+        return reused, sources, reused_reasons
 
     def support(self, task, split, windows, refs):
         if split == 'test':
@@ -238,15 +375,20 @@ class Workflow:
             if not np.array_equal(targets, np.isfinite(windows.labels(refs))):
                 raise ValueError('Seasonal grid and current labels have different finite support')
             return targets, cells
-        targets = np.isfinite(windows.labels(refs))
-        return targets, targets.any(axis=-1)
+        labels = windows.labels(refs)
+        targets = np.isfinite(labels)
+        return targets, validation_window_mask(
+            windows.histories(refs, CONTEXT_LENGTH), labels
+        )
 
     def prepare(self):
         for task in self.tasks:
             log(f'prepare dataset={task.dataset} term={task.term} H={task.prediction_length} validation={task.validation_length}')
-            with self.allocate(task, 'data', 'shared') as run:
-                if run.should_run:
-                    self.finish(run, write_prepared(Windows(task, self.storage), run.run_dir))
+            windows = Windows(task, self.storage)
+            for split in ('validation', 'test'):
+                with self.allocate(task, f'data/{split}', 'shared') as run:
+                    if run.should_run:
+                        self.finish(run, write_prepared(windows, run.run_dir, split))
 
     def vanilla(self):
         from timebench.model_loading.foundation import Forecaster
@@ -258,39 +400,61 @@ class Workflow:
                 if alias != backbone:
                     continue
                 for task in self.tasks:
-                    data = self.prepared(task)
-                    with self.allocate(task, 'predictions', method, {'data': data}) as run:
-                        if not run.should_run:
-                            continue
-                        if model is None:
-                            model = Forecaster(alias, self.weights, self.device)
-                        log(f'vanilla method={method} dataset={task.dataset} term={task.term} L={limit} H={task.prediction_length}')
-                        seed_run(self.seed)
-                        windows = Windows(task, self.storage)
-                        timing = {}
-                        files = []
-                        for split in ('validation', 'test'):
+                    for split in ('validation', 'test'):
+                        data = self.prepared(task, split)
+                        with self.allocate(task, f'predictions/{split}', method, {'data': data}) as run:
+                            if not run.should_run:
+                                continue
+                            log(f'vanilla split={split} method={method} dataset={task.dataset} term={task.term} L={limit} H={task.prediction_length}')
+                            seed_run(self.seed)
+                            windows = Windows(task, self.storage)
                             refs = self.refs(data, split)
-                            prediction = np.lib.format.open_memmap(run.run_dir / f'{split}.npy', mode='w+', dtype=np.float32,
+                            prediction = np.lib.format.open_memmap(run.run_dir / 'prediction.npy', mode='w+', dtype=np.float32,
                                                                   shape=(len(refs), task.prediction_length))
+                            prediction[:] = np.nan
+                            reused, reuse_sources, _ = self.reuse_prediction_rows(
+                                task, split, method, run, refs, prediction
+                            )
+                            if model is None and (~reused).any():
+                                model = Forecaster(alias, self.weights, self.device)
                             timer = EvaluationTimer()
                             timer.start()
                             for start in range(0, len(refs), self.batch_size):
-                                rows = refs[start:start + self.batch_size]
-                                prediction[start:start + len(rows)] = model.forecast(windows.histories(rows, limit), task.prediction_length,
-                                                                                   limit, t5_samples=int(self.config['t5_samples']))
-                            timing[f'{split}_inference_seconds'] = timer.stop()
+                                positions = np.arange(start, min(start + self.batch_size, len(refs)))
+                                positions = positions[~reused[positions]]
+                                if not len(positions):
+                                    continue
+                                rows = refs[positions]
+                                histories = windows.histories(rows, limit)
+                                if split == 'validation':
+                                    usable = validation_window_mask(histories, windows.labels(rows))
+                                    positions = positions[usable]
+                                    histories = [history for history, keep in zip(histories, usable) if keep]
+                                if len(positions):
+                                    prediction[positions] = model.forecast(
+                                        histories, task.prediction_length, limit,
+                                        t5_samples=int(self.config['t5_samples'])
+                                    )
+                            inference_seconds = timer.stop()
                             prediction.flush()
                             targets, cells = self.support(task, split, windows, refs)
                             if np.any(cells & ~np.all(~targets | np.isfinite(prediction), axis=-1)):
                                 raise ValueError(f'Non-finite {method} on required {split} support')
-                            np.save(run.run_dir / f'{split}_context_length.npy',
+                            np.save(run.run_dir / 'context_length.npy',
                                     np.minimum(refs[:, 2], limit), allow_pickle=False)
-                            files.append(f'{split}.npy')
-                            files.append(f'{split}_context_length.npy')
-                        write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method, 'context_limit': limit,
-                                                                  'context_policy': 'all_available_history_capped_at_limit', **timing})
-                        self.finish(run, [*files, 'prediction.json'])
+                            prepared = json.loads((data / 'prepared.json').read_text(encoding='utf-8'))
+                            usable_ticks = np.unique(windows.ticks(refs)[cells]) if len(refs) else []
+                            write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method,
+                                'split': split, 'context_limit': limit,
+                                'context_policy': 'all_available_history_capped_at_limit',
+                                'inference_seconds': inference_seconds,
+                                'reused_rows': int(reused.sum()),
+                                'newly_inferred_rows': int((~reused).sum()),
+                                'reuse_sources': reuse_sources,
+                                'validation_counts': ({**prepared['counts'], 'usable_rows': int(cells.sum()),
+                                                       'usable_dates': int(len(usable_ticks))}
+                                                      if split == 'validation' else None)})
+                            self.finish(run, ['prediction.npy', 'context_length.npy', 'prediction.json'])
             del model
 
     def extract(self):
@@ -301,51 +465,61 @@ class Workflow:
         encoder = None
         representations = {'instance_l2'} | {options['representation'] for options in self.rag_methods.values()}
         for task in self.tasks:
-            data = self.prepared(task)
-            with self.allocate(task, 'extractions', 'tsrag', {'data': data}) as run:
-                if not run.should_run:
-                    continue
-                started = perf_counter()
-                files, errors, seconds = [], {}, {}
-                windows = Windows(task, self.storage)
+            windows = Windows(task, self.storage)
+            for split in ('validation', 'test'):
+                data = self.prepared(task, split)
                 for representation in sorted(representations):
-                    representation_start = perf_counter()
-                    errors[representation] = None
-                    representation_files = []
-                    try:
-                        if representation == 't5' and encoder is None:
-                            encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
-                        for split in ('datastore', 'validation', 'test'):
-                            refs = self.refs(data, split)
-                            width = 768 if representation == 't5' else CONTEXT_LENGTH
-                            filename = f'{split}_{representation}.npy'
-                            embeddings = np.lib.format.open_memmap(run.run_dir / filename, mode='w+', dtype=np.float32,
-                                                                  shape=(len(refs), width))
-                            batch_size = int(self.config['embedding_batch_size'])
-                            for start in range(0, len(refs), batch_size):
-                                rows = refs[start:start + batch_size]
-                                histories = windows.histories(rows, CONTEXT_LENGTH)
-                                values = np.full((len(histories), CONTEXT_LENGTH), np.nan, dtype=np.float32)
-                                for index, history in enumerate(histories):
-                                    values[index, -len(history):] = history
-                                if representation == 't5':
-                                    block = encoder.representation(torch.from_numpy(values[:, None])).detach().float().cpu().numpy()
-                                    if not np.isfinite(block).all():
-                                        raise ValueError(f'Non-finite {split} retrieval embedding')
-                                else:
-                                    block = instance_normalize(values)
-                                embeddings[start:start + len(rows)] = block
-                            embeddings.flush()
-                            representation_files.append(filename)
-                        files.extend(representation_files)
-                    except Exception as exception:
-                        errors[representation] = {'type': type(exception).__name__, 'message': str(exception)}
-                        log(f'TS-RAG {representation} extraction fallback {task.dataset}/{task.term}: {errors[representation]}')
-                    seconds[representation] = perf_counter() - representation_start
-                write_json(run.run_dir / 'extraction.json', {'schema_version': 1, 'errors': errors,
-                                                          'representation_seconds': seconds,
-                                                          'extraction_seconds': perf_counter() - started})
-                self.finish(run, [*files, 'extraction.json'])
+                    with self.allocate(task, f'extractions/{split}', representation, {'data': data}) as run:
+                        if not run.should_run:
+                            continue
+                        started = perf_counter()
+                        error = None
+                        files = []
+                        try:
+                            if representation == 't5' and encoder is None:
+                                encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
+                            for role, refs in (
+                                ('datastore', self.refs(data, 'datastore')),
+                                ('query', self.refs(data, split)),
+                            ):
+                                width = 768 if representation == 't5' else CONTEXT_LENGTH
+                                embeddings = np.lib.format.open_memmap(
+                                    run.run_dir / f'{role}.npy', mode='w+', dtype=np.float32,
+                                    shape=(len(refs), width),
+                                )
+                                embeddings[:] = np.nan
+                                batch_size = int(self.config['embedding_batch_size'])
+                                for start in range(0, len(refs), batch_size):
+                                    positions = np.arange(start, min(start + batch_size, len(refs)))
+                                    rows = refs[positions]
+                                    histories = windows.histories(rows, CONTEXT_LENGTH)
+                                    if role == 'query' and split == 'validation':
+                                        usable = validation_window_mask(histories, windows.labels(rows))
+                                        positions = positions[usable]
+                                        histories = [history for history, keep in zip(histories, usable) if keep]
+                                    if not len(positions):
+                                        continue
+                                    values = np.full((len(histories), CONTEXT_LENGTH), np.nan, dtype=np.float32)
+                                    for index, history in enumerate(histories):
+                                        values[index, -len(history):] = history
+                                    if representation == 't5':
+                                        block = encoder.representation(torch.from_numpy(values[:, None])).detach().float().cpu().numpy()
+                                        if not np.isfinite(block).all():
+                                            raise ValueError(f'Non-finite {split} retrieval embedding')
+                                    else:
+                                        block = instance_normalize(values)
+                                    embeddings[positions] = block
+                                embeddings.flush()
+                                files.append(f'{role}.npy')
+                        except Exception as exception:
+                            error = {'type': type(exception).__name__, 'message': str(exception)}
+                            log(f'TS-RAG {representation} extraction fallback {task.dataset}/{task.term}: {error}')
+                        write_json(run.run_dir / 'extraction.json', {
+                            'schema_version': 1, 'split': split,
+                            'representation': representation, 'error': error,
+                            'extraction_seconds': perf_counter() - started,
+                        })
+                        self.finish(run, [*files, 'extraction.json'])
 
     def predict(self):
         from timebench.external_models.tsrag.retriever import TSRAGRetriever
@@ -355,48 +529,60 @@ class Workflow:
         loaded = encoder = None
         for method, options in self.rag_methods.items():
             for task in self.tasks:
-                data, extraction, fallback = self.prepared(task), self.extraction(task), self.raw(task, 'chronos_bolt_max')
-                deps = {'data': data, 'extraction': extraction, 'fallback': fallback}
-                with self.allocate(task, 'predictions', method, deps) as run:
-                    if not run.should_run:
-                        continue
-                    log(f'predict method={method} dataset={task.dataset} term={task.term} retrieval={options} '
-                        f'alignment_period={task.alignment_period} fallback=chronos_bolt_max')
-                    seed_run(self.seed)
-                    windows = Windows(task, self.storage)
-                    metadata = json.loads((extraction / 'extraction.json').read_text())
-                    task_error = metadata['errors'][options['representation']]
-                    if task_error is None:
-                        try:
-                            if loaded is None:
-                                loaded = load_tsrag(self.weights / 'chronos-bolt-base', self.weights / 'ts-rag', device=self.device)
-                            if options['representation'] == 't5' and encoder is None:
-                                encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
-                        except Exception as exception:
-                            task_error = {'type': type(exception).__name__, 'message': str(exception)}
-                    files = []
-                    timing, counts, reason_counts_by_split = {}, {}, {}
-                    for split in ('validation', 'test'):
+                for split in ('validation', 'test'):
+                    data = self.prepared(task, split)
+                    extraction = self.extraction(task, split, options['representation'])
+                    fallback = self.raw(task, split, 'chronos_bolt_max')
+                    deps = {'data': data, 'extraction': extraction, 'fallback': fallback}
+                    with self.allocate(task, f'predictions/{split}', method, deps) as run:
+                        if not run.should_run:
+                            continue
+                        log(f'predict split={split} method={method} dataset={task.dataset} term={task.term} '
+                            f'retrieval={options} alignment_period={task.alignment_period} fallback=chronos_bolt_max')
+                        seed_run(self.seed)
+                        windows = Windows(task, self.storage)
+                        metadata = json.loads((extraction / 'extraction.json').read_text())
+                        task_error = metadata['error']
                         refs = self.refs(data, split)
-                        base = np.load(fallback / f'{split}.npy', mmap_mode='r')
-                        values = np.lib.format.open_memmap(run.run_dir / f'{split}.npy', mode='w+', dtype=np.float32, shape=base.shape)
+                        base = np.load(fallback / 'prediction.npy', mmap_mode='r')
+                        values = np.lib.format.open_memmap(run.run_dir / 'prediction.npy', mode='w+', dtype=np.float32, shape=base.shape)
                         values[:] = base
                         mask = np.zeros(len(refs), dtype=bool)
-                        reasons = []
+                        reused, reuse_sources, reused_reasons = self.reuse_prediction_rows(
+                            task, split, method, run, refs, values, mask
+                        )
+                        if task_error is None and (~reused).any():
+                            try:
+                                if loaded is None:
+                                    loaded = load_tsrag(self.weights / 'chronos-bolt-base', self.weights / 'ts-rag', device=self.device)
+                                if options['representation'] == 't5' and encoder is None:
+                                    encoder = TSRAGRetriever(self.weights / 'chronos-t5-base', device_map=self.device)
+                            except Exception as exception:
+                                task_error = {'type': type(exception).__name__, 'message': str(exception)}
+                        reasons = [
+                            {'row': int(row), 'reason': reason, 'reused': True}
+                            for row, reason in sorted(reused_reasons.items())
+                        ]
                         reason_counts = {}
+                        for reason in reused_reasons.values():
+                            reason_counts[reason] = reason_counts.get(reason, 0) + 1
                         targets, cells = self.support(task, split, windows, refs)
                         retrieval = None
-                        if task_error is None:
-                            retrieval = CausalRetriever(self.refs(data, 'datastore'), np.load(extraction / f"datastore_{options['representation']}.npy", mmap_mode='r'),
+                        if task_error is None and (~reused).any():
+                            retrieval = CausalRetriever(self.refs(data, 'datastore'), np.load(extraction / 'datastore.npy', mmap_mode='r'),
                                                         task.max_datastore_windows, windows=windows, options=options, encoder=encoder,
                                                         batch_size=int(self.config['embedding_batch_size']),
                                                         minimum_overlap=float(self.config['minimum_overlap_fraction']))
-                            embeddings = (np.load(extraction / f'{split}_t5.npy', mmap_mode='r')
+                            embeddings = (np.load(extraction / 'query.npy', mmap_mode='r')
                                           if options['representation'] == 't5' else None)
                         timer = EvaluationTimer()
                         timer.start()
                         for row, reference in enumerate(refs):
-                            reason = 'extraction_or_model_error' if task_error else None
+                            if reused[row]:
+                                continue
+                            reason = ('unusable_validation_window'
+                                      if split == 'validation' and not cells[row]
+                                      else 'extraction_or_model_error' if task_error else None)
                             if reason is None:
                                 try:
                                     forecast, reason = forecast_query(loaded, encoder, retrieval, windows, reference,
@@ -415,60 +601,90 @@ class Workflow:
                                 reason_counts[reason] = reason_counts.get(reason, 0) + 1
                                 if reason != 'inference_error':
                                     reasons.append({'row': row, 'reason': reason})
-                        timing[f'{split}_inference_seconds'] = timer.stop()
+                        inference_seconds = timer.stop()
                         values.flush()
-                        np.save(run.run_dir / f'{split}_fallback.npy', mask, allow_pickle=False)
-                        write_json(run.run_dir / f'{split}_fallback_reasons.json', reasons)
-                        counts[split] = {'all_rows': int(mask.sum()), 'eligible_rows': int((mask & cells).sum()),
-                                         'grid_rows': int(cells.sum()), 'total_rows': len(refs)}
-                        reason_counts_by_split[split] = reason_counts
-                        files.extend([f'{split}.npy', f'{split}_fallback.npy', f'{split}_fallback_reasons.json'])
-                    write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method, 'context_limit': 512, 'retrieval': options,
-                                                               'alignment_period': task.alignment_period,
-                                                               'fallback_method': 'chronos_bolt_max', 'task_error': task_error,
-                                                               'fallback_counts': counts, 'fallback_reason_split': 'test',
-                                                               'fallback_reasons': reason_counts_by_split['test'],
-                                                               'datastore_preprocessing_seconds': metadata['representation_seconds'][options['representation']],
-                                                               'fallback_source_test_inference_seconds': json.loads((fallback / 'prediction.json').read_text())['test_inference_seconds'],
-                                                               'timing_policy': 'measured_query_work_with_precomputed_bolt_max_fallback', **timing})
-                    self.finish(run, [*files, 'prediction.json'])
+                        np.save(run.run_dir / 'fallback.npy', mask, allow_pickle=False)
+                        write_json(run.run_dir / 'fallback_reasons.json', reasons)
+                        counts = {'all_rows': int(mask.sum()), 'eligible_rows': int((mask & cells).sum()),
+                                  'grid_rows': int(cells.sum()), 'total_rows': len(refs)}
+                        prepared = json.loads((data / 'prepared.json').read_text(encoding='utf-8'))
+                        usable_ticks = np.unique(windows.ticks(refs)[cells]) if len(refs) else []
+                        write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': method,
+                            'split': split, 'context_limit': 512, 'retrieval': options,
+                            'alignment_period': task.alignment_period,
+                            'fallback_method': 'chronos_bolt_max', 'task_error': task_error,
+                            'fallback_counts': {split: counts}, 'fallback_reason_split': split,
+                            'fallback_reasons': reason_counts,
+                            'reused_rows': int(reused.sum()),
+                            'newly_inferred_rows': int((~reused).sum()),
+                            'reuse_sources': reuse_sources,
+                            'validation_counts': ({**prepared['counts'], 'usable_rows': int(cells.sum()),
+                                                   'usable_dates': int(len(usable_ticks))}
+                                                  if split == 'validation' else None),
+                            'datastore_preprocessing_seconds': metadata['extraction_seconds'],
+                            'fallback_source_inference_seconds': json.loads((fallback / 'prediction.json').read_text())['inference_seconds'],
+                            'inference_seconds': inference_seconds,
+                            'timing_policy': 'measured_query_work_with_precomputed_bolt_max_fallback'})
+                        self.finish(run, ['prediction.npy', 'fallback.npy', 'fallback_reasons.json', 'prediction.json'])
 
     def mix(self):
         from timebench.proposal.mixture import estimate_weight, mix
 
         for task in self.tasks:
-            data, c2, rag = self.prepared(task), self.raw(task, 'chronos2_max'), self.rag(task)
-            fallback = self.raw(task, 'chronos_bolt_max')
-            with self.allocate(task, 'predictions', 'bayes_mixture', {'data': data, 'chronos2': c2, 'tsrag': rag, 'fallback': fallback}) as run:
+            validation_data = self.prepared(task, 'validation')
+            validation_c2 = self.raw(task, 'validation', 'chronos2_max')
+            validation_rag = self.rag(task, 'validation')
+            weight_deps = {'data': validation_data, 'chronos2': validation_c2, 'tsrag': validation_rag}
+            with self.allocate(task, 'selections', 'bayes_mixture', weight_deps) as run:
+                if run.action == 'finalize':
+                    run.complete()
+                    (run.run_dir / 'stage_ready.json').unlink(missing_ok=True)
+                elif run.should_run:
+                    windows = Windows(task, self.storage)
+                    refs = self.refs(validation_data, 'validation')
+                    weight = estimate_weight(
+                        np.load(validation_c2 / 'prediction.npy'),
+                        np.load(validation_rag / 'prediction.npy'),
+                        windows.labels(refs), windows.histories(refs, 512), refs,
+                    )
+                    write_json(run.run_dir / 'weight.json', weight)
+                    run.complete(['weight.json'])
+            weight_run = self.mixture_weight(task)
+            data = self.prepared(task, 'test')
+            c2 = self.raw(task, 'test', 'chronos2_max')
+            rag = self.rag(task, 'test')
+            fallback = self.raw(task, 'test', 'chronos_bolt_max')
+            deps = {'data': data, 'weight': weight_run, 'chronos2': c2, 'tsrag': rag, 'fallback': fallback}
+            with self.allocate(task, 'predictions/test', 'bayes_mixture', deps) as run:
                 if not run.should_run:
                     continue
                 windows = Windows(task, self.storage)
-                refs = self.refs(data, 'validation')
-                weight = estimate_weight(np.load(c2 / 'validation.npy'), np.load(rag / 'validation.npy'), windows.labels(refs),
-                                         windows.histories(refs, 512), refs)
-                write_json(run.run_dir / 'weight.json', weight)
-                c2_test, rag_test = np.load(c2 / 'test.npy', mmap_mode='r'), np.load(rag / 'test.npy', mmap_mode='r')
+                weight = json.loads((weight_run / 'weight.json').read_text(encoding='utf-8'))
+                c2_test = np.load(c2 / 'prediction.npy', mmap_mode='r')
+                rag_test = np.load(rag / 'prediction.npy', mmap_mode='r')
                 timer = EvaluationTimer()
                 timer.start()
                 prediction = mix(c2_test, rag_test, weight['tsrag_weight'])
                 inference_seconds = timer.stop()
                 targets, cells = self.support(task, 'test', windows, self.refs(data, 'test'))
                 invalid = cells & ~np.all(~targets | np.isfinite(prediction), axis=-1)
-                prediction[invalid] = np.load(fallback / 'test.npy', mmap_mode='r')[invalid]
-                np.save(run.run_dir / 'test.npy', prediction, allow_pickle=False)
-                np.save(run.run_dir / 'test_fallback.npy', invalid, allow_pickle=False)
-                component_seconds = sum(json.loads((path / 'prediction.json').read_text())['test_inference_seconds'] for path in (c2, rag))
+                prediction[invalid] = np.load(fallback / 'prediction.npy', mmap_mode='r')[invalid]
+                np.save(run.run_dir / 'prediction.npy', prediction, allow_pickle=False)
+                np.save(run.run_dir / 'fallback.npy', invalid, allow_pickle=False)
+                component_seconds = sum(json.loads((path / 'prediction.json').read_text())['inference_seconds'] for path in (c2, rag))
                 write_json(run.run_dir / 'prediction.json', {'schema_version': 1, 'method': 'bayes_mixture', **weight,
                                                            'fallback_method': 'chronos_bolt_max',
-                                                           'test_inference_seconds': component_seconds + inference_seconds,
+                                                           'split': 'test', 'inference_seconds': component_seconds + inference_seconds,
                                                            'mix_only_seconds': inference_seconds, 'nonfinite_fallback_count': int(invalid.sum())})
-                self.finish(run, ['test.npy', 'test_fallback.npy', 'weight.json', 'prediction.json'])
+                self.finish(run, ['prediction.npy', 'fallback.npy', 'prediction.json'])
 
     def methods(self):
         return [*CONTROLS, *self.rag_methods, 'bayes_mixture']
 
     def prediction(self, task, method):
-        return self.rag(task, method) if method in self.rag_methods else self.mixture(task) if method == 'bayes_mixture' else self.raw(task, method)
+        return (self.rag(task, 'test', method) if method in self.rag_methods
+                else self.mixture(task) if method == 'bayes_mixture'
+                else self.raw(task, 'test', method))
 
     def evaluation(self, task, method):
         return self.resolve(task, 'evaluations', method, {'prediction': self.prediction(task, method)})
@@ -489,7 +705,7 @@ class Workflow:
                         continue
                     metadata = json.loads((prediction / 'prediction.json').read_text())
                     log(f'evaluate method={method} dataset={task.dataset} term={task.term}')
-                    values = np.load(prediction / 'test.npy', mmap_mode='r')
+                    values = np.load(prediction / 'prediction.npy', mmap_mode='r')
                     save_window_predictions(dataset, values[:, None, :], f'{task.dataset}/{task.term}', str(self.root),
                                             seasonality=task.seasonality, quantile_levels=[0.5], task_output_dir=str(run.run_dir),
                                             model_hyperparams={'model': method, 'experiment': 'tsrag', 'target_mode': 'univariate',
@@ -498,7 +714,7 @@ class Workflow:
                                                                'fallback_counts': metadata.get('fallback_counts'), 'tsrag_weight': metadata.get('tsrag_weight'),
                                                                'retrieval': metadata.get('retrieval'), 'alignment_period': metadata.get('alignment_period'),
                                                                'nonfinite_fallback_count': metadata.get('nonfinite_fallback_count', 0)},
-                                            inference_seconds=metadata['test_inference_seconds'],
+                                            inference_seconds=metadata['inference_seconds'],
                                             evaluation_grid_path=str(resolve_shared_evaluation_grid(task.dataset, task.term, 'univariate')))
                     self.finish(run, ['predictions.npz', 'metrics.npz', 'metrics_summary.json', 'config.json'])
 
@@ -511,5 +727,8 @@ class Workflow:
         build_report(inputs, self.root.parent / 'reports' / 'tsrag' / launch, self.config)
 
     def run(self, stage):
+        from timebench.pipeline.runtime_resources import log_selected_device
+        selected_device = self.device if stage in {'vanilla', 'extract', 'predict'} else 'cpu'
+        log_selected_device(selected_device, stage=stage, component='tsrag_time')
         log(f'stage={stage} tasks={len(self.tasks)} seed={self.seed} device={self.device} Slurm={os.getenv("SLURM_JOB_ID")}')
         getattr(self, stage)()

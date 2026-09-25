@@ -59,12 +59,12 @@ Missing query history, fewer than 11 eligible neighbors, recorded extraction
 or inference errors, and non-finite native forecasts use
 the independently computed Bolt-max ($L=2048$) forecast for the entire window/variate.
 
-\subsection{Retrieval ablation}
-Cross four binary axes. Scope compares all dataset items and variates with the
+\subsection{Retired retrieval grid}
+The former full-factorial plan crossed four binary axes. Scope compared all dataset items and variates with the
 query's own item and variate. Date alignment and query-scale normalization are
 each off or on. Representation compares T5 EOS with IN lookback L2 at $L=512$.
 
-The grid contains 16 TS-RAG cells. The default uses all variates, no alignment,
+The grid contained 16 TS-RAG cells. The default uses all variates, no alignment,
 released neighbor normalization and T5. Each cell uses Bolt-max fallback.
 The four vanilla controls and default mixture give 21 method labels per task.
 
@@ -86,11 +86,14 @@ matching Adaptime. It invokes no T5 selector. Alignment to query scale preserves
 IN L2 rankings but changes fusion, so retain these cells in the full factorial grid.
 
 \subsection{Validation and mixing}
-The optional validation interval of length $V$ ends at $T-J$; origins use the
-same horizon stride as testing. Default $V$ is the dataset's configured TIME
-validation length. $V=0$ disables weight estimation. If $0<V<H$, or the
-interval leaves no observed prefix, validation is unavailable and the test
-interval remains unchanged. There is no training or fitting split.
+The optional validation interval of length $V$ ends at the first test origin.
+Origins walk backward from that date at stride $H$ and the same phase, capped
+by both $\lfloor V/H\rfloor$ and the number of test dates. Default $V$ is the
+dataset's configured TIME validation length. $V=0$ disables weight estimation.
+A row is usable only when its 512-point context and H-point future each have
+finite support; requested, available and usable counts are recorded. If none
+survive, validation is unavailable and the test interval remains unchanged.
+There is no training or fitting split.
 
 For each validation variate/date, let $c$ be the last 512 available history
 points and define the query scale
@@ -150,7 +153,7 @@ These paths are under \texttt{src/timebench/}.
 \item Extract frozen T5 EOS and instance-normalized lookback caches.
 \item Predict native TS-RAG with explicit Bolt-max fallback.
 \item Estimate/freeze the validation weight and produce mixture medians.
-\item Evaluate all six main methods or 21 ablation methods on the selected Seasonal grid.
+\item Evaluate the six main methods on the selected Seasonal grid.
 \item Write matched comparison and source-manifest reports.
 \end{enumerate}
 Run \texttt{bash scripts/submit\_experiment.sh dgx} from the project root after the
@@ -160,9 +163,10 @@ Use \texttt{validation\_length=0} for no validation, and explicit
 \texttt{datasets=[...]} / \texttt{terms=[...]} overrides for a subset.
 Experiment and Seasonal launchers live under \texttt{scripts/}; they submit
 the root Slurm fronts and delegate implementations to \texttt{src/slurm/}.
-For the complete retrieval grid run:
-\begin{quote}\texttt{bash scripts/submit\_ablation.sh dgx}\end{quote}
-Main and ablation runs reuse matching data, caches and default predictions.
+The former 16-cell submission path is disabled because job 3506764 never
+completed its first new cell and the schedule is too long. Select a smaller
+replacement grid before re-enabling an ablation launcher. Historical interrupted
+manifests are not reusable evidence for that future contract.
 One allocation runs the visible stages sequentially.
 
 All Selena fronts request one GPU, partition \texttt{an}, QoS
@@ -171,11 +175,12 @@ All Selena fronts request one GPU, partition \texttt{an}, QoS
 eight CPUs, 80\,GB memory and 23 hours; cluster requeue remains enabled.
 
 Every task phase has a schema-1 plain scientific manifest allocated before
-expensive work. Exact completed phases are reusable; interrupted tasks restart
-from their beginning. Producer resolution embeds complete scientific
-configuration and the seed, while storage paths and source revisions are
-provenance. Completion follows successful owning \texttt{srun} and declared
-nonempty artifacts. No source, dataset or checkpoint file hashes exist.
+expensive work. Fully written tasks become \texttt{computed}; the successful
+owning \texttt{srun} finalizes them as \texttt{completed}. Later failure
+preserves computed tasks and restarts only interrupted work. Split- and
+representation-specific producers use compact dependency references containing
+only their actual scientific inputs. No source, dataset or checkpoint file
+hashes exist.
 Canonical float32 predictions, fallback masks/reasons and weights live below
 \texttt{outputs/tsrag/}; logs live below \texttt{logs/}. Scheduler runtimes enforce the owning project's
 artifact roots, ignoring copied or inherited artifact aliases while retaining
@@ -190,7 +195,9 @@ reported totals.
 
 Timings separate datastore extraction and query work. TS-RAG reuses cached
 Bolt-max fallback forecasts; its measured inference time excludes computing
-that separate control. Mixture totals include both component times and mixing.
+that separate control. Exact reference rows from equivalent completed control
+or TS-RAG runs are copied before inferring missing rows. Mixture totals include
+both component times and mixing.
 These are pipeline measurements, not independent fresh-process latency.
 The new growing datastore and fallback invalidate direct reuse of Adaptime's
 historical TS-RAG forecasts: run the full current computation afresh.

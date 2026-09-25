@@ -2,14 +2,16 @@
 
 import numpy as np
 
+from timebench.evaluation.validation import validation_window_mask
+
 
 def estimate_weight(chronos2, tsrag, labels, histories, references):
     """Compare MSSE per series/date after averaging supported variates."""
     groups = {}
     for c2, rag, target, history, (item, channel, origin) in zip(chronos2, tsrag, labels, histories, references):
-        support = np.isfinite(target)
-        if not support.any():
+        if not validation_window_mask([history], [target])[0]:
             continue
+        support = np.isfinite(target)
         if not np.all(np.isfinite(c2[support])) or not np.all(np.isfinite(rag[support])):
             continue
         scale = max(float(np.nanstd(np.asarray(history, dtype=np.float64))), 1e-8)

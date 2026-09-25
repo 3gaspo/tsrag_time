@@ -49,7 +49,9 @@ def plot_accuracy_time(
     series = _styles(summary, model_column, styles)
     if not series:
         raise ValueError("No accuracy/timing summaries to plot")
-    figure, axis = plt.subplots(figsize=(8.5, 3.6), constrained_layout=True)
+    many_labels = len(series) > 8
+    figure, axis = plt.subplots(figsize=(10.5 if many_labels else 8.5, 4.2 if many_labels else 3.6),
+                                constrained_layout=True)
     try:
         for model, (label, color, marker) in series.items():
             selected = summary[summary[model_column] == model]
@@ -61,13 +63,18 @@ def plot_accuracy_time(
             score, seconds = float(row[score_column]), float(row[time_column])
             if not np.isfinite(score) or not np.isfinite(seconds) or seconds < 0:
                 raise ValueError(f"Invalid accuracy/timing summary for {model}")
-            axis.scatter(seconds, score, s=110, marker=marker, color=color)
-            axis.annotate(label, (seconds, score), xytext=(8, 8),
-                          textcoords="offset points", color=color)
+            axis.scatter(seconds, score, s=110, marker=marker, color=color,
+                         label=label if many_labels else None)
+            if not many_labels:
+                axis.annotate(label, (seconds, score), xytext=(8, 8),
+                              textcoords="offset points", color=color)
         axis.set_xlabel(time_label)
         axis.set_ylabel(score_label)
         axis.margins(x=0.18, y=0.25)
         axis.grid(alpha=0.25)
+        if many_labels:
+            axis.legend(loc="upper left", bbox_to_anchor=(1.01, 1), ncol=1,
+                        fontsize=8, frameon=True)
         path = Path(path)
         path.parent.mkdir(parents=True, exist_ok=True)
         figure.savefig(path, dpi=220, bbox_inches="tight")

@@ -65,6 +65,15 @@ else
         "$LOGS_ROOT"
         "$OUTPUTS_ROOT"
     )
+    for checkout_artifact_root in "$PROJECT_ROOT/logs" "$PROJECT_ROOT/outputs"; do
+        duplicate=false
+        for artifact_root in "${artifact_roots[@]}"; do
+            [ "$checkout_artifact_root" != "$artifact_root" ] || duplicate=true
+        done
+        if [ "$duplicate" = false ] && { [ -d "$checkout_artifact_root" ] || [ -L "$checkout_artifact_root" ]; }; then
+            artifact_roots+=("$checkout_artifact_root")
+        fi
+    done
 fi
 
 for artifact_root in "${artifact_roots[@]}"; do
