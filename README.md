@@ -148,8 +148,11 @@ require completed producers. Restarting recomputes only interrupted tasks.
 override. `TIME_RUN_CONFLICT_POLICY=overwrite_exact|overwrite_path|new`,
 `TIME_SKIP_COMPLETED`, and `TIME_FORCE_RERUN` retain the shared lifecycle controls.
 
-Scheduler launchers enforce project-owned artifact roots, ignoring inherited or
-copied artifact-path settings while preserving shared data/weight settings.
+Scheduler launchers default to project-owned artifact roots while preserving
+shared data/weight settings. Explicit `OUTPUTS_ROOT` and `LOGS_ROOT` values
+take precedence. The shared Seasonal producer uses the common Seasonal root
+for artifacts and its `logs/` child for job streams and workflow status;
+TS-RAG consumes its task grid through `TIME_SEASONAL_TASKS_ROOT`.
 Scientific stage artifacts live under
 `outputs/tsrag/{data,extractions,predictions,evaluations}`. Launch-exact reports
 live under `outputs/reports/tsrag/<launch-id>/`; their `performance/` bundle

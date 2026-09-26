@@ -16,4 +16,11 @@ case "$cluster" in
     *) echo 'usage: bash scripts/submit_seasonal_naive.sh dgx|selena [shared|project] [Hydra overrides...]' >&2; exit 2 ;;
 esac
 if [ "$#" -ge 2 ]; then shift 2; elif [ "$#" -eq 1 ]; then shift; fi
-sbatch "$front" "$@"
+dependency=()
+[ -z "${SBATCH_DEPENDENCY:-}" ] || dependency=(--dependency="$SBATCH_DEPENDENCY")
+mkdir -p "$TIME_LOGS" "$TIME_SEASONAL_LOGS_ROOT"
+sbatch "${dependency[@]}" \
+    --output="$TIME_SEASONAL_LOGS_ROOT/%x_%j.out" \
+    --error="$TIME_SEASONAL_LOGS_ROOT/%x_%j.err" \
+    --export="ALL,OUTPUTS_ROOT=$TIME_SEASONAL_ROOT,LOGS_ROOT=$TIME_SEASONAL_LOGS_ROOT" \
+    "$front" "$@"

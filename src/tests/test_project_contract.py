@@ -365,6 +365,10 @@ class Contract(unittest.TestCase):
         self.assertIn('src/slurm/submit_experiment.sh', ablation)
         self.assertIn('TSRAG_EXPERIMENT_FAMILY=ablation', ablation)
         self.assertNotIn('exit 2', ablation)
+        runtime = (ROOT/'src/slurm/runtime_paths.sh').read_text()
+        seasonal_submit = (ROOT/'src/slurm/submit_seasonal.sh').read_text()
+        self.assertIn('OUTPUTS_ROOT="${OUTPUTS_ROOT:-${TIME_OUTPUTS:-$default_outputs_root}}"', runtime)
+        self.assertIn('LOGS_ROOT=$TIME_SEASONAL_LOGS_ROOT', seasonal_submit)
         required = ('--gres=gpu:1', '--partition=an', '--qos=an_preemptable', '--exclusive',
                     '--wckey=P12CU:DATASCIENCE', '--ntasks=1')
         for front in ROOT.glob('*_selena.slurm'):
@@ -402,8 +406,13 @@ class Contract(unittest.TestCase):
             paths_command = command.replace('printf "%s"', 'printf "%s\\n%s"').replace(
                 '"$TIME_DATASET"', '"$TIME_OUTPUTS" "$TIME_LOGS"')
             result = subprocess.run([str(bash), '-c', paths_command], env=environment, capture_output=True, text=True, check=True)
-            self.assertEqual(result.stdout.splitlines()[-2:], [f'{root.as_posix()}/outputs', f'{root.as_posix()}/logs'])
+            self.assertEqual(result.stdout.splitlines()[-2:], ['/foreign/outputs', '/foreign/logs'])
             environment.update(SELENA_NNI='H12345', TIME_SCRATCH_ROOT='/foreign/project')
+            result = subprocess.run([str(bash), '-c', 'mkdir() { :; }\n' + paths_command], env=environment,
+                                    capture_output=True, text=True, check=True)
+            self.assertEqual(result.stdout.splitlines()[-2:], ['/foreign/outputs', '/foreign/logs'])
+            for key in ('TIME_OUTPUTS', 'OUTPUTS_ROOT', 'TIME_LOGS', 'LOGS_ROOT'):
+                environment.pop(key)
             result = subprocess.run([str(bash), '-c', 'mkdir() { :; }\n' + paths_command], env=environment,
                                     capture_output=True, text=True, check=True)
             scratch = f'/scratch/users/h12345/codes/{root.name}'
