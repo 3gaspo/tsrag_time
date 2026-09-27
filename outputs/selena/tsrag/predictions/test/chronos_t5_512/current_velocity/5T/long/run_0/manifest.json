@@ -1,0 +1,105 @@
+{
+  "completed_at": "2026-09-27T14:55:11.399602+00:00",
+  "computed_at": "2026-09-27T14:53:20.122429+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {
+    "seed": 0
+  },
+  "identity": {
+    "dataset": "current_velocity",
+    "frequency": "5T",
+    "method": "chronos_t5_512",
+    "model": "chronos_t5",
+    "target_mode": "univariate",
+    "term": "long"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-27T14:53:20.088496+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      }
+    ],
+    "launch_id": "selena_3584841",
+    "launched_at": "2026-09-27T14:53:20.088496+00:00",
+    "slurm_job_id": "3584841"
+  },
+  "model_config": {
+    "backbone": "chronos_t5",
+    "checkpoint": "chronos-t5-base",
+    "context_length": 512,
+    "method": "vanilla",
+    "num_samples": 20,
+    "point_forecast": "median"
+  },
+  "pipeline_config": {
+    "covariates": "none",
+    "dependencies": {
+      "data": {
+        "completed_at": "2026-09-27T14:52:32.903372+00:00",
+        "identity": {
+          "dataset": "current_velocity",
+          "frequency": "5T",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "long"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "chronos_t5_512",
+    "phase": "predictions/test",
+    "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+    "split": "test",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "current_velocity/5T",
+      "prediction_length": 864,
+      "seasonality": 288,
+      "term": "long",
+      "test_length": 4320
+    },
+    "validation_support": null
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/current_velocity/5T",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 288,
+      "dataset": "current_velocity/5T",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 864,
+      "seasonality": 288,
+      "term": "long",
+      "test_length": 4320,
+      "validation_length": 4320
+    },
+    "upstream_manifests": {
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/current_velocity/5T/long/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "prediction.npy",
+    "context_length.npy",
+    "prediction.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-27T14:53:20.088496+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-27T14:55:11.399602+00:00"
+}

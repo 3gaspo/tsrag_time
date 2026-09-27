@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_t5_512",
+  "split": "validation",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.7859041690826416e-05,
+  "reused_rows": 10,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_t5_512/Vehicle_Sales/M/short/run_0/manifest.json",
+      "rows": 10
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 120,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 1,
+    "requested_rows": 10,
+    "available_dates": 1,
+    "available_rows": 10,
+    "datastore_rows": 0,
+    "usable_rows": 10,
+    "usable_dates": 1
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_512",
+  "split": "validation",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 0.19529821909964085,
+  "reused_rows": 0,
+  "newly_inferred_rows": 4,
+  "reuse_sources": [],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 2688,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 4,
+    "requested_rows": 4,
+    "available_dates": 4,
+    "available_rows": 4,
+    "datastore_rows": 30913,
+    "usable_rows": 4,
+    "usable_dates": 4
+  }
+}

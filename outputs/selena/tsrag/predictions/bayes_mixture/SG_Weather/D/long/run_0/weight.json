@@ -1,0 +1,11 @@
+{
+  "tsrag_weight": 0.43037974683544306,
+  "validation_dates": 156,
+  "tsrag_wins_with_half_ties": 67.0,
+  "prior": [
+    1,
+    1
+  ],
+  "score": "per_date_mean_variate_msse",
+  "status": "estimated"
+}

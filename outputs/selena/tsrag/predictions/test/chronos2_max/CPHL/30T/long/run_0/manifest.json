@@ -1,0 +1,104 @@
+{
+  "completed_at": "2026-09-27T14:55:10.637853+00:00",
+  "computed_at": "2026-09-27T14:54:52.765731+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {
+    "seed": 0
+  },
+  "identity": {
+    "dataset": "CPHL",
+    "frequency": "30T",
+    "method": "chronos2_max",
+    "model": "chronos2",
+    "target_mode": "univariate",
+    "term": "long"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-27T14:54:52.735570+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      }
+    ],
+    "launch_id": "selena_3584841",
+    "launched_at": "2026-09-27T14:54:52.735570+00:00",
+    "slurm_job_id": "3584841"
+  },
+  "model_config": {
+    "backbone": "chronos2",
+    "checkpoint": "chronos2",
+    "context_length": 8192,
+    "method": "vanilla",
+    "point_forecast": "median"
+  },
+  "pipeline_config": {
+    "covariates": "none",
+    "dependencies": {
+      "data": {
+        "completed_at": "2026-09-27T14:52:32.715516+00:00",
+        "identity": {
+          "dataset": "CPHL",
+          "frequency": "30T",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "long"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "chronos2_max",
+    "phase": "predictions/test",
+    "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+    "split": "test",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "CPHL/30T",
+      "prediction_length": 144,
+      "seasonality": 48,
+      "term": "long",
+      "test_length": 1440
+    },
+    "validation_support": null
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/CPHL/30T",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 48,
+      "dataset": "CPHL/30T",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 144,
+      "seasonality": 48,
+      "term": "long",
+      "test_length": 1440,
+      "validation_length": 1440
+    },
+    "upstream_manifests": {
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/CPHL/30T/long/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "prediction.npy",
+    "context_length.npy",
+    "prediction.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-27T14:54:52.735570+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-27T14:55:10.637853+00:00"
+}

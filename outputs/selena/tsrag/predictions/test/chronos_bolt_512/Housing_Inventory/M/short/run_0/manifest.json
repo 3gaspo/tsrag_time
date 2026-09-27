@@ -1,0 +1,104 @@
+{
+  "completed_at": "2026-09-27T14:55:11.677528+00:00",
+  "computed_at": "2026-09-27T14:53:02.522989+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {
+    "seed": 0
+  },
+  "identity": {
+    "dataset": "Housing_Inventory",
+    "frequency": "M",
+    "method": "chronos_bolt_512",
+    "model": "chronos_bolt",
+    "target_mode": "univariate",
+    "term": "short"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-27T14:53:02.492564+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      }
+    ],
+    "launch_id": "selena_3584841",
+    "launched_at": "2026-09-27T14:53:02.492564+00:00",
+    "slurm_job_id": "3584841"
+  },
+  "model_config": {
+    "backbone": "chronos_bolt",
+    "checkpoint": "chronos-bolt-base",
+    "context_length": 512,
+    "method": "vanilla",
+    "point_forecast": "median"
+  },
+  "pipeline_config": {
+    "covariates": "none",
+    "dependencies": {
+      "data": {
+        "completed_at": "2026-09-27T14:52:32.599602+00:00",
+        "identity": {
+          "dataset": "Housing_Inventory",
+          "frequency": "M",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "chronos_bolt_512",
+    "phase": "predictions/test",
+    "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+    "split": "test",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "Housing_Inventory/M",
+      "prediction_length": 12,
+      "seasonality": 12,
+      "term": "short",
+      "test_length": 36
+    },
+    "validation_support": null
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/Housing_Inventory/M",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 12,
+      "dataset": "Housing_Inventory/M",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 12,
+      "seasonality": 12,
+      "term": "short",
+      "test_length": 36,
+      "validation_length": 12
+    },
+    "upstream_manifests": {
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/Housing_Inventory/M/short/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "prediction.npy",
+    "context_length.npy",
+    "prediction.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-27T14:53:02.492564+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-27T14:55:11.677528+00:00"
+}

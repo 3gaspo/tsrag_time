@@ -1,0 +1,45 @@
+{
+  "dataset_config": "Global_Influenza/W/short",
+  "num_series": 15,
+  "num_windows": 4,
+  "num_variates": 4,
+  "num_model_inputs": 240,
+  "prediction_length": 13,
+  "num_quantiles": 1,
+  "quantile_levels": [
+    0.5
+  ],
+  "freq": "W",
+  "seasonality": 1,
+  "context_length": 2048,
+  "metric_names": [
+    "MSE",
+    "MAE",
+    "RMSE",
+    "MAPE",
+    "sMAPE",
+    "MASE",
+    "ND",
+    "CRPS"
+  ],
+  "prediction_scale_factor": 10.0,
+  "metrics_summary_file": "metrics_summary.json",
+  "evaluation_grid": {
+    "definition": "finite_ground_truth_and_seasonal_naive_mase",
+    "source": "/fslarge/scratch/users/h61084/codes/seasonal/foundation_models/tasks/seasonal_naive/univariate/Global_Influenza/W/short/run_0/evaluation_grid.npz",
+    "valid_values": 237,
+    "total_values": 240
+  },
+  "launch_id": "selena_3452080",
+  "inference_seconds": 0.13079119380563498,
+  "model": "chronos_bolt_max",
+  "experiment": "tsrag",
+  "target_mode": "univariate",
+  "forecast_type": "point",
+  "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/Global_Influenza/W/short/run_0/manifest.json",
+  "fallback_counts": null,
+  "tsrag_weight": null,
+  "retrieval": null,
+  "alignment_period": null,
+  "nonfinite_fallback_count": 0
+}

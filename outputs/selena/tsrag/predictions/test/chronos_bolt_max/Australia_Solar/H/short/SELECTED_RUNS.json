@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "model_config": {
+          "backbone": "chronos_bolt",
+          "checkpoint": "chronos-bolt-base",
+          "context_length": 2048,
+          "method": "vanilla",
+          "point_forecast": "median"
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:32.656995+00:00",
+              "identity": {
+                "dataset": "Australia_Solar",
+                "frequency": "H",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "chronos_bolt_max",
+          "phase": "predictions/test",
+          "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+          "split": "test",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Australia_Solar/H",
+            "prediction_length": 24,
+            "seasonality": 24,
+            "term": "short",
+            "test_length": 2520
+          },
+          "validation_support": null
+        }
+      }
+    }
+  ]
+}

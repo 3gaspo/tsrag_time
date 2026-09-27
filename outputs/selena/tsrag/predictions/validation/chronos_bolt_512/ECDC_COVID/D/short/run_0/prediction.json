@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_512",
+  "split": "validation",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.822039484977722e-05,
+  "reused_rows": 9,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_512/ECDC_COVID/D/short/run_0/manifest.json",
+      "rows": 9
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 244,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 9,
+    "requested_rows": 9,
+    "available_dates": 9,
+    "available_rows": 9,
+    "datastore_rows": 3874,
+    "usable_rows": 9,
+    "usable_dates": 9
+  }
+}

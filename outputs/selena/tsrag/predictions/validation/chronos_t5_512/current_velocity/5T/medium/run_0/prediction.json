@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_t5_512",
+  "split": "validation",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 2.0070001482963562e-05,
+  "reused_rows": 90,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_t5_512/current_velocity/5T/medium/run_0/manifest.json",
+      "rows": 90
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 25920,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 15,
+    "requested_rows": 90,
+    "available_dates": 15,
+    "available_rows": 90,
+    "datastore_rows": 127818,
+    "usable_rows": 90,
+    "usable_dates": 15
+  }
+}

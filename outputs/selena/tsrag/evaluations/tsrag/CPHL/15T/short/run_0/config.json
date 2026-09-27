@@ -1,0 +1,63 @@
+{
+  "dataset_config": "CPHL/15T/short",
+  "num_series": 2,
+  "num_windows": 120,
+  "num_variates": 1,
+  "num_model_inputs": 240,
+  "prediction_length": 12,
+  "num_quantiles": 1,
+  "quantile_levels": [
+    0.5
+  ],
+  "freq": "15T",
+  "seasonality": 96,
+  "context_length": 512,
+  "metric_names": [
+    "MSE",
+    "MAE",
+    "RMSE",
+    "MAPE",
+    "sMAPE",
+    "MASE",
+    "ND",
+    "CRPS"
+  ],
+  "prediction_scale_factor": 1.0,
+  "metrics_summary_file": "metrics_summary.json",
+  "evaluation_grid": {
+    "definition": "finite_ground_truth_and_seasonal_naive_mase",
+    "source": "/fslarge/scratch/users/h61084/codes/seasonal/foundation_models/tasks/seasonal_naive/univariate/CPHL/15T/short/run_0/evaluation_grid.npz",
+    "valid_values": 240,
+    "total_values": 240
+  },
+  "launch_id": "selena_3452080",
+  "inference_seconds": 4.177017824724317,
+  "model": "tsrag",
+  "experiment": "tsrag",
+  "target_mode": "univariate",
+  "forecast_type": "point",
+  "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/tsrag/CPHL/15T/short/run_0/manifest.json",
+  "fallback_counts": {
+    "validation": {
+      "all_rows": 141,
+      "eligible_rows": 141,
+      "grid_rows": 240,
+      "total_rows": 240
+    },
+    "test": {
+      "all_rows": 140,
+      "eligible_rows": 140,
+      "grid_rows": 240,
+      "total_rows": 240
+    }
+  },
+  "tsrag_weight": null,
+  "retrieval": {
+    "scope": "all",
+    "aligned": false,
+    "query_scale": false,
+    "representation": "t5"
+  },
+  "alignment_period": 96,
+  "nonfinite_fallback_count": 0
+}

@@ -1,0 +1,63 @@
+{
+  "dataset_config": "Oil_Price/B/short",
+  "num_series": 1,
+  "num_windows": 35,
+  "num_variates": 12,
+  "num_model_inputs": 420,
+  "prediction_length": 20,
+  "num_quantiles": 1,
+  "quantile_levels": [
+    0.5
+  ],
+  "freq": "B",
+  "seasonality": 5,
+  "context_length": 512,
+  "metric_names": [
+    "MSE",
+    "MAE",
+    "RMSE",
+    "MAPE",
+    "sMAPE",
+    "MASE",
+    "ND",
+    "CRPS"
+  ],
+  "prediction_scale_factor": 1.0,
+  "metrics_summary_file": "metrics_summary.json",
+  "evaluation_grid": {
+    "definition": "finite_ground_truth_and_seasonal_naive_mase",
+    "source": "/fslarge/scratch/users/h61084/codes/seasonal/foundation_models/tasks/seasonal_naive/univariate/Oil_Price/B/short/run_0/evaluation_grid.npz",
+    "valid_values": 420,
+    "total_values": 420
+  },
+  "launch_id": "selena_3452080",
+  "inference_seconds": 9.832017473876476,
+  "model": "tsrag",
+  "experiment": "tsrag",
+  "target_mode": "univariate",
+  "forecast_type": "point",
+  "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/tsrag/Oil_Price/B/short/run_0/manifest.json",
+  "fallback_counts": {
+    "validation": {
+      "all_rows": 60,
+      "eligible_rows": 60,
+      "grid_rows": 60,
+      "total_rows": 60
+    },
+    "test": {
+      "all_rows": 420,
+      "eligible_rows": 420,
+      "grid_rows": 420,
+      "total_rows": 420
+    }
+  },
+  "tsrag_weight": null,
+  "retrieval": {
+    "scope": "all",
+    "aligned": false,
+    "query_scale": false,
+    "representation": "t5"
+  },
+  "alignment_period": 1,
+  "nonfinite_fallback_count": 0
+}

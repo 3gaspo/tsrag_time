@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "validation",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 3.9789825677871704e-05,
+  "reused_rows": 468,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/azure2019_U/5T/short/run_0/manifest.json",
+      "rows": 468
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 22464,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 156,
+    "requested_rows": 468,
+    "available_dates": 156,
+    "available_rows": 468,
+    "datastore_rows": 185370,
+    "usable_rows": 468,
+    "usable_dates": 144
+  }
+}

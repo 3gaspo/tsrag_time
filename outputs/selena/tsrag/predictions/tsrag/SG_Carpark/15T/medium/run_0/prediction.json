@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "method": "tsrag",
+  "context_limit": 512,
+  "retrieval": {
+    "scope": "all",
+    "aligned": false,
+    "query_scale": false,
+    "representation": "t5"
+  },
+  "alignment_period": 672,
+  "fallback_method": "chronos_bolt_max",
+  "task_error": null,
+  "fallback_counts": {
+    "validation": {
+      "all_rows": 2477,
+      "eligible_rows": 2477,
+      "grid_rows": 2478,
+      "total_rows": 2478
+    },
+    "test": {
+      "all_rows": 2477,
+      "eligible_rows": 2477,
+      "grid_rows": 2478,
+      "total_rows": 2478
+    }
+  },
+  "fallback_reasons": {
+    "nonfinite_prediction": 4954
+  },
+  "datastore_preprocessing_seconds": 9296.73367026262,
+  "fallback_source_test_inference_seconds": 23.75448342040181,
+  "timing_policy": "measured_query_work_with_precomputed_bolt_max_fallback",
+  "validation_inference_seconds": 4301.180782031268,
+  "test_inference_seconds": 4720.510157419369
+}

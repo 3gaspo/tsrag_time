@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_t5_512",
+  "split": "validation",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.8930062651634216e-05,
+  "reused_rows": 75,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_t5_512/Coastal_T_S/15T/long/run_0/manifest.json",
+      "rows": 75
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 21600,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 25,
+    "requested_rows": 75,
+    "available_dates": 25,
+    "available_rows": 75,
+    "datastore_rows": 283692,
+    "usable_rows": 75,
+    "usable_dates": 10
+  }
+}

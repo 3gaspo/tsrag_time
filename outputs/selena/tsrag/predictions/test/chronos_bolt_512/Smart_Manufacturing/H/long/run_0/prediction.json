@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_512",
+  "split": "test",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 2.7960166335105896e-05,
+  "reused_rows": 170,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_512/Smart_Manufacturing/H/long/run_0/manifest.json",
+      "rows": 170
+    }
+  ],
+  "external_vanilla": {
+    "configured_root": "/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/foundation_models/inference",
+    "status": "no_compatible_run",
+    "checked_runs": 1
+  },
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 40650,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": null
+}

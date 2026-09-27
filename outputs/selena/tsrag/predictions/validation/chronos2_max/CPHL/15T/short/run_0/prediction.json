@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos2_max",
+  "split": "validation",
+  "context_limit": 8192,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 2.633035182952881e-05,
+  "reused_rows": 240,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos2_max/CPHL/15T/short/run_0/manifest.json",
+      "rows": 240
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 2876,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 240,
+    "requested_rows": 240,
+    "available_dates": 240,
+    "available_rows": 240,
+    "datastore_rows": 18185,
+    "usable_rows": 240,
+    "usable_dates": 240
+  }
+}

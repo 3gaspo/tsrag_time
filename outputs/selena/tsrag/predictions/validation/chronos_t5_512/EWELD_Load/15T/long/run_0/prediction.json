@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_t5_512",
+  "split": "validation",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.7760321497917175e-05,
+  "reused_rows": 20,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_t5_512/EWELD_Load/15T/long/run_0/manifest.json",
+      "rows": 20
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 13440,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 2,
+    "requested_rows": 20,
+    "available_dates": 2,
+    "available_rows": 20,
+    "datastore_rows": 179530,
+    "usable_rows": 20,
+    "usable_dates": 2
+  }
+}

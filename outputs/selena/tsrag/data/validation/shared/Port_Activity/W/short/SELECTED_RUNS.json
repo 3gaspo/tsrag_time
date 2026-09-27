@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "component": "data/validation",
+          "method": "shared"
+        },
+        "pipeline_config": {
+          "datastore_policy": "calendar_causal_complete_64_step_future_before_real_query",
+          "datastore_stride": 1,
+          "dependencies": {},
+          "max_datastore_windows": null,
+          "method": "shared",
+          "phase": "data/validation",
+          "split": "validation",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Port_Activity/W",
+            "prediction_length": 13,
+            "seasonality": 1,
+            "term": "short",
+            "test_length": 52
+          },
+          "validation_length": 13,
+          "validation_schedule": "walk_backward_from_first_test_origin_at_stride_H",
+          "validation_stride": 13
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "dataset_config": "current_velocity/15T/short",
+  "num_series": 5,
+  "num_windows": 120,
+  "num_variates": 6,
+  "num_model_inputs": 3600,
+  "prediction_length": 12,
+  "num_quantiles": 1,
+  "quantile_levels": [
+    0.5
+  ],
+  "freq": "15T",
+  "seasonality": 96,
+  "context_length": 512,
+  "metric_names": [
+    "MSE",
+    "MAE",
+    "RMSE",
+    "MAPE",
+    "sMAPE",
+    "MASE",
+    "ND",
+    "CRPS"
+  ],
+  "prediction_scale_factor": 1.0,
+  "metrics_summary_file": "metrics_summary.json",
+  "evaluation_grid": {
+    "definition": "finite_ground_truth_and_seasonal_naive_mase",
+    "source": "/fslarge/scratch/users/h61084/codes/seasonal/foundation_models/tasks/seasonal_naive/univariate/current_velocity/15T/short/run_0/evaluation_grid.npz",
+    "valid_values": 3600,
+    "total_values": 3600
+  },
+  "launch_id": "selena_3452080",
+  "inference_seconds": 103.80622455105186,
+  "model": "chronos_t5_512",
+  "experiment": "tsrag",
+  "target_mode": "univariate",
+  "forecast_type": "point",
+  "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_t5_512/current_velocity/15T/short/run_0/manifest.json",
+  "fallback_counts": null,
+  "tsrag_weight": null,
+  "retrieval": null,
+  "alignment_period": null,
+  "nonfinite_fallback_count": 0
+}

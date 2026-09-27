@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "component": "data/test",
+          "method": "shared"
+        },
+        "pipeline_config": {
+          "datastore_policy": "calendar_causal_complete_64_step_future_before_real_query",
+          "datastore_stride": 1,
+          "dependencies": {},
+          "max_datastore_windows": null,
+          "method": "shared",
+          "phase": "data/test",
+          "split": "test",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Supply_Chain_Location/D",
+            "prediction_length": 30,
+            "seasonality": 1,
+            "term": "short",
+            "test_length": 365
+          }
+        }
+      }
+    }
+  ]
+}

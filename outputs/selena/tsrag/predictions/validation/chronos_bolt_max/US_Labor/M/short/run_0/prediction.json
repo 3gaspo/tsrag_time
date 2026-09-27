@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "validation",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.9099563360214233e-05,
+  "reused_rows": 14,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/US_Labor/M/short/run_0/manifest.json",
+      "rows": 14
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 168,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 1,
+    "requested_rows": 14,
+    "available_dates": 1,
+    "available_rows": 14,
+    "datastore_rows": 0,
+    "usable_rows": 14,
+    "usable_dates": 1
+  }
+}

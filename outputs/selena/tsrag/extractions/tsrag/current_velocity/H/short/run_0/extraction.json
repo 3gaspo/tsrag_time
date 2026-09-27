@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "errors": {
+    "instance_l2": null,
+    "t5": null
+  },
+  "representation_seconds": {
+    "instance_l2": 4.599178828299046,
+    "t5": 658.5255054272711
+  },
+  "extraction_seconds": 663.2312134746462
+}

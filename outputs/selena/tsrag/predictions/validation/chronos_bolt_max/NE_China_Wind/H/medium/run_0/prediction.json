@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "validation",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.967884600162506e-05,
+  "reused_rows": 40,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/NE_China_Wind/H/medium/run_0/manifest.json",
+      "rows": 40
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 2880,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 10,
+    "requested_rows": 40,
+    "available_dates": 10,
+    "available_rows": 40,
+    "datastore_rows": 29588,
+    "usable_rows": 40,
+    "usable_dates": 10
+  }
+}

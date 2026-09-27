@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "validation",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 3.1169503927230835e-05,
+  "reused_rows": 288,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/Coastal_T_S/H/medium/run_0/manifest.json",
+      "rows": 288
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 48384,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 96,
+    "requested_rows": 288,
+    "available_dates": 96,
+    "available_rows": 288,
+    "datastore_rows": 310557,
+    "usable_rows": 288,
+    "usable_dates": 36
+  }
+}

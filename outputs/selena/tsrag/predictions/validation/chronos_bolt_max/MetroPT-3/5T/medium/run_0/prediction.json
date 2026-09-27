@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "validation",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 2.1541491150856018e-05,
+  "reused_rows": 36,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/MetroPT-3/5T/medium/run_0/manifest.json",
+      "rows": 36
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 7440,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 6,
+    "requested_rows": 36,
+    "available_dates": 6,
+    "available_rows": 36,
+    "datastore_rows": 91308,
+    "usable_rows": 36,
+    "usable_dates": 6
+  }
+}

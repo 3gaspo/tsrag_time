@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "validation",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.92299485206604e-05,
+  "reused_rows": 20,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/CPHL/30T/long/run_0/manifest.json",
+      "rows": 20
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 2665,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 20,
+    "requested_rows": 20,
+    "available_dates": 20,
+    "available_rows": 20,
+    "datastore_rows": 25058,
+    "usable_rows": 20,
+    "usable_dates": 20
+  }
+}

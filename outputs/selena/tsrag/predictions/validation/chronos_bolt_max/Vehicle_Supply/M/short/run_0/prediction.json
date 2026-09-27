@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "validation",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.833215355873108e-05,
+  "reused_rows": 6,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/Vehicle_Supply/M/short/run_0/manifest.json",
+      "rows": 6
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 72,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 1,
+    "requested_rows": 6,
+    "available_dates": 1,
+    "available_rows": 6,
+    "datastore_rows": 0,
+    "usable_rows": 6,
+    "usable_dates": 1
+  }
+}

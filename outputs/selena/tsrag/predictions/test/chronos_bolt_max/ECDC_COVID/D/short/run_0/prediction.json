@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_max",
+  "split": "test",
+  "context_limit": 2048,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 1.746043562889099e-05,
+  "reused_rows": 45,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/foundation_models/inference/chronos_bolt/univariate/ECDC_COVID/D/short/run_0/manifest.json",
+      "rows": 45,
+      "kind": "evaluating_tsfms_canonical_vanilla"
+    }
+  ],
+  "external_vanilla": {
+    "configured_root": "/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/foundation_models/inference",
+    "status": "reused",
+    "checked_runs": 1,
+    "manifest": "/fslarge/scratch/users/h61084/codes/evaluating_tsfms/outputs/foundation_models/inference/chronos_bolt/univariate/ECDC_COVID/D/short/run_0/manifest.json",
+    "rows": 45
+  },
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 1220,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": null
+}

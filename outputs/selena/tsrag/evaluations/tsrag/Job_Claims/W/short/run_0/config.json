@@ -1,0 +1,63 @@
+{
+  "dataset_config": "Job_Claims/W/short",
+  "num_series": 1,
+  "num_windows": 4,
+  "num_variates": 2,
+  "num_model_inputs": 8,
+  "prediction_length": 13,
+  "num_quantiles": 1,
+  "quantile_levels": [
+    0.5
+  ],
+  "freq": "W",
+  "seasonality": 1,
+  "context_length": 512,
+  "metric_names": [
+    "MSE",
+    "MAE",
+    "RMSE",
+    "MAPE",
+    "sMAPE",
+    "MASE",
+    "ND",
+    "CRPS"
+  ],
+  "prediction_scale_factor": 100.0,
+  "metrics_summary_file": "metrics_summary.json",
+  "evaluation_grid": {
+    "definition": "finite_ground_truth_and_seasonal_naive_mase",
+    "source": "/fslarge/scratch/users/h61084/codes/seasonal/foundation_models/tasks/seasonal_naive/univariate/Job_Claims/W/short/run_0/evaluation_grid.npz",
+    "valid_values": 8,
+    "total_values": 8
+  },
+  "launch_id": "selena_3452080",
+  "inference_seconds": 0.00017326325178146362,
+  "model": "tsrag",
+  "experiment": "tsrag",
+  "target_mode": "univariate",
+  "forecast_type": "point",
+  "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/tsrag/Job_Claims/W/short/run_0/manifest.json",
+  "fallback_counts": {
+    "validation": {
+      "all_rows": 2,
+      "eligible_rows": 2,
+      "grid_rows": 2,
+      "total_rows": 2
+    },
+    "test": {
+      "all_rows": 8,
+      "eligible_rows": 8,
+      "grid_rows": 8,
+      "total_rows": 8
+    }
+  },
+  "tsrag_weight": null,
+  "retrieval": {
+    "scope": "all",
+    "aligned": false,
+    "query_scale": false,
+    "representation": "t5"
+  },
+  "alignment_period": 1,
+  "nonfinite_fallback_count": 0
+}

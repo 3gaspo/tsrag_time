@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos2_max",
+  "split": "validation",
+  "context_limit": 8192,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 2.394057810306549e-05,
+  "reused_rows": 75,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos2_max/epf_electricity_price/H/long/run_0/manifest.json",
+      "rows": 75
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 12600,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 75,
+    "requested_rows": 75,
+    "available_dates": 75,
+    "available_rows": 75,
+    "datastore_rows": 253829,
+    "usable_rows": 75,
+    "usable_dates": 45
+  }
+}

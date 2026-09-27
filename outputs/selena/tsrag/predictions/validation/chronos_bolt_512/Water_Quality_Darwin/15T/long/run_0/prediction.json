@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "method": "chronos_bolt_512",
+  "split": "validation",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "inference_seconds": 2.4920329451560974e-05,
+  "reused_rows": 210,
+  "newly_inferred_rows": 0,
+  "reuse_sources": [
+    {
+      "manifest": "/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_512/Water_Quality_Darwin/15T/long/run_0/manifest.json",
+      "rows": 210
+    }
+  ],
+  "external_vanilla": null,
+  "prediction_nan_values": 0,
+  "produced_nan_values": 0,
+  "prediction_values": 60480,
+  "prediction_nan_rate": 0.0,
+  "validation_counts": {
+    "requested_dates": 35,
+    "requested_rows": 210,
+    "available_dates": 35,
+    "available_rows": 210,
+    "datastore_rows": 605118,
+    "usable_rows": 210,
+    "usable_dates": 35
+  }
+}

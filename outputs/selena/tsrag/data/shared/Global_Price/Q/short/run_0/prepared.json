@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "task": {
+    "dataset": "Global_Price/Q",
+    "term": "short",
+    "prediction_length": 4,
+    "test_length": 20,
+    "validation_length": 8,
+    "seasonality": 4,
+    "datastore_stride": 1,
+    "max_datastore_windows": null,
+    "alignment_period": 4
+  },
+  "source_path": "/scratch/users/h61084/datasets/hf_dataset/Global_Price/Q",
+  "counts": {
+    "validation": 120,
+    "test": 300,
+    "datastore": 0
+  },
+  "datastore_policy": "cross_variate_calendar_causal_complete_64_step_future_before_real_query"
+}

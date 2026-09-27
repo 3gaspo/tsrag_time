@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "model_config": {
+          "backbone": "chronos_bolt",
+          "checkpoint": "chronos-bolt-base",
+          "context_length": 512,
+          "method": "vanilla",
+          "point_forecast": "median"
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:31.832042+00:00",
+              "identity": {
+                "dataset": "Supply_Chain_Customer",
+                "frequency": "D",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "chronos_bolt_512",
+          "phase": "predictions/validation",
+          "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+          "split": "validation",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Supply_Chain_Customer/D",
+            "prediction_length": 30,
+            "seasonality": 1,
+            "term": "short",
+            "test_length": 365
+          },
+          "validation_support": "finite_context_and_future"
+        }
+      }
+    }
+  ]
+}

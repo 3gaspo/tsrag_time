@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "task": {
+    "dataset": "CPHL/30T",
+    "term": "short",
+    "prediction_length": 12,
+    "test_length": 1440,
+    "validation_length": 1440,
+    "seasonality": 48,
+    "datastore_stride": 1,
+    "max_datastore_windows": null,
+    "alignment_period": 48
+  },
+  "source_path": "/scratch/users/h61084/datasets/hf_dataset/CPHL/30T",
+  "counts": {
+    "validation": 240,
+    "test": 240,
+    "datastore": 28202
+  },
+  "datastore_policy": "cross_variate_calendar_causal_complete_64_step_future_before_real_query"
+}

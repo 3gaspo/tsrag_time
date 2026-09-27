@@ -1,0 +1,8 @@
+{
+  "schema_version": 1,
+  "method": "chronos_t5_512",
+  "context_limit": 512,
+  "context_policy": "all_available_history_capped_at_limit",
+  "validation_inference_seconds": 31.417683947831392,
+  "test_inference_seconds": 125.93944262247533
+}
