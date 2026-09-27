@@ -845,12 +845,14 @@ def select_completed_runs(
     config_filters: Mapping[str, Any] | None = None,
     config_policy: str = "error",
     repeat_policy: str = "selected",
+    task_specific_model_fields: set[str] | None = None,
 ) -> list[tuple[Path, dict[str, Any]]]:
-    """Select completed task runs under explicit config and repeat policies."""
+    """Select completed runs, allowing declared model fields to vary by task."""
     if config_policy not in CONFIG_POLICIES:
         raise ManifestError(f"config_policy must be one of {CONFIG_POLICIES}")
     if repeat_policy not in REPEAT_POLICIES:
         raise ManifestError(f"repeat_policy must be one of {REPEAT_POLICIES}")
+    task_specific_model_fields = set(task_specific_model_fields or ())
     filters = dict(config_filters or {})
     candidates: list[tuple[Path, dict[str, Any]]] = []
     root = Path(root).expanduser().resolve()
@@ -999,7 +1001,11 @@ def select_completed_runs(
         for group in by_model:
             global_configs = [
                 {
-                    "model_config": item[1].get("model_config", {}),
+                    "model_config": {
+                        key: value
+                        for key, value in item[1].get("model_config", {}).items()
+                        if key not in task_specific_model_fields
+                    },
                     "covariate_mode": item[1]
                     .get("experiment_config", {})
                     .get("covariate_mode"),
