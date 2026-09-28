@@ -1,27 +1,0 @@
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
-  warnings.warn(
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
-  warnings.warn(
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
-  offset = pd.tseries.frequencies.to_offset(freq)
-Loading weights:   0%|          | 0/269 [00:00<?, ?it/s]Loading weights:   0%|          | 1/269 [00:00<02:12,  2.02it/s]Loading weights:   4%|▍         | 11/269 [00:00<00:11, 22.00it/s]Loading weights:  14%|█▍        | 39/269 [00:00<00:02, 78.97it/s]Loading weights:  24%|██▍       | 65/269 [00:00<00:01, 120.99it/s]Loading weights:  34%|███▍      | 91/269 [00:00<00:01, 153.04it/s]Loading weights:  43%|████▎     | 117/269 [00:01<00:00, 177.60it/s]Loading weights:  58%|█████▊    | 155/269 [00:01<00:00, 226.03it/s]Loading weights:  67%|██████▋   | 181/269 [00:01<00:00, 202.47it/s]Loading weights:  76%|███████▌  | 204/269 [00:01<00:00, 205.57it/s]Loading weights:  84%|████████▍ | 227/269 [00:01<00:00, 206.52it/s]Loading weights:  93%|█████████▎| 250/269 [00:01<00:00, 210.36it/s]Loading weights: 100%|██████████| 269/269 [00:01<00:00, 156.05it/s]
-/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/chronos/chronos_bolt.py:546: UserWarning: We recommend keeping prediction length <= 64. The quality of longer predictions may degrade since the model is not optimized for it. 
-  warnings.warn(msg)
-srun: Job step aborted: Waiting up to 32 seconds for job step to finish.
-slurmstepd: error: *** STEP 3449889.1 ON sean0005 CANCELLED AT 2026-09-16T18:38:13 ***
-slurmstepd: error: *** JOB 3449889 ON sean0005 CANCELLED AT 2026-09-16T18:38:13 ***
-srun: error: sean0005: task 0: Exited with exit code 143
