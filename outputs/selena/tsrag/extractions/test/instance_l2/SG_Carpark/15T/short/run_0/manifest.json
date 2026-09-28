@@ -1,12 +1,12 @@
 {
-  "computed_at": "2026-09-28T06:52:41.383373+00:00",
+  "computed_at": "2026-09-28T06:53:56.219785+00:00",
   "experiment": "tsrag",
   "experiment_config": {},
   "identity": {
     "dataset": "SG_Carpark",
     "frequency": "15T",
-    "method": "t5",
-    "model": "t5",
+    "method": "instance_l2",
+    "model": "instance_l2",
     "target_mode": "univariate",
     "term": "short"
   },
@@ -16,26 +16,26 @@
       {
         "action": "new",
         "launch_id": "selena_3584841",
-        "launched_at": "2026-09-28T04:22:37.697231+00:00",
+        "launched_at": "2026-09-28T06:52:41.395347+00:00",
         "slurm_array_task_id": null,
         "slurm_job_id": "3584841"
       }
     ],
     "launch_id": "selena_3584841",
-    "launched_at": "2026-09-28T04:22:37.697231+00:00",
+    "launched_at": "2026-09-28T06:52:41.395347+00:00",
     "slurm_job_id": "3584841"
   },
   "model_config": {
-    "checkpoint": "chronos-t5-base",
+    "checkpoint": null,
     "context_length": 512,
     "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
     "method": "retrieval_representation",
-    "representation": "t5"
+    "representation": "instance_l2"
   },
   "pipeline_config": {
     "dependencies": {
       "data": {
-        "completed_at": "2026-09-27T14:52:31.710562+00:00",
+        "completed_at": "2026-09-27T14:52:32.559670+00:00",
         "identity": {
           "dataset": "SG_Carpark",
           "frequency": "15T",
@@ -47,10 +47,10 @@
         "run": "run_0"
       }
     },
-    "method": "t5",
-    "phase": "extractions/validation",
-    "representation": "t5",
-    "split": "validation",
+    "method": "instance_l2",
+    "phase": "extractions/test",
+    "representation": "instance_l2",
+    "split": "test",
     "target_mode": "univariate",
     "task": {
       "dataset": "SG_Carpark/15T",
@@ -59,7 +59,7 @@
       "term": "short",
       "test_length": 672
     },
-    "validation_support": "finite_context_and_future"
+    "validation_support": null
   },
   "project": "tsrag_time",
   "provenance": {
@@ -80,7 +80,7 @@
       "validation_length": 672
     },
     "upstream_manifests": {
-      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/validation/shared/SG_Carpark/15T/short/run_0/manifest.json"
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/SG_Carpark/15T/short/run_0/manifest.json"
     }
   },
   "required_artifacts": [
@@ -94,7 +94,7 @@
     "embedding_batch_size": 512
   },
   "schema_version": 1,
-  "started_at": "2026-09-28T04:22:37.697231+00:00",
+  "started_at": "2026-09-28T06:52:41.395347+00:00",
   "status": "computed",
-  "updated_at": "2026-09-28T06:52:41.383373+00:00"
+  "updated_at": "2026-09-28T06:53:56.219785+00:00"
 }
