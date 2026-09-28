@@ -247,19 +247,22 @@ class Workflow:
 
     def resolve(self, task, phase, method, dependencies=None):
         expected = self.science(task, phase, method, dependencies or {})
-        selected = select_completed_runs(self.path(task, phase, method), config_policy='distinct', repeat_policy='selected')
+        selected = select_completed_runs(self.path(task, phase, method), config_policy='distinct', repeat_policy='latest')
         matches = [path for path, manifest in selected if all(manifest[key] == value for key, value in expected.items())
                    and manifest['identity'] == self.identity(task, method)]
         if len(matches) != 1:
             raise ValueError(f'Expected one exact completed {phase}/{method} for {task.dataset}/{task.term}; found {len(matches)}')
         return matches[0]
 
-    def finish(self, run, files):
+    def finish(self, run, files, artifact_metadata=None):
         if os.getenv('TSRAG_DEFER_COMPLETION') == '1':
-            write_json(run.run_dir / 'stage_ready.json', {'required_artifacts': files})
-            run.compute(files)
+            write_json(run.run_dir / 'stage_ready.json', {
+                'required_artifacts': files,
+                'artifact_metadata': artifact_metadata,
+            })
+            run.compute(files, artifact_metadata=artifact_metadata)
         else:
-            run.complete(files)
+            run.complete(files, artifact_metadata=artifact_metadata)
 
     def prepared(self, task, split):
         return self.resolve(task, f'data/{split}', 'shared')
@@ -797,7 +800,7 @@ class Workflow:
                     metadata = json.loads((prediction / 'prediction.json').read_text())
                     log(f'evaluate method={method} dataset={task.dataset} term={task.term}')
                     values = np.load(prediction / 'prediction.npy', mmap_mode='r')
-                    save_window_predictions(dataset, values[:, None, :], f'{task.dataset}/{task.term}', str(self.root),
+                    evaluation_metadata = save_window_predictions(dataset, values[:, None, :], f'{task.dataset}/{task.term}', str(self.root),
                                             seasonality=task.seasonality, quantile_levels=[0.5], task_output_dir=str(run.run_dir),
                                             model_hyperparams={'model': method, 'experiment': 'tsrag', 'target_mode': 'univariate',
                                                                'forecast_type': 'point', 'prediction_manifest': str(prediction / 'manifest.json'),
@@ -807,15 +810,18 @@ class Workflow:
                                                                'nonfinite_fallback_count': metadata.get('nonfinite_fallback_count', 0)},
                                             inference_seconds=metadata['inference_seconds'],
                                             evaluation_grid_path=str(resolve_shared_evaluation_grid(task.dataset, task.term, 'univariate')))
-                    self.finish(run, ['predictions.npz', 'metrics.npz', 'metrics_summary.json', 'config.json'])
+                    self.finish(
+                        run,
+                        ['predictions.npz', 'metrics.npz', 'metrics_summary.json'],
+                        {'evaluation': evaluation_metadata},
+                    )
 
     def report(self):
         from timebench.results.comparison import build_report
 
         inputs = [(task, method, self.evaluation(task, method), self.prediction(task, method))
                   for task in self.tasks for method in self.methods()]
-        launch = os.getenv('TIME_LAUNCH_ID', 'manual')
-        build_report(inputs, self.root.parent / 'reports' / 'tsrag' / launch, self.config)
+        build_report(inputs, self.root / 'reports', self.config)
 
     def run(self, stage):
         from timebench.pipeline.runtime_resources import log_selected_device

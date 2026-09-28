@@ -12,7 +12,7 @@ LIGHT_NAMES = {
     "SELECTED_RUNS.json", "manifest.json", "model_manifest.json",
     "result_manifest.json", "prediction_manifest.json", "selection.json",
     "comparison_summary.json", "time_summary_manifest.json", "time_summary.json",
-    "time_tasks.csv", "audit_manifest.json", "config.json", "metrics_summary.json",
+    "time_tasks.csv", "audit_manifest.json", "metrics_summary.json",
     "summary.json", "report_manifest.json", "comparison.csv", "task_summary.csv",
     "dataset_summary.csv", "full_dataset.csv", "dataset_features_full.csv",
     "prepared.json", "retrieval.json", "prediction.json", "extraction.json",

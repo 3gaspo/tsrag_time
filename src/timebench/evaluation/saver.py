@@ -7,7 +7,6 @@ Output structure:
             predictions.npz  # Contains quantile predictions and levels
             metrics.npz      # Contains per-window metrics
             metrics_summary.json  # Contains lightweight aggregate metrics
-            config.json     # Contains dataset config
 """
 
 import json
@@ -59,7 +58,7 @@ def save_window_predictions(
         ds_config: Dataset configuration string, e.g., "m4_weekly/W/short"
         output_base_dir: Base directory for output files
         seasonality: Seasonal period length for MASE computation
-        model_hyperparams: Dictionary of model hyperparameters to save in config
+        model_hyperparams: Model metadata returned for the run manifest
         quantile_levels: Quantile levels for output (default: [0.1, 0.2, ..., 0.9])
         inference_seconds: Accelerator-synchronized wall time for the complete
             test forecasting loop. Model loading, dataset construction, metric
@@ -78,11 +77,8 @@ def save_window_predictions(
         metrics_summary.json:
             - Finite mean and coverage counts for each metric
 
-        config.json:
-            - Dataset, forecast-shape, metric, and model configuration
-
     Returns:
-        config: Dictionary containing dataset config
+        Dictionary to store as artifact metadata in the run manifest.
     """
     # Setup quantile levels
     if quantile_levels is None:
@@ -298,7 +294,7 @@ def save_window_predictions(
     np.savez_compressed(metrics_path, **metrics)
     print(f"    Saved metrics to {metrics_path}")
 
-    # Save config
+    # Build evaluation metadata for the authoritative run manifest.
     config = {
         "dataset_config": ds_config,
         "num_series": num_series,
@@ -323,10 +319,6 @@ def save_window_predictions(
         },
     }
 
-    launch_id = os.environ.get("TIME_LAUNCH_ID")
-    if launch_id:
-        config["launch_id"] = launch_id
-
     if inference_seconds is not None:
         inference_seconds = float(inference_seconds)
         if not np.isfinite(inference_seconds) or inference_seconds < 0:
@@ -336,11 +328,6 @@ def save_window_predictions(
     # Add model hyperparameters if provided
     if model_hyperparams:
         config.update(model_hyperparams)
-
-    config_path = os.path.join(ds_output_dir, "config.json")
-    with open(config_path, "w") as f:
-        json.dump(config, f, indent=2)
-    print(f"    Saved config to {config_path}")
 
     metric_summaries = {}
     for metric_name, metric_values in metrics.items():
@@ -354,8 +341,6 @@ def save_window_predictions(
         "prediction_outputs": prediction_outputs,
         "metrics": metric_summaries,
     }
-    if launch_id:
-        metrics_summary["launch_id"] = launch_id
     if model_hyperparams and "model" in model_hyperparams:
         metrics_summary["model"] = model_hyperparams["model"]
     if inference_seconds is not None:

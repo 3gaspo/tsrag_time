@@ -47,8 +47,10 @@ store. Required checkpoint directories below `TIME_WEIGHTS` are
 The last must contain exactly one released `best.pth`, loaded strictly.
 Inference loads local checkpoints only and never downloads weights.
 
-The main path variables retain TIME's defaults: `TIME_DATASET=datasets/hf_dataset`,
-`TIME_WEIGHTS=weights`, `TIME_OUTPUTS=outputs`, and `TIME_LOGS=logs`.
+The main path variables retain TIME's data and weight defaults:
+`TIME_DATASET=datasets/hf_dataset` and `TIME_WEIGHTS=weights`. DGX/local
+artifacts default to `TIME_OUTPUTS=outputs/dgx` and `TIME_LOGS=logs/dgx`;
+Selena launchers use the project scratch roots.
 `TIME_SEASONAL_SCOPE=shared` selects the existing common Seasonal store;
 `TIME_SEASONAL_ROOT` or `TIME_SEASONAL_TASKS_ROOT` may override its location.
 Prepared Arrow targets are consumed directly; no CSV exclusions or missing-value
@@ -145,7 +147,7 @@ to `completed`. A later failure preserves computed work, and a recovery launch
 finalizes it without forecasting again. Downstream stages and reports still
 require completed producers. Restarting recomputes only interrupted tasks.
 `STAGES` is a comma-separated recovery
-override. `TIME_RUN_CONFLICT_POLICY=overwrite_exact|overwrite_path|new`,
+override. `TIME_RUN_CONFLICT_POLICY=skip|replace|new` (default `skip`),
 `TIME_SKIP_COMPLETED`, and `TIME_FORCE_RERUN` retain the shared lifecycle controls.
 
 Scheduler launchers default to project-owned artifact roots while preserving
@@ -154,16 +156,24 @@ take precedence. The shared Seasonal producer uses the common Seasonal root
 for artifacts and its `logs/` child for job streams and workflow status;
 TS-RAG consumes its task grid through `TIME_SEASONAL_TASKS_ROOT`.
 Scientific stage artifacts live under
-`outputs/tsrag/{data,extractions,predictions,evaluations}`. Launch-exact reports
-live under `outputs/reports/tsrag/<launch-id>/`; their `performance/` bundle
-contains task/domain/timing tables and matched PNG/PDF figures.
+`<O>/tsrag/{data,extractions,predictions,evaluations}`. Reports live under
+`<O>/tsrag/reports/`; their `performance/` bundle contains task/domain/timing
+tables and matched PNG/PDF figures. Here `<O>` is `outputs/dgx` for DGX/local
+execution, the project scratch `outputs` root on Selena, and `outputs/selena`
+after synchronization. Launch IDs and timestamps remain in manifests and
+experiment logs, never directory names. Runtime records are grouped below
+`logs/<surface>/tsrag/{slurm,hydra,stage_logs,workflow_status}/` as applicable.
 Data, extraction and prediction caches are split by `validation` versus `test`;
 extractions are also split by representation. Canonical
 `predictions/test/<method>/<dataset>/<term>/run_n/prediction.npy` files retain
 float32 medians. Mixture calibration is a separate
 `selections/bayes_mixture/.../weight.json` producer. Evaluation runs contain standard TIME predictions, metric
 arrays, and compact summaries. TS-RAG fallback masks/reasons and mixture weights
-are persisted. Reports include mean, population variance, standard deviation,
+are persisted. Every `run_n/manifest.json` is the authoritative schema-1
+scientific configuration and lifecycle record, including all result-changing
+settings omitted from the path. Runtime-only settings do not affect run
+identity, and run directories contain no redundant `config.json`. Reports
+include mean, population variance, standard deviation,
 finite-value counts, scaled MASE, and the matched Seasonal MASE variance ratio.
 An unavailable or zero Seasonal variance leaves that ratio undefined.
 

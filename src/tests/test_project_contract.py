@@ -312,9 +312,9 @@ class Contract(unittest.TestCase):
                 workflow.vanilla()
                 self.assertEqual(len(before), len(list(workflow.root.rglob('run_0/manifest.json'))))
                 self.assertFalse(list(workflow.root.rglob('run_1')))
-                report = json.loads((workflow.root.parent/'reports/tsrag/synthetic/report_manifest.json').read_text())
+                report = json.loads((workflow.root/'reports/report_manifest.json').read_text())
                 self.assertEqual(len(report['inputs']), len(workflow.methods()))
-                aggregate = json.loads((workflow.root.parent/'reports/tsrag/synthetic/comparison_summary.json').read_text())
+                aggregate = json.loads((workflow.root/'reports/comparison_summary.json').read_text())
                 self.assertEqual(aggregate['tsrag']['pooled_fallback_rate'], 1.)
                 self.assertEqual(aggregate['tsrag']['mean_task_fallback_rate'], 1.)
                 self.assertEqual(aggregate['tsrag']['fallback_split'], 'test')
@@ -375,7 +375,8 @@ class Contract(unittest.TestCase):
             text = front.read_text()
             for directive in required:
                 self.assertIn(f'#SBATCH {directive}', text)
-            self.assertIn('/codes/tsrag_time/logs/%x_%j', text)
+            self.assertIn('/codes/tsrag_time/logs/', text)
+            self.assertIn('/slurm/%x_%j', text)
         # Bash is the installed Git shell; this requires no project environment.
         bash = Path(r'C:\Program Files\Git\bin\bash.exe')
         if bash.exists():

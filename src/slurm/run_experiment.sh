@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 source "$PROJECT_ROOT/src/slurm/runtime_paths.sh"
+export TIME_EXPERIMENT=tsrag
 export PYTHONPATH="$PROJECT_ROOT/src${PYTHONPATH:+:$PYTHONPATH}"
 export HF_HUB_OFFLINE=1 HF_DATASETS_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export TSRAG_DEFER_COMPLETION=1

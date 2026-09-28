@@ -54,7 +54,7 @@ def foundation_weight_path(
 
 def outputs_root() -> Path:
     """Generated predictions, metrics, and experiment reports."""
-    return _configured_path("TIME_OUTPUTS", PROJECT_ROOT / "outputs")
+    return _configured_path("TIME_OUTPUTS", PROJECT_ROOT / "outputs" / "dgx")
 
 
 def foundation_experiment_name(experiment: str | None = None) -> str:
@@ -85,4 +85,4 @@ def foundation_identity_root(
 
 def logs_root() -> Path:
     """Runtime streams and scheduler logs."""
-    return _configured_path("TIME_LOGS", PROJECT_ROOT / "logs")
+    return _configured_path("TIME_LOGS", PROJECT_ROOT / "logs" / "dgx")

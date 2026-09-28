@@ -35,8 +35,8 @@ def resolve_shared_evaluation_grid(
         config_filters={
             "pipeline_config.evaluation_grid": EVALUATION_GRID_DEFINITION,
         },
-        config_policy="error",
-        repeat_policy="selected",
+        config_policy="latest",
+        repeat_policy="latest",
     )
     if len(selected) != 1:
         raise ManifestError(

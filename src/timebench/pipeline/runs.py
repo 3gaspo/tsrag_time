@@ -15,7 +15,7 @@ from typing import Any, Mapping, Sequence
 SCHEMA_VERSION = 1
 MANIFEST_NAME = "manifest.json"
 VALID_STATUSES = {"running", "interrupted", "computed", "completed"}
-CONFLICT_POLICIES = ("overwrite_exact", "overwrite_path", "new")
+CONFLICT_POLICIES = ("skip", "replace", "new")
 CONFIG_POLICIES = ("error", "distinct", "latest", "average")
 REPEAT_POLICIES = ("selected", "latest", "distinct", "average")
 RUN_PATTERN = re.compile(r"run_(\d+)")
@@ -130,12 +130,18 @@ class RunHandle:
             )
         return artifacts
 
-    def compute(self, required_artifacts: Sequence[str]) -> None:
+    def compute(
+        self,
+        required_artifacts: Sequence[str],
+        artifact_metadata: Mapping[str, Any] | None = None,
+    ) -> None:
         """Preserve finished computation before a separate final check."""
         if self.action in {"skip", "finalize"}:
             self._completed = True
             return
         artifacts = self._artifacts(required_artifacts)
+        if artifact_metadata is not None:
+            self.manifest["artifact_metadata"] = dict(artifact_metadata)
         self.manifest["required_artifacts"] = artifacts
         self.manifest["status"] = "computed"
         self.manifest.pop("error", None)
@@ -144,11 +150,17 @@ class RunHandle:
         _write_manifest(self.run_dir / MANIFEST_NAME, self.manifest)
         self._completed = True
 
-    def complete(self, required_artifacts: Sequence[str] | None = None) -> None:
+    def complete(
+        self,
+        required_artifacts: Sequence[str] | None = None,
+        artifact_metadata: Mapping[str, Any] | None = None,
+    ) -> None:
         if self.action == "skip":
             self._completed = True
             return
         artifacts = self._artifacts(required_artifacts)
+        if artifact_metadata is not None:
+            self.manifest["artifact_metadata"] = dict(artifact_metadata)
         self.manifest["required_artifacts"] = artifacts
         self.manifest["status"] = "completed"
         self.manifest.pop("error", None)
@@ -379,7 +391,7 @@ def _select_reuse_source(
             f"Reuse source is ambiguous for {dict(identity)}; select one completed run"
         )
     source_dir, source_manifest = reusable[0]
-    compact_artifacts = ("config.json", "metrics_summary.json")
+    compact_artifacts = ("metrics_summary.json",)
     missing = [
         name
         for name in compact_artifacts
@@ -432,7 +444,7 @@ def allocate_run(
     reuse_from: str | Path | None = None,
 ) -> RunHandle:
     """Skip, resume, overwrite, or allocate one exact task configuration."""
-    policy = policy or os.environ.get("TIME_RUN_CONFLICT_POLICY", "overwrite_exact")
+    policy = policy or os.environ.get("TIME_RUN_CONFLICT_POLICY", "skip")
     if policy not in CONFLICT_POLICIES:
         raise ManifestError(f"Run conflict policy must be one of {CONFLICT_POLICIES}")
     if skip_completed is None:
@@ -464,7 +476,7 @@ def allocate_run(
         if manifest["status"] == "computed"
         and (run_index is None or _run_index(path) == run_index)
     ]
-    if computed and policy == "overwrite_exact" and not force:
+    if computed and policy == "skip" and not force:
         target, manifest = max(computed, key=lambda item: _run_index(item[0]))
         launched_at = _now()
         attempt = _attempt("finalize", launched_at)
@@ -512,7 +524,7 @@ def allocate_run(
             )
     if reusable is not None:
         source_dir, source_manifest = reusable
-        compact_artifacts = ("config.json", "metrics_summary.json")
+        compact_artifacts = ("metrics_summary.json",)
         completed_local = [
             (path, manifest)
             for path, manifest in exact
@@ -557,9 +569,9 @@ def allocate_run(
                 and old_manifest.get("identity") == dict(identity)
                 and _scientific_config(old_manifest) == scientific
             )
-            if not same and policy != "overwrite_path":
+            if not same and policy != "replace":
                 raise ManifestError(
-                    f"{target} contains a different configuration; use overwrite_path"
+                    f"{target} contains a different configuration; use replace"
                 )
             _archive_manifest(target, old_manifest)
             _clear_run_artifacts(target)
@@ -578,6 +590,7 @@ def allocate_run(
             "pipeline_config": dict(pipeline_config),
             "runtime_config": dict(runtime_config),
             "experiment_config": dict(experiment_config),
+            "artifact_metadata": dict(source_manifest.get("artifact_metadata", {})),
             "provenance": {
                 **dict(provenance or {}),
                 "reused_from_manifest": str(source_manifest_path),
@@ -613,12 +626,12 @@ def allocate_run(
 
     if target is not None and target.exists() and policy == "new":
         raise ManifestError(f"Requested new run already exists: {target}")
-    if old_manifest is not None and policy == "overwrite_path":
+    if old_manifest is not None and policy == "replace":
         action = "overwrite"
     if target is None and policy == "new":
         next_index = 0 if not run_dirs else max(map(_run_index, run_dirs)) + 1
         target = root / f"run_{next_index}"
-    elif target is None and policy == "overwrite_path" and run_dirs:
+    elif target is None and policy == "replace" and run_dirs:
         target = run_dirs[-1]
         old_manifest = load_manifest(target)
         action = "overwrite"
@@ -634,9 +647,9 @@ def allocate_run(
             and old_manifest.get("identity") == dict(identity)
             and _scientific_config(old_manifest) == scientific
         )
-        if not same and policy != "overwrite_path":
+        if not same and policy != "replace":
             raise ManifestError(
-                f"{target} contains a different configuration; use overwrite_path"
+                f"{target} contains a different configuration; use replace"
             )
         if same:
             status = old_manifest["status"]
@@ -843,11 +856,11 @@ def select_completed_runs(
     target_modes: set[str] | None = None,
     launch_id: str | None = None,
     config_filters: Mapping[str, Any] | None = None,
-    config_policy: str = "error",
-    repeat_policy: str = "selected",
+    config_policy: str = "latest",
+    repeat_policy: str = "latest",
     task_specific_model_fields: set[str] | None = None,
 ) -> list[tuple[Path, dict[str, Any]]]:
-    """Select completed runs, allowing declared model fields to vary by task."""
+    """Select runs while allowing task fields such as Seasonal periodicity."""
     if config_policy not in CONFIG_POLICIES:
         raise ManifestError(f"config_policy must be one of {CONFIG_POLICIES}")
     if repeat_policy not in REPEAT_POLICIES:
@@ -999,12 +1012,16 @@ def select_completed_runs(
             else:
                 by_model.append([item])
         for group in by_model:
+            model = group[0][1]["identity"]["model"]
+            task_fields = set(task_specific_model_fields)
+            if model == "seasonal_naive":
+                task_fields.add("season_length")
             global_configs = [
                 {
                     "model_config": {
                         key: value
                         for key, value in item[1].get("model_config", {}).items()
-                        if key not in task_specific_model_fields
+                        if key not in task_fields
                     },
                     "covariate_mode": item[1]
                     .get("experiment_config", {})

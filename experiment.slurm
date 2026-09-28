@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=tsrag
 #SBATCH --gres=gpu:1
-#SBATCH --output=logs/%x_%j.out
-#SBATCH --error=logs/%x_%j.err
+#SBATCH --output=logs/dgx/tsrag/slurm/%x_%j.out
+#SBATCH --error=logs/dgx/tsrag/slurm/%x_%j.err
 #SBATCH --time=23:00:00
 #SBATCH --partition=h100
 #SBATCH --nodes=1

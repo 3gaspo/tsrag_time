@@ -105,14 +105,14 @@ fi
 
 paths=()
 if [ -n "$job_id" ]; then
-    shopt -s nullglob
-    out_logs=(
-        "$project_root"/logs/*_"$job_id".out
-        "$project_root"/logs/*_"$job_id"_*.out
-        "$project_root"/logs/selena/*_"$job_id".out
-        "$project_root"/logs/selena/*_"$job_id"_*.out
+    out_logs=()
+    while IFS= read -r -d '' out_log; do
+        out_logs+=("$out_log")
+    done < <(
+        find "$project_root/logs/dgx" "$project_root/logs/selena" \
+            -type f \( -name "*_${job_id}.out" -o -name "*_${job_id}_*.out" \) \
+            -print0 2>/dev/null
     )
-    shopt -u nullglob
     [ "${#out_logs[@]}" -gt 0 ] || {
         echo "no local or synchronized Selena logs found for job $job_id" >&2
         exit 1
@@ -128,18 +128,19 @@ if [ -n "$job_id" ]; then
             "${err_log#"$project_root"/}"
         )
     done
-    for status_root in logs/workflow_status logs/selena/workflow_status; do
+    for status_root in logs/dgx logs/selena; do
         [ -d "$status_root" ] || continue
         while IFS= read -r -d '' status_file; do
             if grep -qxF "slurm_job_id=$job_id" "$status_file"; then
                 paths+=("$status_file")
             fi
-        done < <(find "$status_root" -type f -name '*.status' -print0)
+        done < <(find "$status_root" -type f -path '*/workflow_status/*' -name '*.status' -print0)
     done
-    for metadata_root in logs/dataset_metadata logs/selena/dataset_metadata; do
-        if [ -d "$metadata_root/$job_id" ]; then
-            paths+=("$metadata_root/$job_id")
-        fi
+    for log_root in logs/dgx logs/selena; do
+        [ -d "$log_root" ] || continue
+        while IFS= read -r -d '' metadata_file; do
+            paths+=("$metadata_file")
+        done < <(find "$log_root" -type f -path "*/dataset_metadata/${job_id}__*" -print0)
     done
     [ -n "$message" ] || message="slurm: publish job $job_id"
 else

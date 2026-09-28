@@ -25,7 +25,7 @@ def main():
         names = (SOURCES if args.render == 'all' else ('method_overview', 'experiment_guideline')
                  if args.render == 'protocol' else ('method_overview',))
         for name in names:
-            build = ROOT/'outputs/documentation_build'/name
+            build = ROOT/'outputs/dgx/documentation_build'/name
             build.mkdir(parents=True, exist_ok=True)
             for repeat in range(2):
                 result = subprocess.run([pdflatex, '-interaction=nonstopmode', '-halt-on-error',

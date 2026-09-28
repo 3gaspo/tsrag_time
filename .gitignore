@@ -2,10 +2,12 @@ AGENTS.md
 .venv/
 __pycache__/
 *.py[cod]
-outputs/*
-!outputs/.gitkeep
-logs/*
-!logs/.gitkeep
+outputs/**
+!outputs/**/
+!outputs/**/.gitkeep
+logs/**
+!logs/**/
+!logs/**/.gitkeep
 datasets/*
 !datasets/.gitkeep
 weights/*

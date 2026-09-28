@@ -20,7 +20,10 @@ def main():
         if manifest['status'] != 'computed' or manifest['launch']['launch_id'] != args.launch:
             continue
         ready = json.loads(path.read_text())
-        RunHandle(path.parent, manifest, 'finalize').complete(ready['required_artifacts'])
+        RunHandle(path.parent, manifest, 'finalize').complete(
+            ready['required_artifacts'],
+            artifact_metadata=ready.get('artifact_metadata'),
+        )
         path.unlink()
 
 

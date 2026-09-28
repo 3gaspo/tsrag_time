@@ -184,7 +184,13 @@ each split and representation use compact dependency references containing
 only their actual scientific inputs. No source, dataset or checkpoint file
 hashes exist.
 Canonical float32 predictions, fallback masks/reasons and weights live below
-\texttt{outputs/tsrag/}; logs live below \texttt{logs/}. Scheduler runtimes enforce the owning project's
+\texttt{outputs/<surface>/tsrag/}; reports live below that experiment's
+\texttt{reports/} directory. Logs use the matching
+\texttt{logs/<surface>/tsrag/} hierarchy. Timestamps and launch identifiers
+remain in manifests and logs rather than directory names. Each
+\texttt{run\_n/manifest.json} is the authoritative scientific configuration and
+lifecycle record; run directories do not duplicate it in a
+\texttt{config.json}. Scheduler runtimes enforce the owning project's
 artifact roots, ignoring copied or inherited artifact aliases while retaining
 shared dataset and weight settings. Reports include retrieval axes, alignment
 periods and fallback methods, and record all input

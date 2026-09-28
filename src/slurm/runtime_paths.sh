@@ -39,8 +39,8 @@ if [ -n "${SELENA_NNI:-}" ]; then
     default_outputs_root="$TIME_SCRATCH_ROOT/outputs"
     default_logs_root="$TIME_SCRATCH_ROOT/logs"
 else
-    default_outputs_root="$runtime_project_root/outputs"
-    default_logs_root="$runtime_project_root/logs"
+    default_outputs_root="$runtime_project_root/outputs/dgx"
+    default_logs_root="$runtime_project_root/logs/dgx"
 fi
 OUTPUTS_ROOT="${OUTPUTS_ROOT:-${TIME_OUTPUTS:-$default_outputs_root}}"
 LOGS_ROOT="${LOGS_ROOT:-${TIME_LOGS:-$default_logs_root}}"

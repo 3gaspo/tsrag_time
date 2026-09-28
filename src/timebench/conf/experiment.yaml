@@ -32,6 +32,7 @@ minimum_overlap_fraction: 0.8
 alignment_period: null
 hydra:
   run:
-    dir: ${oc.env:TIME_LOGS,logs}/hydra/${now:%Y%m%d_%H%M%S}_${stage}
+    dir: ${oc.env:TIME_LOGS,logs/dgx}/${oc.env:TIME_EXPERIMENT,tsrag}/hydra/${stage}
   job:
     chdir: false
+  output_subdir: null
