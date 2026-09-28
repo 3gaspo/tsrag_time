@@ -6,7 +6,8 @@ runtime_project_root="${PROJECT_ROOT:-${ROOT_DIR:?ROOT_DIR or PROJECT_ROOT must 
 # Project path settings apply before defaults; explicit submission overrides win.
 runtime_path_variables=(TIME_STORAGE_ROOT TIME_DATA_ROOT TIME_DATASET TIME_METADATA TIME_WEIGHTS
     TIME_VANILLA_PREDICTIONS_PATH
-    TIME_SEASONAL_SCOPE TIME_SEASONAL_ROOT TIME_SEASONAL_TASKS_ROOT TIME_SEASONAL_LOGS_ROOT
+    TIME_SEASONAL_SCOPE TIME_SEASONAL_ROOT TIME_SEASONAL_OUTPUTS_ROOT
+    TIME_SEASONAL_EVALUATIONS_ROOT TIME_SEASONAL_LOGS_ROOT
     OUTPUTS_ROOT LOGS_ROOT TIME_OUTPUTS TIME_LOGS
     HF_HOME HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE TORCH_HOME)
 declare -A runtime_path_overrides=()
@@ -53,7 +54,7 @@ case "$TIME_SEASONAL_SCOPE" in
         default_seasonal_root="$TIME_STORAGE_ROOT/codes/seasonal"
         ;;
     project)
-        default_seasonal_root="$TIME_OUTPUTS"
+        default_seasonal_root="$runtime_project_root"
         ;;
     *)
         echo "TIME_SEASONAL_SCOPE must be shared or project" >&2
@@ -61,12 +62,15 @@ case "$TIME_SEASONAL_SCOPE" in
         ;;
 esac
 TIME_SEASONAL_ROOT="${TIME_SEASONAL_ROOT:-$default_seasonal_root}"
-TIME_SEASONAL_TASKS_ROOT="${TIME_SEASONAL_TASKS_ROOT:-$TIME_SEASONAL_ROOT/foundation_models/tasks}"
 if [ "$TIME_SEASONAL_SCOPE" = shared ]; then
+    default_seasonal_outputs_root="$TIME_SEASONAL_ROOT/outputs"
     default_seasonal_logs_root="$TIME_SEASONAL_ROOT/logs"
 else
+    default_seasonal_outputs_root="$TIME_OUTPUTS"
     default_seasonal_logs_root="$TIME_LOGS"
 fi
+TIME_SEASONAL_OUTPUTS_ROOT="${TIME_SEASONAL_OUTPUTS_ROOT:-$default_seasonal_outputs_root}"
+TIME_SEASONAL_EVALUATIONS_ROOT="${TIME_SEASONAL_EVALUATIONS_ROOT:-$TIME_SEASONAL_OUTPUTS_ROOT/seasonal_naive/evaluations}"
 TIME_SEASONAL_LOGS_ROOT="${TIME_SEASONAL_LOGS_ROOT:-$default_seasonal_logs_root}"
 
 HF_HOME="${HF_HOME:-$TIME_WEIGHTS/huggingface}"
@@ -77,7 +81,8 @@ TORCH_HOME="${TORCH_HOME:-$TIME_WEIGHTS/torch}"
 
 export TIME_STORAGE_ROOT TIME_DATA_ROOT TIME_DATASET TIME_METADATA TIME_WEIGHTS
 export TIME_VANILLA_PREDICTIONS_PATH
-export TIME_SEASONAL_SCOPE TIME_SEASONAL_ROOT TIME_SEASONAL_TASKS_ROOT TIME_SEASONAL_LOGS_ROOT
+export TIME_SEASONAL_SCOPE TIME_SEASONAL_ROOT TIME_SEASONAL_OUTPUTS_ROOT
+export TIME_SEASONAL_EVALUATIONS_ROOT TIME_SEASONAL_LOGS_ROOT
 export OUTPUTS_ROOT LOGS_ROOT TIME_OUTPUTS TIME_LOGS
 export HF_HOME HUGGINGFACE_HUB_CACHE HF_DATASETS_CACHE TRANSFORMERS_CACHE TORCH_HOME
 echo "[$(date -u '+%Y-%m-%d %H:%M:%S UTC')] TS-RAG paths: project=$runtime_project_root outputs=$TIME_OUTPUTS logs=$TIME_LOGS"

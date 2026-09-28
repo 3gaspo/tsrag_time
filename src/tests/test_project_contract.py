@@ -368,14 +368,17 @@ class Contract(unittest.TestCase):
         runtime = (ROOT/'src/slurm/runtime_paths.sh').read_text()
         seasonal_submit = (ROOT/'src/slurm/submit_seasonal.sh').read_text()
         self.assertIn('OUTPUTS_ROOT="${OUTPUTS_ROOT:-${TIME_OUTPUTS:-$default_outputs_root}}"', runtime)
+        self.assertIn('OUTPUTS_ROOT=$TIME_SEASONAL_OUTPUTS_ROOT', seasonal_submit)
         self.assertIn('LOGS_ROOT=$TIME_SEASONAL_LOGS_ROOT', seasonal_submit)
+        self.assertIn('TIME_EXPERIMENT=seasonal_naive', seasonal_submit)
         required = ('--gres=gpu:1', '--partition=an', '--qos=an_preemptable', '--exclusive',
                     '--wckey=P12CU:DATASCIENCE', '--ntasks=1')
         for front in ROOT.glob('*_selena.slurm'):
             text = front.read_text()
             for directive in required:
                 self.assertIn(f'#SBATCH {directive}', text)
-            self.assertIn('/codes/tsrag_time/logs/', text)
+            log_owner = 'seasonal' if front.name == 'seasonal_naive_selena.slurm' else 'tsrag_time'
+            self.assertIn(f'/codes/{log_owner}/logs/', text)
             self.assertIn('/slurm/%x_%j', text)
         # Bash is the installed Git shell; this requires no project environment.
         bash = Path(r'C:\Program Files\Git\bin\bash.exe')

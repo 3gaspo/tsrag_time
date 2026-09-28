@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=seasonal
-#SBATCH --output=logs/dgx/foundation_models/slurm/%x_%j.out
-#SBATCH --error=logs/dgx/foundation_models/slurm/%x_%j.err
+#SBATCH --output=logs/dgx/seasonal_naive/slurm/%x_%j.out
+#SBATCH --error=logs/dgx/seasonal_naive/slurm/%x_%j.err
 #SBATCH --time=23:00:00
 #SBATCH --partition=h100
 #SBATCH --nodes=1
@@ -12,6 +12,6 @@
 PROJECT_ROOT="${SLURM_SUBMIT_DIR:-$(pwd)}"
 cd "$PROJECT_ROOT"
 export PROJECT_ROOT TIME_STORAGE_ROOT="${TIME_STORAGE_ROOT:-$HOME}"
-export TIME_EXPERIMENT=foundation_models
+export TIME_EXPERIMENT=seasonal_naive
 export TIME_LAUNCH_ID="${TIME_LAUNCH_ID:-dgx_seasonal_${SLURM_JOB_ID}}"
 source "$PROJECT_ROOT/src/slurm/run_seasonal.sh"

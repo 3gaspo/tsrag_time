@@ -51,8 +51,8 @@ The main path variables retain TIME's data and weight defaults:
 `TIME_DATASET=datasets/hf_dataset` and `TIME_WEIGHTS=weights`. DGX/local
 artifacts default to `TIME_OUTPUTS=outputs/dgx` and `TIME_LOGS=logs/dgx`;
 Selena launchers use the project scratch roots.
-`TIME_SEASONAL_SCOPE=shared` selects the existing common Seasonal store;
-`TIME_SEASONAL_ROOT` or `TIME_SEASONAL_TASKS_ROOT` may override its location.
+`TIME_SEASONAL_SCOPE=shared` selects the independent common Seasonal checkout;
+`TIME_SEASONAL_ROOT` or `TIME_SEASONAL_EVALUATIONS_ROOT` may override its location.
 Prepared Arrow targets are consumed directly; no CSV exclusions or missing-value
 policy is applied a second time.
 
@@ -152,9 +152,10 @@ override. `TIME_RUN_CONFLICT_POLICY=skip|replace|new` (default `skip`),
 
 Scheduler launchers default to project-owned artifact roots while preserving
 shared data/weight settings. Explicit `OUTPUTS_ROOT` and `LOGS_ROOT` values
-take precedence. The shared Seasonal producer uses the common Seasonal root
-for artifacts and its `logs/` child for job streams and workflow status;
-TS-RAG consumes its task grid through `TIME_SEASONAL_TASKS_ROOT`.
+take precedence. The shared Seasonal checkout stores artifacts below
+`outputs/seasonal_naive/` and runtime records below `logs/seasonal_naive/`;
+TS-RAG consumes its completed evaluation grid through
+`TIME_SEASONAL_EVALUATIONS_ROOT`.
 Scientific stage artifacts live under
 `<O>/tsrag/{data,extractions,predictions,evaluations}`. Reports live under
 `<O>/tsrag/reports/`; their `performance/` bundle contains task/domain/timing

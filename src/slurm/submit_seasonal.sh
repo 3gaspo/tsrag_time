@@ -18,9 +18,9 @@ esac
 if [ "$#" -ge 2 ]; then shift 2; elif [ "$#" -eq 1 ]; then shift; fi
 dependency=()
 [ -z "${SBATCH_DEPENDENCY:-}" ] || dependency=(--dependency="$SBATCH_DEPENDENCY")
-mkdir -p "$TIME_LOGS/foundation_models/slurm" "$TIME_SEASONAL_LOGS_ROOT/foundation_models/slurm"
+mkdir -p "$TIME_SEASONAL_LOGS_ROOT/seasonal_naive/slurm"
 sbatch "${dependency[@]}" \
-    --output="$TIME_SEASONAL_LOGS_ROOT/foundation_models/slurm/%x_%j.out" \
-    --error="$TIME_SEASONAL_LOGS_ROOT/foundation_models/slurm/%x_%j.err" \
-    --export="ALL,OUTPUTS_ROOT=$TIME_SEASONAL_ROOT,LOGS_ROOT=$TIME_SEASONAL_LOGS_ROOT,TIME_EXPERIMENT=foundation_models" \
+    --output="$TIME_SEASONAL_LOGS_ROOT/seasonal_naive/slurm/%x_%j.out" \
+    --error="$TIME_SEASONAL_LOGS_ROOT/seasonal_naive/slurm/%x_%j.err" \
+    --export="ALL,OUTPUTS_ROOT=$TIME_SEASONAL_OUTPUTS_ROOT,LOGS_ROOT=$TIME_SEASONAL_LOGS_ROOT,TIME_EXPERIMENT=seasonal_naive" \
     "$front" "$@"

@@ -14,16 +14,15 @@ def resolve_shared_evaluation_grid(
 ) -> Path:
     """Return one selected completed grid produced in the shared Seasonal root."""
 
-    tasks_root = os.environ.get("TIME_SEASONAL_TASKS_ROOT")
-    if not tasks_root:
+    evaluations_root = os.environ.get("TIME_SEASONAL_EVALUATIONS_ROOT")
+    if not evaluations_root:
         raise ManifestError(
-            "TIME_SEASONAL_TASKS_ROOT must point to Seasonal Naive task artifacts"
+            "TIME_SEASONAL_EVALUATIONS_ROOT must point to Seasonal Naive evaluations"
         )
     if target_mode not in {"univariate", "multivariate"}:
         raise ManifestError(f"Unknown target mode {target_mode!r}")
     identity_root = (
-        Path(tasks_root).expanduser().resolve()
-        / "seasonal_naive"
+        Path(evaluations_root).expanduser().resolve()
         / "univariate"
         / dataset
         / term
