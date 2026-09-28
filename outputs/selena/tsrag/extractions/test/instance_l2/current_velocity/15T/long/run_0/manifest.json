@@ -1,0 +1,100 @@
+{
+  "computed_at": "2026-09-27T21:19:25.117331+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {},
+  "identity": {
+    "dataset": "current_velocity",
+    "frequency": "15T",
+    "method": "instance_l2",
+    "model": "instance_l2",
+    "target_mode": "univariate",
+    "term": "long"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-27T21:19:21.294021+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      }
+    ],
+    "launch_id": "selena_3584841",
+    "launched_at": "2026-09-27T21:19:21.294021+00:00",
+    "slurm_job_id": "3584841"
+  },
+  "model_config": {
+    "checkpoint": null,
+    "context_length": 512,
+    "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+    "method": "retrieval_representation",
+    "representation": "instance_l2"
+  },
+  "pipeline_config": {
+    "dependencies": {
+      "data": {
+        "completed_at": "2026-09-27T14:52:32.885880+00:00",
+        "identity": {
+          "dataset": "current_velocity",
+          "frequency": "15T",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "long"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "instance_l2",
+    "phase": "extractions/test",
+    "representation": "instance_l2",
+    "split": "test",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "current_velocity/15T",
+      "prediction_length": 288,
+      "seasonality": 96,
+      "term": "long",
+      "test_length": 1440
+    },
+    "validation_support": null
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/current_velocity/15T",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 96,
+      "dataset": "current_velocity/15T",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 288,
+      "seasonality": 96,
+      "term": "long",
+      "test_length": 1440,
+      "validation_length": 1440
+    },
+    "upstream_manifests": {
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/current_velocity/15T/long/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "datastore.npy",
+    "query.npy",
+    "extraction.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-27T21:19:21.294021+00:00",
+  "status": "computed",
+  "updated_at": "2026-09-27T21:19:25.117331+00:00"
+}

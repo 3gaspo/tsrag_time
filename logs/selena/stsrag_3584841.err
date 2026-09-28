@@ -55,3 +55,5 @@
 Loading weights:   0%|          | 0/257 [00:00<?, ?it/s]Loading weights:  80%|████████  | 206/257 [00:00<00:00, 2058.08it/s]Loading weights: 100%|██████████| 257/257 [00:00<00:00, 2060.36it/s]
 /fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
   periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]

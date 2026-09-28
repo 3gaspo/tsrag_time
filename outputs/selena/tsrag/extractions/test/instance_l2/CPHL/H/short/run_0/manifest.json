@@ -1,0 +1,100 @@
+{
+  "computed_at": "2026-09-27T22:41:12.595580+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {},
+  "identity": {
+    "dataset": "CPHL",
+    "frequency": "H",
+    "method": "instance_l2",
+    "model": "instance_l2",
+    "target_mode": "univariate",
+    "term": "short"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-27T22:41:12.206072+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      }
+    ],
+    "launch_id": "selena_3584841",
+    "launched_at": "2026-09-27T22:41:12.206072+00:00",
+    "slurm_job_id": "3584841"
+  },
+  "model_config": {
+    "checkpoint": null,
+    "context_length": 512,
+    "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+    "method": "retrieval_representation",
+    "representation": "instance_l2"
+  },
+  "pipeline_config": {
+    "dependencies": {
+      "data": {
+        "completed_at": "2026-09-27T14:52:32.738861+00:00",
+        "identity": {
+          "dataset": "CPHL",
+          "frequency": "H",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "instance_l2",
+    "phase": "extractions/test",
+    "representation": "instance_l2",
+    "split": "test",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "CPHL/H",
+      "prediction_length": 24,
+      "seasonality": 24,
+      "term": "short",
+      "test_length": 672
+    },
+    "validation_support": null
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/CPHL/H",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 24,
+      "dataset": "CPHL/H",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 24,
+      "seasonality": 24,
+      "term": "short",
+      "test_length": 672,
+      "validation_length": 672
+    },
+    "upstream_manifests": {
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/CPHL/H/short/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "datastore.npy",
+    "query.npy",
+    "extraction.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-27T22:41:12.206072+00:00",
+  "status": "computed",
+  "updated_at": "2026-09-27T22:41:12.595580+00:00"
+}

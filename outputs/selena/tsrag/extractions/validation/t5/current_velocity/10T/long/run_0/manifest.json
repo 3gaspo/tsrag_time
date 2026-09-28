@@ -1,4 +1,5 @@
 {
+  "computed_at": "2026-09-27T20:08:46.996900+00:00",
   "experiment": "tsrag",
   "experiment_config": {},
   "identity": {
@@ -82,7 +83,11 @@
       "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/validation/shared/current_velocity/10T/long/run_0/manifest.json"
     }
   },
-  "required_artifacts": [],
+  "required_artifacts": [
+    "datastore.npy",
+    "query.npy",
+    "extraction.json"
+  ],
   "runtime_config": {
     "batch_size": 32,
     "device": "cuda",
@@ -90,6 +95,6 @@
   },
   "schema_version": 1,
   "started_at": "2026-09-27T19:33:35.757374+00:00",
-  "status": "running",
-  "updated_at": "2026-09-27T19:33:35.757374+00:00"
+  "status": "computed",
+  "updated_at": "2026-09-27T20:08:46.996900+00:00"
 }
