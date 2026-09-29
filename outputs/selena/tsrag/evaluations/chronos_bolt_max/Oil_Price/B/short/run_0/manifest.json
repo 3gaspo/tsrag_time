@@ -1,4 +1,50 @@
 {
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": null,
+      "context_length": 2048,
+      "dataset_config": "Oil_Price/B/short",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/Oil_Price/B/short/run_0/evaluation_grid.npz",
+        "total_values": 420,
+        "valid_values": 420
+      },
+      "experiment": "tsrag",
+      "fallback_counts": null,
+      "forecast_type": "point",
+      "freq": "B",
+      "inference_seconds": 0.46498194336891174,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "chronos_bolt_max",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 420,
+      "num_quantiles": 1,
+      "num_series": 1,
+      "num_variates": 12,
+      "num_windows": 35,
+      "prediction_length": 20,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_max/Oil_Price/B/short/run_0/manifest.json",
+      "prediction_scale_factor": 1.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": null,
+      "seasonality": 5,
+      "target_mode": "univariate",
+      "tsrag_weight": null
+    }
+  },
   "completed_at": "2026-09-18T01:58:25.077231+00:00",
   "experiment": "tsrag",
   "experiment_config": {
@@ -141,8 +187,7 @@
   "required_artifacts": [
     "predictions.npz",
     "metrics.npz",
-    "metrics_summary.json",
-    "config.json"
+    "metrics_summary.json"
   ],
   "runtime_config": {
     "batch_size": 32,

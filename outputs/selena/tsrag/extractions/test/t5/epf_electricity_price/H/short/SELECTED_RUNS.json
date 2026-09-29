@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "checkpoint": "chronos-t5-base",
+          "context_length": 512,
+          "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+          "method": "retrieval_representation",
+          "representation": "t5"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:32.827123+00:00",
+              "identity": {
+                "dataset": "epf_electricity_price",
+                "frequency": "H",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "t5",
+          "phase": "extractions/test",
+          "representation": "t5",
+          "split": "test",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "epf_electricity_price/H",
+            "prediction_length": 24,
+            "seasonality": 24,
+            "term": "short",
+            "test_length": 2520
+          },
+          "validation_support": null
+        }
+      }
+    }
+  ]
+}

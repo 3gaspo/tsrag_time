@@ -1,4 +1,68 @@
 {
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": 12,
+      "context_length": 512,
+      "dataset_config": "Housing_Inventory/M/short",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/Housing_Inventory/M/short/run_0/evaluation_grid.npz",
+        "total_values": 12,
+        "valid_values": 12
+      },
+      "experiment": "tsrag",
+      "fallback_counts": {
+        "test": {
+          "all_rows": 12,
+          "eligible_rows": 12,
+          "grid_rows": 12,
+          "total_rows": 12
+        },
+        "validation": {
+          "all_rows": 4,
+          "eligible_rows": 4,
+          "grid_rows": 4,
+          "total_rows": 4
+        }
+      },
+      "forecast_type": "point",
+      "freq": "M",
+      "inference_seconds": 0.00021277368068695068,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "tsrag",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 12,
+      "num_quantiles": 1,
+      "num_series": 1,
+      "num_variates": 4,
+      "num_windows": 3,
+      "prediction_length": 12,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/tsrag/Housing_Inventory/M/short/run_0/manifest.json",
+      "prediction_scale_factor": 100.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": {
+        "aligned": false,
+        "query_scale": false,
+        "representation": "t5",
+        "scope": "all"
+      },
+      "seasonality": 12,
+      "target_mode": "univariate",
+      "tsrag_weight": null
+    }
+  },
   "completed_at": "2026-09-18T01:58:26.064623+00:00",
   "experiment": "tsrag",
   "experiment_config": {
@@ -321,8 +385,7 @@
   "required_artifacts": [
     "predictions.npz",
     "metrics.npz",
-    "metrics_summary.json",
-    "config.json"
+    "metrics_summary.json"
   ],
   "runtime_config": {
     "batch_size": 32,

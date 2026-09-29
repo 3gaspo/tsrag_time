@@ -1,87 +1,86 @@
 {
-  "dataset_config": "CPHL/H/long",
   "aggregation": "mean over the shared Seasonal Naive MASE evaluation grid",
+  "dataset_config": "CPHL/H/long",
   "evaluation_grid": {
     "definition": "finite_ground_truth_and_seasonal_naive_mase",
-    "source": "/fslarge/scratch/users/h61084/codes/seasonal/foundation_models/tasks/seasonal_naive/univariate/CPHL/H/long/run_0/evaluation_grid.npz",
-    "valid_values": 8,
-    "total_values": 8
+    "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/CPHL/H/long/run_0/evaluation_grid.npz",
+    "total_values": 8,
+    "valid_values": 8
   },
+  "inference_seconds": 0.9428048292174935,
   "metrics": {
-    "MSE": {
-      "mean": 0.5238185329237314,
-      "std": 0.6550138036726778,
-      "variance": 0.4290430830017493,
+    "CRPS": {
       "dispersion_ddof": 0,
-      "finite_values": 8,
       "evaluation_values": 8,
-      "total_values": 8
+      "finite_values": 8,
+      "mean": 0.4389587691063507,
+      "std": 0.1333466379644312,
+      "total_values": 8,
+      "variance": 0.017781325856417084
     },
     "MAE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 0.46611354091804463,
       "std": 0.3435189129165073,
-      "variance": 0.11800524353133895,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
-    },
-    "RMSE": {
-      "mean": 0.5845880157557486,
-      "std": 0.42670292330670523,
-      "variance": 0.18207538475848795,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
+      "total_values": 8,
+      "variance": 0.11800524353133895
     },
     "MAPE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 0.5010015872890765,
       "std": 0.1892043382175999,
-      "variance": 0.03579828160035994,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
-    },
-    "sMAPE": {
-      "mean": 0.4763134064004913,
-      "std": 0.15956734971862596,
-      "variance": 0.025461739096226284,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
+      "total_values": 8,
+      "variance": 0.03579828160035994
     },
     "MASE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 2.1359616387568403,
       "std": 0.8567834100413897,
-      "variance": 0.734077811722152,
+      "total_values": 8,
+      "variance": 0.734077811722152
+    },
+    "MSE": {
       "dispersion_ddof": 0,
-      "finite_values": 8,
       "evaluation_values": 8,
-      "total_values": 8
+      "finite_values": 8,
+      "mean": 0.5238185329237314,
+      "std": 0.6550138036726778,
+      "total_values": 8,
+      "variance": 0.4290430830017493
     },
     "ND": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 0.4389587691063507,
       "std": 0.1333466379644312,
-      "variance": 0.017781325856417084,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
+      "total_values": 8,
+      "variance": 0.017781325856417084
     },
-    "CRPS": {
-      "mean": 0.4389587691063507,
-      "std": 0.1333466379644312,
-      "variance": 0.017781325856417084,
+    "RMSE": {
       "dispersion_ddof": 0,
-      "finite_values": 8,
       "evaluation_values": 8,
-      "total_values": 8
+      "finite_values": 8,
+      "mean": 0.5845880157557486,
+      "std": 0.42670292330670523,
+      "total_values": 8,
+      "variance": 0.18207538475848795
+    },
+    "sMAPE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
+      "mean": 0.4763134064004913,
+      "std": 0.15956734971862596,
+      "total_values": 8,
+      "variance": 0.025461739096226284
     }
   },
-  "launch_id": "selena_3452080",
-  "model": "bayes_mixture",
-  "inference_seconds": 0.9428048292174935
+  "model": "bayes_mixture"
 }

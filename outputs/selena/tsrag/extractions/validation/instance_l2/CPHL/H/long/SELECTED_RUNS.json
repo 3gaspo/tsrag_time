@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "checkpoint": null,
+          "context_length": 512,
+          "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+          "method": "retrieval_representation",
+          "representation": "instance_l2"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:31.883062+00:00",
+              "identity": {
+                "dataset": "CPHL",
+                "frequency": "H",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "long"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "instance_l2",
+          "phase": "extractions/validation",
+          "representation": "instance_l2",
+          "split": "validation",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "CPHL/H",
+            "prediction_length": 336,
+            "seasonality": 24,
+            "term": "long",
+            "test_length": 672
+          },
+          "validation_support": "finite_context_and_future"
+        }
+      }
+    }
+  ]
+}

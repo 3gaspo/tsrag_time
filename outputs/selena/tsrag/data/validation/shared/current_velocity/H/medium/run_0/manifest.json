@@ -20,6 +20,34 @@
         "launched_at": "2026-09-27T14:52:09.737989+00:00",
         "slurm_array_task_id": null,
         "slurm_job_id": "3584841"
+      },
+      {
+        "action": "reuse",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-28T11:21:56.839711+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      },
+      {
+        "action": "reuse",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-28T11:25:24.298129+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      },
+      {
+        "action": "reuse",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-28T11:47:23.926269+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
+      },
+      {
+        "action": "reuse",
+        "launch_id": "selena_3584841",
+        "launched_at": "2026-09-28T12:46:17.996450+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3584841"
       }
     ],
     "launch_id": "selena_3584841",
@@ -83,5 +111,5 @@
   "schema_version": 1,
   "started_at": "2026-09-27T14:52:09.737989+00:00",
   "status": "completed",
-  "updated_at": "2026-09-27T14:52:32.063352+00:00"
+  "updated_at": "2026-09-28T12:46:17.996450+00:00"
 }

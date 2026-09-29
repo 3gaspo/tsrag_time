@@ -1,4 +1,68 @@
 {
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": 1,
+      "context_length": 512,
+      "dataset_config": "US_Term_Structure/B/short",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/US_Term_Structure/B/short/run_0/evaluation_grid.npz",
+        "total_values": 1400,
+        "valid_values": 1400
+      },
+      "experiment": "tsrag",
+      "fallback_counts": {
+        "test": {
+          "all_rows": 1400,
+          "eligible_rows": 1400,
+          "grid_rows": 1400,
+          "total_rows": 1400
+        },
+        "validation": {
+          "all_rows": 200,
+          "eligible_rows": 200,
+          "grid_rows": 200,
+          "total_rows": 200
+        }
+      },
+      "forecast_type": "point",
+      "freq": "B",
+      "inference_seconds": 77.79992619156837,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "tsrag",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 1400,
+      "num_quantiles": 1,
+      "num_series": 1,
+      "num_variates": 40,
+      "num_windows": 35,
+      "prediction_length": 20,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/tsrag/US_Term_Structure/B/short/run_0/manifest.json",
+      "prediction_scale_factor": 1.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": {
+        "aligned": false,
+        "query_scale": false,
+        "representation": "t5",
+        "scope": "all"
+      },
+      "seasonality": 5,
+      "target_mode": "univariate",
+      "tsrag_weight": null
+    }
+  },
   "completed_at": "2026-09-18T01:58:26.079265+00:00",
   "experiment": "tsrag",
   "experiment_config": {
@@ -321,8 +385,7 @@
   "required_artifacts": [
     "predictions.npz",
     "metrics.npz",
-    "metrics_summary.json",
-    "config.json"
+    "metrics_summary.json"
   ],
   "runtime_config": {
     "batch_size": 32,

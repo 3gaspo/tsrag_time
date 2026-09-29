@@ -1,4 +1,68 @@
 {
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": 1,
+      "context_length": 512,
+      "dataset_config": "Job_Claims/W/short",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/Job_Claims/W/short/run_0/evaluation_grid.npz",
+        "total_values": 8,
+        "valid_values": 8
+      },
+      "experiment": "tsrag",
+      "fallback_counts": {
+        "test": {
+          "all_rows": 8,
+          "eligible_rows": 8,
+          "grid_rows": 8,
+          "total_rows": 8
+        },
+        "validation": {
+          "all_rows": 2,
+          "eligible_rows": 2,
+          "grid_rows": 2,
+          "total_rows": 2
+        }
+      },
+      "forecast_type": "point",
+      "freq": "W",
+      "inference_seconds": 0.00017326325178146362,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "tsrag",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 8,
+      "num_quantiles": 1,
+      "num_series": 1,
+      "num_variates": 2,
+      "num_windows": 4,
+      "prediction_length": 13,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/tsrag/Job_Claims/W/short/run_0/manifest.json",
+      "prediction_scale_factor": 100.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": {
+        "aligned": false,
+        "query_scale": false,
+        "representation": "t5",
+        "scope": "all"
+      },
+      "seasonality": 1,
+      "target_mode": "univariate",
+      "tsrag_weight": null
+    }
+  },
   "completed_at": "2026-09-18T01:58:26.071919+00:00",
   "experiment": "tsrag",
   "experiment_config": {
@@ -321,8 +385,7 @@
   "required_artifacts": [
     "predictions.npz",
     "metrics.npz",
-    "metrics_summary.json",
-    "config.json"
+    "metrics_summary.json"
   ],
   "runtime_config": {
     "batch_size": 32,

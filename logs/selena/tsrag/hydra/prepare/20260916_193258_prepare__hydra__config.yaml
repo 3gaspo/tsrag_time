@@ -1,0 +1,43 @@
+stage: prepare
+experiment_mode: full
+datasets:
+- all
+terms:
+- short
+- medium
+- long
+excluded_datasets:
+- Coastal_T_S/5T
+- current_velocity/20T
+- azure2019_D/5T
+- azure2019_I/5T
+dataset_config: null
+seed: 0
+device: cuda
+batch_size: 32
+embedding_batch_size: 512
+t5_samples: 20
+validation_length: null
+datastore_stride: 1
+max_datastore_windows: null
+ablation: false
+retrieval:
+  scope: all
+  aligned: false
+  query_scale: false
+  representation: t5
+retrieval_grid:
+  scope:
+  - all
+  - same_series
+  aligned:
+  - false
+  - true
+  query_scale:
+  - false
+  - true
+  representation:
+  - t5
+  - instance_l2
+minimum_overlap_fraction: 0.8
+alignment_period: null

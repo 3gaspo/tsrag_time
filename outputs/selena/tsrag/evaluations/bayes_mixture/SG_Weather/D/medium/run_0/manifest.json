@@ -1,4 +1,50 @@
 {
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": null,
+      "context_length": 8192,
+      "dataset_config": "SG_Weather/D/medium",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/SG_Weather/D/medium/run_0/evaluation_grid.npz",
+        "total_values": 1248,
+        "valid_values": 1222
+      },
+      "experiment": "tsrag",
+      "fallback_counts": null,
+      "forecast_type": "point",
+      "freq": "D",
+      "inference_seconds": 30.81966257840395,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "bayes_mixture",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 1248,
+      "num_quantiles": 1,
+      "num_series": 6,
+      "num_variates": 4,
+      "num_windows": 52,
+      "prediction_length": 7,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/bayes_mixture/SG_Weather/D/medium/run_0/manifest.json",
+      "prediction_scale_factor": 1.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": null,
+      "seasonality": 1,
+      "target_mode": "univariate",
+      "tsrag_weight": 0.46645367412140576
+    }
+  },
   "completed_at": "2026-09-18T01:58:24.148352+00:00",
   "experiment": "tsrag",
   "experiment_config": {
@@ -545,8 +591,7 @@
   "required_artifacts": [
     "predictions.npz",
     "metrics.npz",
-    "metrics_summary.json",
-    "config.json"
+    "metrics_summary.json"
   ],
   "runtime_config": {
     "batch_size": 32,

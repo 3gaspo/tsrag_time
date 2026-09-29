@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "checkpoint": "chronos-t5-base",
+          "context_length": 512,
+          "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+          "method": "retrieval_representation",
+          "representation": "t5"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:33.079770+00:00",
+              "identity": {
+                "dataset": "Coastal_T_S",
+                "frequency": "15T",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "t5",
+          "phase": "extractions/test",
+          "representation": "t5",
+          "split": "test",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Coastal_T_S/15T",
+            "prediction_length": 12,
+            "seasonality": 96,
+            "term": "short",
+            "test_length": 1440
+          },
+          "validation_support": null
+        }
+      }
+    }
+  ]
+}

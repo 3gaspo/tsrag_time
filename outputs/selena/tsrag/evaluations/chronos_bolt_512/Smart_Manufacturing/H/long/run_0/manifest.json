@@ -1,4 +1,50 @@
 {
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": null,
+      "context_length": 512,
+      "dataset_config": "Smart_Manufacturing/H/long",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/Smart_Manufacturing/H/long/run_0/evaluation_grid.npz",
+        "total_values": 170,
+        "valid_values": 170
+      },
+      "experiment": "tsrag",
+      "fallback_counts": null,
+      "forecast_type": "point",
+      "freq": "H",
+      "inference_seconds": 1.963304502889514,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "chronos_bolt_512",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 170,
+      "num_quantiles": 1,
+      "num_series": 34,
+      "num_variates": 5,
+      "num_windows": 1,
+      "prediction_length": 336,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/chronos_bolt_512/Smart_Manufacturing/H/long/run_0/manifest.json",
+      "prediction_scale_factor": 1.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": null,
+      "seasonality": 24,
+      "target_mode": "univariate",
+      "tsrag_weight": null
+    }
+  },
   "completed_at": "2026-09-18T01:58:27.333897+00:00",
   "experiment": "tsrag",
   "experiment_config": {
@@ -141,8 +187,7 @@
   "required_artifacts": [
     "predictions.npz",
     "metrics.npz",
-    "metrics_summary.json",
-    "config.json"
+    "metrics_summary.json"
   ],
   "runtime_config": {
     "batch_size": 32,

@@ -1,4 +1,50 @@
 {
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": null,
+      "context_length": 8192,
+      "dataset_config": "current_velocity/15T/medium",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/current_velocity/15T/medium/run_0/evaluation_grid.npz",
+        "total_values": 450,
+        "valid_values": 450
+      },
+      "experiment": "tsrag",
+      "fallback_counts": null,
+      "forecast_type": "point",
+      "freq": "15T",
+      "inference_seconds": 38.522857962176204,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "bayes_mixture",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 450,
+      "num_quantiles": 1,
+      "num_series": 5,
+      "num_variates": 6,
+      "num_windows": 15,
+      "prediction_length": 96,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/bayes_mixture/current_velocity/15T/medium/run_0/manifest.json",
+      "prediction_scale_factor": 1.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": null,
+      "seasonality": 96,
+      "target_mode": "univariate",
+      "tsrag_weight": 0.24675324675324675
+    }
+  },
   "completed_at": "2026-09-18T01:58:24.494673+00:00",
   "experiment": "tsrag",
   "experiment_config": {
@@ -545,8 +591,7 @@
   "required_artifacts": [
     "predictions.npz",
     "metrics.npz",
-    "metrics_summary.json",
-    "config.json"
+    "metrics_summary.json"
   ],
   "runtime_config": {
     "batch_size": 32,

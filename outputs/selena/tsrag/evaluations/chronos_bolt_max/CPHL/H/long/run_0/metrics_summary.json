@@ -1,87 +1,86 @@
 {
-  "dataset_config": "CPHL/H/long",
   "aggregation": "mean over the shared Seasonal Naive MASE evaluation grid",
+  "dataset_config": "CPHL/H/long",
   "evaluation_grid": {
     "definition": "finite_ground_truth_and_seasonal_naive_mase",
-    "source": "/fslarge/scratch/users/h61084/codes/seasonal/foundation_models/tasks/seasonal_naive/univariate/CPHL/H/long/run_0/evaluation_grid.npz",
-    "valid_values": 8,
-    "total_values": 8
+    "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/CPHL/H/long/run_0/evaluation_grid.npz",
+    "total_values": 8,
+    "valid_values": 8
   },
+  "inference_seconds": 0.3709530849009752,
   "metrics": {
-    "MSE": {
-      "mean": 0.5424804660588955,
-      "std": 0.6356130199667087,
-      "variance": 0.40400391115119966,
+    "CRPS": {
       "dispersion_ddof": 0,
-      "finite_values": 8,
       "evaluation_values": 8,
-      "total_values": 8
+      "finite_values": 8,
+      "mean": 0.44877944571092643,
+      "std": 0.1575911750441042,
+      "total_values": 8,
+      "variance": 0.024834978451781484
     },
     "MAE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 0.4768431089243713,
       "std": 0.3479459069165488,
-      "variance": 0.12106635413997964,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
-    },
-    "RMSE": {
-      "mean": 0.6003659323034847,
-      "std": 0.4266628802559031,
-      "variance": 0.18204121338826312,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
+      "total_values": 8,
+      "variance": 0.12106635413997964
     },
     "MAPE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 0.5200424688236307,
       "std": 0.24253408988878616,
-      "variance": 0.05882278475818181,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
-    },
-    "sMAPE": {
-      "mean": 0.4744034590644533,
-      "std": 0.16003366695935647,
-      "variance": 0.025610774560458224,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
+      "total_values": 8,
+      "variance": 0.05882278475818181
     },
     "MASE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 2.1537965293959545,
       "std": 0.838506938916045,
-      "variance": 0.703093886610356,
+      "total_values": 8,
+      "variance": 0.703093886610356
+    },
+    "MSE": {
       "dispersion_ddof": 0,
-      "finite_values": 8,
       "evaluation_values": 8,
-      "total_values": 8
+      "finite_values": 8,
+      "mean": 0.5424804660588955,
+      "std": 0.6356130199667087,
+      "total_values": 8,
+      "variance": 0.40400391115119966
     },
     "ND": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
       "mean": 0.44877944571092643,
       "std": 0.1575911750441042,
-      "variance": 0.024834978451781484,
-      "dispersion_ddof": 0,
-      "finite_values": 8,
-      "evaluation_values": 8,
-      "total_values": 8
+      "total_values": 8,
+      "variance": 0.024834978451781484
     },
-    "CRPS": {
-      "mean": 0.44877944571092643,
-      "std": 0.1575911750441042,
-      "variance": 0.024834978451781484,
+    "RMSE": {
       "dispersion_ddof": 0,
-      "finite_values": 8,
       "evaluation_values": 8,
-      "total_values": 8
+      "finite_values": 8,
+      "mean": 0.6003659323034847,
+      "std": 0.4266628802559031,
+      "total_values": 8,
+      "variance": 0.18204121338826312
+    },
+    "sMAPE": {
+      "dispersion_ddof": 0,
+      "evaluation_values": 8,
+      "finite_values": 8,
+      "mean": 0.4744034590644533,
+      "std": 0.16003366695935647,
+      "total_values": 8,
+      "variance": 0.025610774560458224
     }
   },
-  "launch_id": "selena_3452080",
-  "model": "chronos_bolt_max",
-  "inference_seconds": 0.3709530849009752
+  "model": "chronos_bolt_max"
 }
