@@ -167,6 +167,30 @@ def configured_root(explicit: Path | None, environment: str, kind: str) -> Path:
     return Path(configured) if configured else scratch_root(kind)
 
 
+def register_shared_seasonal_rewrites(migration: Migration) -> None:
+    configured = os.environ.get("TIME_SEASONAL_ROOT")
+    if configured:
+        project_root = Path(configured).expanduser().resolve()
+    else:
+        nni_file = Path(os.environ.get("TIME_NNI_FILE", Path.home() / "codes/.secrets/nni"))
+        nni = nni_file.read_text(encoding="utf-8").splitlines()[0].strip().lower()
+        if re.fullmatch(r"[a-z][a-z0-9_-]*", nni) is None:
+            raise ValueError(f"Invalid NNI in {nni_file}")
+        project_root = Path("/scratch/users") / nni / "codes/seasonal"
+    legacy = project_root / "foundation_models"
+    current = project_root / "outputs/seasonal_naive"
+    migration.moves.extend([
+        (
+            str((legacy / "inference/seasonal_naive").resolve()),
+            str((current / "inference").resolve()),
+        ),
+        (
+            str((legacy / "tasks/seasonal_naive").resolve()),
+            str((current / "evaluations").resolve()),
+        ),
+    ])
+
+
 def report_time(path: Path) -> tuple[str, int]:
     manifests = list(path.rglob("*report_manifest.json"))
     values: list[str] = []
@@ -467,6 +491,7 @@ def main() -> None:
     outputs_root = configured_root(args.outputs_root, "TIME_OUTPUTS", "outputs")
     logs_root = configured_root(args.logs_root, "TIME_LOGS", "logs")
     migration = Migration(outputs_root, logs_root, args.dry_run)
+    register_shared_seasonal_rewrites(migration)
     if PROJECT == "evaluating_tsfms":
         evaluating_stream_plan(migration.logs)  # Validate every root stream before moving anything.
         migrate_evaluating_outputs(migration)
