@@ -1,0 +1,121 @@
+{
+  "completed_at": "2026-09-29T23:10:48.557311+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {},
+  "identity": {
+    "dataset": "epf_electricity_price",
+    "frequency": "H",
+    "method": "bayes_mixture",
+    "model": "bayes_mixture",
+    "target_mode": "univariate",
+    "term": "long"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T23:10:48.525663+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
+      }
+    ],
+    "launch_id": "selena_3607202",
+    "launched_at": "2026-09-29T23:10:48.525663+00:00",
+    "slurm_job_id": "3607202"
+  },
+  "model_config": {
+    "component": "selections",
+    "method": "bayes_mixture"
+  },
+  "pipeline_config": {
+    "dependencies": {
+      "chronos2": {
+        "completed_at": "2026-09-27T14:55:08.343400+00:00",
+        "identity": {
+          "dataset": "epf_electricity_price",
+          "frequency": "H",
+          "method": "chronos2_max",
+          "model": "chronos2",
+          "target_mode": "univariate",
+          "term": "long"
+        },
+        "run": "run_0"
+      },
+      "data": {
+        "completed_at": "2026-09-27T14:52:31.971994+00:00",
+        "identity": {
+          "dataset": "epf_electricity_price",
+          "frequency": "H",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "long"
+        },
+        "run": "run_0"
+      },
+      "tsrag": {
+        "completed_at": "2026-09-29T21:32:20.719743+00:00",
+        "identity": {
+          "dataset": "epf_electricity_price",
+          "frequency": "H",
+          "method": "tsrag",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "long"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "bayes_mixture",
+    "no_validation_fallback": "chronos2_max",
+    "phase": "selections",
+    "rule": "beta_1_1_per_date_mean_variate_msse_win_frequency",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "epf_electricity_price/H",
+      "prediction_length": 168,
+      "seasonality": 24,
+      "term": "long",
+      "test_length": 2520
+    },
+    "validation_support": "finite_context_and_future"
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/epf_electricity_price/H",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 168,
+      "dataset": "epf_electricity_price/H",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 168,
+      "seasonality": 24,
+      "term": "long",
+      "test_length": 2520,
+      "validation_length": 2520
+    },
+    "upstream_manifests": {
+      "chronos2": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/validation/chronos2_max/epf_electricity_price/H/long/run_0/manifest.json",
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/validation/shared/epf_electricity_price/H/long/run_0/manifest.json",
+      "tsrag": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/validation/tsrag/epf_electricity_price/H/long/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "weight.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-29T23:10:48.525663+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-29T23:10:48.557311+00:00"
+}

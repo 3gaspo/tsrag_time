@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "component": "selections",
+          "method": "bayes_mixture"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "chronos2": {
+              "completed_at": "2026-09-27T14:55:08.557111+00:00",
+              "identity": {
+                "dataset": "Coastal_T_S",
+                "frequency": "20T",
+                "method": "chronos2_max",
+                "model": "chronos2",
+                "target_mode": "univariate",
+                "term": "long"
+              },
+              "run": "run_0"
+            },
+            "data": {
+              "completed_at": "2026-09-27T14:52:32.198374+00:00",
+              "identity": {
+                "dataset": "Coastal_T_S",
+                "frequency": "20T",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "long"
+              },
+              "run": "run_0"
+            },
+            "tsrag": {
+              "completed_at": "2026-09-29T21:32:20.955969+00:00",
+              "identity": {
+                "dataset": "Coastal_T_S",
+                "frequency": "20T",
+                "method": "tsrag",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "long"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "bayes_mixture",
+          "no_validation_fallback": "chronos2_max",
+          "phase": "selections",
+          "rule": "beta_1_1_per_date_mean_variate_msse_win_frequency",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Coastal_T_S/20T",
+            "prediction_length": 216,
+            "seasonality": 72,
+            "term": "long",
+            "test_length": 1080
+          },
+          "validation_support": "finite_context_and_future"
+        }
+      }
+    }
+  ]
+}

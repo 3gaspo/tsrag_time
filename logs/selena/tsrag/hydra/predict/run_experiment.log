@@ -1,0 +1,18 @@
+[2026-09-29 14:23:19,914][datasets][INFO] - PyTorch version 2.9.1 available.
+[2026-09-29 14:24:01,979][faiss.loader][INFO] - Loading faiss with AVX512 support.
+[2026-09-29 14:24:01,979][faiss.loader][INFO] - Could not load library with AVX512 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx512'")
+[2026-09-29 14:24:01,979][faiss.loader][INFO] - Loading faiss with AVX2 support.
+[2026-09-29 14:24:01,979][faiss.loader][INFO] - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+[2026-09-29 14:24:01,980][faiss.loader][INFO] - Loading faiss.
+[2026-09-29 14:24:03,389][faiss.loader][INFO] - Successfully loaded faiss.
+[2026-09-29 23:32:47,875][datasets][INFO] - PyTorch version 2.9.1 available.
+[2026-09-29 23:33:46,384][faiss.loader][INFO] - Loading faiss with AVX512 support.
+[2026-09-29 23:33:46,384][faiss.loader][INFO] - Could not load library with AVX512 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx512'")
+[2026-09-29 23:33:46,384][faiss.loader][INFO] - Loading faiss with AVX2 support.
+[2026-09-29 23:33:46,385][faiss.loader][INFO] - Could not load library with AVX2 support due to:
+ModuleNotFoundError("No module named 'faiss.swigfaiss_avx2'")
+[2026-09-29 23:33:46,385][faiss.loader][INFO] - Loading faiss.
+[2026-09-29 23:33:47,680][faiss.loader][INFO] - Successfully loaded faiss.

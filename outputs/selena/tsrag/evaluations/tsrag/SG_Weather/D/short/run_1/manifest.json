@@ -1,0 +1,165 @@
+{
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": 1,
+      "context_length": 512,
+      "dataset_config": "SG_Weather/D/short",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/SG_Weather/D/short/run_0/evaluation_grid.npz",
+        "total_values": 2928,
+        "valid_values": 2862
+      },
+      "experiment": "tsrag",
+      "fallback_counts": {
+        "test": {
+          "all_rows": 2868,
+          "eligible_rows": 2803,
+          "grid_rows": 2862,
+          "total_rows": 2928
+        }
+      },
+      "forecast_type": "point",
+      "freq": "D",
+      "inference_seconds": 65.99797520413995,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "tsrag",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 2928,
+      "num_quantiles": 1,
+      "num_series": 6,
+      "num_variates": 4,
+      "num_windows": 122,
+      "prediction_length": 3,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/tsrag/SG_Weather/D/short/run_0/manifest.json",
+      "prediction_outputs": {
+        "cells_with_nan": 0,
+        "evaluation_nan_rate": 0.0,
+        "evaluation_nan_values": 0,
+        "evaluation_values": 8492,
+        "nan_rate": 0.0,
+        "nan_values": 0,
+        "total_cells": 2928,
+        "total_values": 8784
+      },
+      "prediction_scale_factor": 1.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": {
+        "aligned": false,
+        "query_scale": false,
+        "representation": "t5",
+        "scope": "all"
+      },
+      "seasonality": 1,
+      "target_mode": "univariate",
+      "tsrag_weight": null
+    }
+  },
+  "completed_at": "2026-09-29T23:12:46.504842+00:00",
+  "computed_at": "2026-09-29T23:11:49.656796+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {},
+  "identity": {
+    "dataset": "SG_Weather",
+    "frequency": "D",
+    "method": "tsrag",
+    "model": "chronos_bolt",
+    "target_mode": "univariate",
+    "term": "short"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T23:11:49.285138+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
+      }
+    ],
+    "launch_id": "selena_3607202",
+    "launched_at": "2026-09-29T23:11:49.285138+00:00",
+    "slurm_job_id": "3607202"
+  },
+  "model_config": {
+    "component": "evaluations",
+    "method": "tsrag"
+  },
+  "pipeline_config": {
+    "dependencies": {
+      "prediction": {
+        "completed_at": "2026-09-29T21:32:22.182906+00:00",
+        "identity": {
+          "dataset": "SG_Weather",
+          "frequency": "D",
+          "method": "tsrag",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      }
+    },
+    "evaluation_grid": "finite_ground_truth_and_seasonal_naive_mase",
+    "method": "tsrag",
+    "nan_policy": "omit_nan_predictions_report_counts_reject_infinity",
+    "phase": "evaluations",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "SG_Weather/D",
+      "prediction_length": 3,
+      "seasonality": 1,
+      "term": "short",
+      "test_length": 366
+    }
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/SG_Weather/D",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 1,
+      "dataset": "SG_Weather/D",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 3,
+      "seasonality": 1,
+      "term": "short",
+      "test_length": 366,
+      "validation_length": 366
+    },
+    "upstream_manifests": {
+      "prediction": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/tsrag/SG_Weather/D/short/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "predictions.npz",
+    "metrics.npz",
+    "metrics_summary.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-29T23:11:49.285138+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-29T23:12:46.504842+00:00"
+}

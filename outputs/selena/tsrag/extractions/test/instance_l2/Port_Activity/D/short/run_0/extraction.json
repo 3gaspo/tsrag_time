@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "split": "test",
+  "representation": "instance_l2",
+  "error": null,
+  "extraction_seconds": 4.975423902273178
+}

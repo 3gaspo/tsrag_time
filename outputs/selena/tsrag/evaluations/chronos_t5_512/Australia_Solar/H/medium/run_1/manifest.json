@@ -1,0 +1,153 @@
+{
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": null,
+      "context_length": 512,
+      "dataset_config": "Australia_Solar/H/medium",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/Australia_Solar/H/medium/run_0/evaluation_grid.npz",
+        "total_values": 105,
+        "valid_values": 105
+      },
+      "experiment": "tsrag",
+      "fallback_counts": null,
+      "forecast_type": "point",
+      "freq": "H",
+      "inference_seconds": 2.5328248739242554e-05,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "chronos_t5_512",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 105,
+      "num_quantiles": 1,
+      "num_series": 1,
+      "num_variates": 3,
+      "num_windows": 35,
+      "prediction_length": 72,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/chronos_t5_512/Australia_Solar/H/medium/run_0/manifest.json",
+      "prediction_outputs": {
+        "cells_with_nan": 0,
+        "evaluation_nan_rate": 0.0,
+        "evaluation_nan_values": 0,
+        "evaluation_values": 6271,
+        "nan_rate": 0.0,
+        "nan_values": 0,
+        "total_cells": 105,
+        "total_values": 7560
+      },
+      "prediction_scale_factor": 100.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": null,
+      "seasonality": 24,
+      "target_mode": "univariate",
+      "tsrag_weight": null
+    }
+  },
+  "completed_at": "2026-09-29T23:12:47.257743+00:00",
+  "computed_at": "2026-09-29T23:11:55.199963+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {},
+  "identity": {
+    "dataset": "Australia_Solar",
+    "frequency": "H",
+    "method": "chronos_t5_512",
+    "model": "chronos_t5",
+    "target_mode": "univariate",
+    "term": "medium"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T23:11:55.151695+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
+      }
+    ],
+    "launch_id": "selena_3607202",
+    "launched_at": "2026-09-29T23:11:55.151695+00:00",
+    "slurm_job_id": "3607202"
+  },
+  "model_config": {
+    "component": "evaluations",
+    "method": "chronos_t5_512"
+  },
+  "pipeline_config": {
+    "dependencies": {
+      "prediction": {
+        "completed_at": "2026-09-27T14:55:11.145954+00:00",
+        "identity": {
+          "dataset": "Australia_Solar",
+          "frequency": "H",
+          "method": "chronos_t5_512",
+          "model": "chronos_t5",
+          "target_mode": "univariate",
+          "term": "medium"
+        },
+        "run": "run_0"
+      }
+    },
+    "evaluation_grid": "finite_ground_truth_and_seasonal_naive_mase",
+    "method": "chronos_t5_512",
+    "nan_policy": "omit_nan_predictions_report_counts_reject_infinity",
+    "phase": "evaluations",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "Australia_Solar/H",
+      "prediction_length": 72,
+      "seasonality": 24,
+      "term": "medium",
+      "test_length": 2520
+    }
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/Australia_Solar/H",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 24,
+      "dataset": "Australia_Solar/H",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 72,
+      "seasonality": 24,
+      "term": "medium",
+      "test_length": 2520,
+      "validation_length": 2520
+    },
+    "upstream_manifests": {
+      "prediction": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/chronos_t5_512/Australia_Solar/H/medium/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "predictions.npz",
+    "metrics.npz",
+    "metrics_summary.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-29T23:11:55.151695+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-29T23:12:47.257743+00:00"
+}

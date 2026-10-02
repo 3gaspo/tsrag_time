@@ -1,0 +1,7 @@
+model,tasks,timed_tasks,total_inference_seconds,total_datastore_preprocessing_seconds
+chronos_t5_512,90,90,0.004360785707831383,0.0
+chronos_bolt_512,90,90,0.004556896165013313,0.0
+chronos_bolt_max,90,90,0.004111018031835556,0.0
+chronos2_max,90,90,0.004181653261184692,0.0
+tsrag,90,90,18132.373541807756,55699.077570295194
+bayes_mixture,90,90,18132.392749255523,0.0

@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "model_config": {
+          "components": [
+            "chronos2_max",
+            "tsrag"
+          ],
+          "method": "bayes_mixture",
+          "no_validation": "chronos2",
+          "nonfinite_fallback": "chronos_bolt_max",
+          "prior": [
+            1,
+            1
+          ],
+          "score": "per_date_mean_variate_msse"
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "dependencies": {
+            "chronos2": {
+              "completed_at": "2026-09-27T14:55:11.029435+00:00",
+              "identity": {
+                "dataset": "ECDC_COVID",
+                "frequency": "D",
+                "method": "chronos2_max",
+                "model": "chronos2",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "data": {
+              "completed_at": "2026-09-27T14:52:33.119318+00:00",
+              "identity": {
+                "dataset": "ECDC_COVID",
+                "frequency": "D",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "fallback": {
+              "completed_at": "2026-09-27T14:55:10.447470+00:00",
+              "identity": {
+                "dataset": "ECDC_COVID",
+                "frequency": "D",
+                "method": "chronos_bolt_max",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "tsrag": {
+              "completed_at": "2026-09-29T23:10:25.748902+00:00",
+              "identity": {
+                "dataset": "ECDC_COVID",
+                "frequency": "D",
+                "method": "tsrag",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "weight": {
+              "completed_at": "2026-09-29T23:10:54.422422+00:00",
+              "identity": {
+                "dataset": "ECDC_COVID",
+                "frequency": "D",
+                "method": "bayes_mixture",
+                "model": "bayes_mixture",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "bayes_mixture",
+          "phase": "predictions/test",
+          "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+          "split": "test",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "ECDC_COVID/D",
+            "prediction_length": 30,
+            "seasonality": 1,
+            "term": "short",
+            "test_length": 150
+          },
+          "validation_support": null
+        }
+      }
+    }
+  ]
+}

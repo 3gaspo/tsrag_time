@@ -1,8 +1,6 @@
 {
-  "error": {
-    "message": "launch selena_3584841 ended before task completion",
-    "type": "InterruptedLaunch"
-  },
+  "completed_at": "2026-09-29T12:23:11.571767+00:00",
+  "computed_at": "2026-09-29T10:37:54.946366+00:00",
   "experiment": "tsrag",
   "experiment_config": {},
   "identity": {
@@ -14,7 +12,7 @@
     "term": "medium"
   },
   "launch": {
-    "action": "new",
+    "action": "resume",
     "attempts": [
       {
         "action": "new",
@@ -22,11 +20,30 @@
         "launched_at": "2026-09-28T22:43:12.802803+00:00",
         "slurm_array_task_id": null,
         "slurm_job_id": "3584841"
+      },
+      {
+        "action": "resume",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T10:36:33.087420+00:00",
+        "resumed_from": {
+          "launch_id": "selena_3584841",
+          "launched_at": "2026-09-28T22:43:12.802803+00:00",
+          "slurm_job_id": "3584841"
+        },
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
+      },
+      {
+        "action": "reuse",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T21:32:41.641015+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
       }
     ],
-    "launch_id": "selena_3584841",
-    "launched_at": "2026-09-28T22:43:12.802803+00:00",
-    "slurm_job_id": "3584841"
+    "launch_id": "selena_3607202",
+    "launched_at": "2026-09-29T10:36:33.087420+00:00",
+    "slurm_job_id": "3607202"
   },
   "model_config": {
     "checkpoint": "chronos-t5-base",
@@ -86,14 +103,18 @@
       "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/validation/shared/Finland_Traffic/15T/medium/run_0/manifest.json"
     }
   },
-  "required_artifacts": [],
+  "required_artifacts": [
+    "datastore.npy",
+    "query.npy",
+    "extraction.json"
+  ],
   "runtime_config": {
     "batch_size": 32,
     "device": "cuda",
     "embedding_batch_size": 512
   },
   "schema_version": 1,
-  "started_at": "2026-09-28T22:43:12.802803+00:00",
-  "status": "interrupted",
-  "updated_at": "2026-09-28T22:43:29.781436+00:00"
+  "started_at": "2026-09-29T10:36:33.087420+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-29T21:32:41.641015+00:00"
 }

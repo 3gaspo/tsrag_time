@@ -109,6 +109,45 @@
           }
         }
       }
+    },
+    {
+      "mode": "auto",
+      "run": "run_1",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "component": "evaluations",
+          "method": "chronos_bolt_max"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "prediction": {
+              "completed_at": "2026-09-27T14:55:09.958883+00:00",
+              "identity": {
+                "dataset": "Smart_Manufacturing",
+                "frequency": "H",
+                "method": "chronos_bolt_max",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "medium"
+              },
+              "run": "run_0"
+            }
+          },
+          "evaluation_grid": "finite_ground_truth_and_seasonal_naive_mase",
+          "method": "chronos_bolt_max",
+          "nan_policy": "omit_nan_predictions_report_counts_reject_infinity",
+          "phase": "evaluations",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Smart_Manufacturing/H",
+            "prediction_length": 168,
+            "seasonality": 24,
+            "term": "medium",
+            "test_length": 336
+          }
+        }
+      }
     }
   ]
 }

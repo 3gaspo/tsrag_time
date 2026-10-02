@@ -1,0 +1,164 @@
+{
+  "completed_at": "2026-09-29T23:11:02.195135+00:00",
+  "computed_at": "2026-09-29T23:10:55.815542+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {
+    "seed": 0
+  },
+  "identity": {
+    "dataset": "Vehicle_Supply",
+    "frequency": "M",
+    "method": "bayes_mixture",
+    "model": "bayes_mixture",
+    "target_mode": "univariate",
+    "term": "short"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T23:10:55.791549+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
+      }
+    ],
+    "launch_id": "selena_3607202",
+    "launched_at": "2026-09-29T23:10:55.791549+00:00",
+    "slurm_job_id": "3607202"
+  },
+  "model_config": {
+    "components": [
+      "chronos2_max",
+      "tsrag"
+    ],
+    "method": "bayes_mixture",
+    "no_validation": "chronos2",
+    "nonfinite_fallback": "chronos_bolt_max",
+    "prior": [
+      1,
+      1
+    ],
+    "score": "per_date_mean_variate_msse"
+  },
+  "pipeline_config": {
+    "covariates": "none",
+    "dependencies": {
+      "chronos2": {
+        "completed_at": "2026-09-27T14:55:10.892472+00:00",
+        "identity": {
+          "dataset": "Vehicle_Supply",
+          "frequency": "M",
+          "method": "chronos2_max",
+          "model": "chronos2",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "data": {
+        "completed_at": "2026-09-27T14:52:32.975057+00:00",
+        "identity": {
+          "dataset": "Vehicle_Supply",
+          "frequency": "M",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "fallback": {
+        "completed_at": "2026-09-27T14:55:10.306322+00:00",
+        "identity": {
+          "dataset": "Vehicle_Supply",
+          "frequency": "M",
+          "method": "chronos_bolt_max",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "tsrag": {
+        "completed_at": "2026-09-29T23:10:25.650516+00:00",
+        "identity": {
+          "dataset": "Vehicle_Supply",
+          "frequency": "M",
+          "method": "tsrag",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "weight": {
+        "completed_at": "2026-09-29T23:10:55.739779+00:00",
+        "identity": {
+          "dataset": "Vehicle_Supply",
+          "frequency": "M",
+          "method": "bayes_mixture",
+          "model": "bayes_mixture",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "bayes_mixture",
+    "phase": "predictions/test",
+    "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+    "split": "test",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "Vehicle_Supply/M",
+      "prediction_length": 12,
+      "seasonality": 12,
+      "term": "short",
+      "test_length": 60
+    },
+    "validation_support": null
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/Vehicle_Supply/M",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 12,
+      "dataset": "Vehicle_Supply/M",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 12,
+      "seasonality": 12,
+      "term": "short",
+      "test_length": 60,
+      "validation_length": 12
+    },
+    "upstream_manifests": {
+      "chronos2": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/chronos2_max/Vehicle_Supply/M/short/run_0/manifest.json",
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/Vehicle_Supply/M/short/run_0/manifest.json",
+      "fallback": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/chronos_bolt_max/Vehicle_Supply/M/short/run_0/manifest.json",
+      "tsrag": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/tsrag/Vehicle_Supply/M/short/run_0/manifest.json",
+      "weight": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/selections/bayes_mixture/Vehicle_Supply/M/short/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "prediction.npy",
+    "fallback.npy",
+    "retrieval_provenance.npy",
+    "prediction.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-29T23:10:55.791549+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-29T23:11:02.195135+00:00"
+}

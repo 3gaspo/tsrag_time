@@ -513,6 +513,45 @@
           }
         }
       }
+    },
+    {
+      "mode": "auto",
+      "run": "run_1",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "component": "evaluations",
+          "method": "bayes_mixture"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "prediction": {
+              "completed_at": "2026-09-29T23:11:02.116584+00:00",
+              "identity": {
+                "dataset": "current_velocity",
+                "frequency": "5T",
+                "method": "bayes_mixture",
+                "model": "bayes_mixture",
+                "target_mode": "univariate",
+                "term": "medium"
+              },
+              "run": "run_0"
+            }
+          },
+          "evaluation_grid": "finite_ground_truth_and_seasonal_naive_mase",
+          "method": "bayes_mixture",
+          "nan_policy": "omit_nan_predictions_report_counts_reject_infinity",
+          "phase": "evaluations",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "current_velocity/5T",
+            "prediction_length": 288,
+            "seasonality": 288,
+            "term": "medium",
+            "test_length": 4320
+          }
+        }
+      }
     }
   ]
 }

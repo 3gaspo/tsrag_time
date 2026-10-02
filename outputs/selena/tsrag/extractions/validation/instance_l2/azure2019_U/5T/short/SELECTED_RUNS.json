@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "checkpoint": null,
+          "context_length": 512,
+          "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+          "method": "retrieval_representation",
+          "representation": "instance_l2"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:31.895412+00:00",
+              "identity": {
+                "dataset": "azure2019_U",
+                "frequency": "5T",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "instance_l2",
+          "phase": "extractions/validation",
+          "representation": "instance_l2",
+          "split": "validation",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "azure2019_U/5T",
+            "prediction_length": 48,
+            "seasonality": 288,
+            "term": "short",
+            "test_length": 288
+          },
+          "validation_support": "finite_context_and_future"
+        }
+      }
+    }
+  ]
+}

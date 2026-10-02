@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "method": "bayes_mixture",
+  "tsrag_weight": 0.24675324675324675,
+  "validation_dates": 75,
+  "tsrag_wins_with_half_ties": 18.0,
+  "prior": [
+    1,
+    1
+  ],
+  "score": "per_date_mean_variate_msse",
+  "status": "estimated",
+  "fallback_method": "chronos_bolt_max",
+  "produced_nan_values": 0,
+  "retrieval_provenance": {
+    "retrieval_extractions": 900,
+    "retrieved_neighbors": 9000,
+    "same_user_neighbors": 4761,
+    "same_user_retrieval_percentage": 52.9,
+    "normalized_time_distance_sum": 3609.6285287658884,
+    "average_normalized_time_distance_to_query": 0.40106983652954314,
+    "same_user_definition": "same dataset item/user as the query",
+    "normalized_time_distance_definition": "(query_tick-neighbor_tick)/(query_tick-earliest_datastore_tick)"
+  },
+  "split": "test",
+  "inference_seconds": 37.2222415804863,
+  "mix_only_seconds": 0.0001901518553495407,
+  "nonfinite_fallback_count": 0
+}

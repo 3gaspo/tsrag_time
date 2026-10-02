@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "method": "tsrag",
+  "split": "test",
+  "context_limit": 512,
+  "retrieval": {
+    "scope": "all",
+    "aligned": false,
+    "query_scale": false,
+    "representation": "t5"
+  },
+  "alignment_period": 48,
+  "fallback_method": "chronos_bolt_max",
+  "task_error": null,
+  "fallback_counts": {
+    "test": {
+      "all_rows": 52,
+      "eligible_rows": 52,
+      "grid_rows": 60,
+      "total_rows": 60
+    }
+  },
+  "fallback_reason_split": "test",
+  "fallback_reasons": {
+    "nonfinite_prediction": 52
+  },
+  "reused_rows": 0,
+  "newly_inferred_rows": 60,
+  "reuse_sources": [],
+  "produced_nan_values": 3328,
+  "retrieval_provenance": {
+    "retrieval_extractions": 60,
+    "retrieved_neighbors": 600,
+    "same_user_neighbors": 370,
+    "same_user_retrieval_percentage": 61.666666666666664,
+    "normalized_time_distance_sum": 227.50827191803958,
+    "average_normalized_time_distance_to_query": 0.37918045319673266,
+    "same_user_definition": "same dataset item/user as the query",
+    "normalized_time_distance_definition": "(query_tick-neighbor_tick)/(query_tick-earliest_datastore_tick)"
+  },
+  "validation_counts": null,
+  "datastore_preprocessing_seconds": 54.00014859996736,
+  "fallback_source_inference_seconds": 1.704692840576172e-05,
+  "inference_seconds": 1.5846600998193026,
+  "timing_policy": "measured_query_work_with_precomputed_bolt_max_fallback"
+}

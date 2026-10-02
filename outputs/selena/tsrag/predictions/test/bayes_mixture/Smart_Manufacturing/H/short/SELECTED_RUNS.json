@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "model_config": {
+          "components": [
+            "chronos2_max",
+            "tsrag"
+          ],
+          "method": "bayes_mixture",
+          "no_validation": "chronos2",
+          "nonfinite_fallback": "chronos_bolt_max",
+          "prior": [
+            1,
+            1
+          ],
+          "score": "per_date_mean_variate_msse"
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "dependencies": {
+            "chronos2": {
+              "completed_at": "2026-09-27T14:55:10.562520+00:00",
+              "identity": {
+                "dataset": "Smart_Manufacturing",
+                "frequency": "H",
+                "method": "chronos2_max",
+                "model": "chronos2",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "data": {
+              "completed_at": "2026-09-27T14:52:32.638488+00:00",
+              "identity": {
+                "dataset": "Smart_Manufacturing",
+                "frequency": "H",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "fallback": {
+              "completed_at": "2026-09-27T14:55:09.970067+00:00",
+              "identity": {
+                "dataset": "Smart_Manufacturing",
+                "frequency": "H",
+                "method": "chronos_bolt_max",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "tsrag": {
+              "completed_at": "2026-09-29T23:10:25.424955+00:00",
+              "identity": {
+                "dataset": "Smart_Manufacturing",
+                "frequency": "H",
+                "method": "tsrag",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            },
+            "weight": {
+              "completed_at": "2026-09-29T23:10:57.296304+00:00",
+              "identity": {
+                "dataset": "Smart_Manufacturing",
+                "frequency": "H",
+                "method": "bayes_mixture",
+                "model": "bayes_mixture",
+                "target_mode": "univariate",
+                "term": "short"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "bayes_mixture",
+          "phase": "predictions/test",
+          "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+          "split": "test",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Smart_Manufacturing/H",
+            "prediction_length": 24,
+            "seasonality": 24,
+            "term": "short",
+            "test_length": 336
+          },
+          "validation_support": null
+        }
+      }
+    }
+  ]
+}

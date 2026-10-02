@@ -1,0 +1,153 @@
+{
+  "artifact_metadata": {
+    "evaluation": {
+      "alignment_period": null,
+      "context_length": 8192,
+      "dataset_config": "Finland_Traffic/15T/long",
+      "evaluation_grid": {
+        "definition": "finite_ground_truth_and_seasonal_naive_mase",
+        "source": "/fslarge/scratch/users/h61084/codes/seasonal/outputs/seasonal_naive/evaluations/univariate/Finland_Traffic/15T/long/run_0/evaluation_grid.npz",
+        "total_values": 4,
+        "valid_values": 4
+      },
+      "experiment": "tsrag",
+      "fallback_counts": null,
+      "forecast_type": "point",
+      "freq": "15T",
+      "inference_seconds": 1.6716710850596428,
+      "metric_names": [
+        "MSE",
+        "MAE",
+        "RMSE",
+        "MAPE",
+        "sMAPE",
+        "MASE",
+        "ND",
+        "CRPS"
+      ],
+      "metrics_summary_file": "metrics_summary.json",
+      "model": "bayes_mixture",
+      "nonfinite_fallback_count": 0,
+      "num_model_inputs": 4,
+      "num_quantiles": 1,
+      "num_series": 1,
+      "num_variates": 1,
+      "num_windows": 4,
+      "prediction_length": 672,
+      "prediction_manifest": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/bayes_mixture/Finland_Traffic/15T/long/run_0/manifest.json",
+      "prediction_outputs": {
+        "cells_with_nan": 0,
+        "evaluation_nan_rate": 0.0,
+        "evaluation_nan_values": 0,
+        "evaluation_values": 2688,
+        "nan_rate": 0.0,
+        "nan_values": 0,
+        "total_cells": 4,
+        "total_values": 2688
+      },
+      "prediction_scale_factor": 1.0,
+      "quantile_levels": [
+        0.5
+      ],
+      "retrieval": null,
+      "seasonality": 96,
+      "target_mode": "univariate",
+      "tsrag_weight": 0.16666666666666666
+    }
+  },
+  "completed_at": "2026-09-29T23:12:44.621518+00:00",
+  "computed_at": "2026-09-29T23:12:28.543775+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {},
+  "identity": {
+    "dataset": "Finland_Traffic",
+    "frequency": "15T",
+    "method": "bayes_mixture",
+    "model": "bayes_mixture",
+    "target_mode": "univariate",
+    "term": "long"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T23:12:28.528724+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
+      }
+    ],
+    "launch_id": "selena_3607202",
+    "launched_at": "2026-09-29T23:12:28.528724+00:00",
+    "slurm_job_id": "3607202"
+  },
+  "model_config": {
+    "component": "evaluations",
+    "method": "bayes_mixture"
+  },
+  "pipeline_config": {
+    "dependencies": {
+      "prediction": {
+        "completed_at": "2026-09-29T23:11:01.973888+00:00",
+        "identity": {
+          "dataset": "Finland_Traffic",
+          "frequency": "15T",
+          "method": "bayes_mixture",
+          "model": "bayes_mixture",
+          "target_mode": "univariate",
+          "term": "long"
+        },
+        "run": "run_0"
+      }
+    },
+    "evaluation_grid": "finite_ground_truth_and_seasonal_naive_mase",
+    "method": "bayes_mixture",
+    "nan_policy": "omit_nan_predictions_report_counts_reject_infinity",
+    "phase": "evaluations",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "Finland_Traffic/15T",
+      "prediction_length": 672,
+      "seasonality": 96,
+      "term": "long",
+      "test_length": 2976
+    }
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/Finland_Traffic/15T",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 672,
+      "dataset": "Finland_Traffic/15T",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 672,
+      "seasonality": 96,
+      "term": "long",
+      "test_length": 2976,
+      "validation_length": 2880
+    },
+    "upstream_manifests": {
+      "prediction": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/bayes_mixture/Finland_Traffic/15T/long/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "predictions.npz",
+    "metrics.npz",
+    "metrics_summary.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-29T23:12:28.528724+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-29T23:12:44.621518+00:00"
+}

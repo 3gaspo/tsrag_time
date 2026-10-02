@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "checkpoint": null,
+          "context_length": 512,
+          "instance_normalization": "lookback_nanmean_nanstd_eps_1e-8",
+          "method": "retrieval_representation",
+          "representation": "instance_l2"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:32.802882+00:00",
+              "identity": {
+                "dataset": "MetroPT-3",
+                "frequency": "5T",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "long"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "instance_l2",
+          "phase": "extractions/test",
+          "representation": "instance_l2",
+          "split": "test",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "MetroPT-3/5T",
+            "prediction_length": 576,
+            "seasonality": 288,
+            "term": "long",
+            "test_length": 1728
+          },
+          "validation_support": null
+        }
+      }
+    }
+  ]
+}

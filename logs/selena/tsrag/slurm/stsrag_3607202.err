@@ -1,0 +1,150 @@
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
+  warnings.warn(
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: Period with BDay freq is deprecated and will be removed in a future version. Use a DatetimeIndex with BDay freq instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
+  warnings.warn(
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
+  warnings.warn(
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: Period with BDay freq is deprecated and will be removed in a future version. Use a DatetimeIndex with BDay freq instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
+  warnings.warn(
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+Loading weights:   0%|          | 0/269 [00:00<?, ?it/s]Loading weights:   0%|          | 1/269 [00:00<00:29,  9.01it/s]Loading weights:  14%|█▍        | 37/269 [00:00<00:01, 157.07it/s]Loading weights:  21%|██        | 57/269 [00:00<00:01, 172.22it/s]Loading weights:  33%|███▎      | 88/269 [00:00<00:00, 215.53it/s]Loading weights:  41%|████      | 110/269 [00:00<00:00, 213.53it/s]Loading weights:  50%|████▉     | 134/269 [00:00<00:00, 180.85it/s]Loading weights:  60%|██████    | 162/269 [00:00<00:00, 203.12it/s]Loading weights:  82%|████████▏ | 221/269 [00:00<00:00, 295.09it/s]Loading weights:  97%|█████████▋| 261/269 [00:01<00:00, 321.93it/s]Loading weights: 100%|██████████| 269/269 [00:01<00:00, 249.22it/s]
+[transformers] [1mChronosBoltModelForForecastingWithRetrieval LOAD REPORT[0m from: /fslarge/scratch/users/h61084/weights/chronos-bolt-base
+Key                      | Status  | 
+-------------------------+---------+-
+mha.out_proj.weight      | MISSING | 
+ffn.{0, 2}.bias          | MISSING | 
+encode_mlp.{0, 2}.weight | MISSING | 
+mha.in_proj_bias         | MISSING | 
+gate_layer.{0, 2}.weight | MISSING | 
+gate_layer.{0, 2}.bias   | MISSING | 
+encode_mlp.{0, 2}.bias   | MISSING | 
+ffn.{0, 2}.weight        | MISSING | 
+mha.out_proj.bias        | MISSING | 
+mha.in_proj_weight       | MISSING | 
+
+Notes:
+- MISSING:	those params were newly initialized because missing from the checkpoint. Consider training on your downstream task.
+[transformers] `torch_dtype` is deprecated! Use `dtype` instead!
+Loading weights:   0%|          | 0/257 [00:00<?, ?it/s]Loading weights:   0%|          | 1/257 [00:00<00:43,  5.88it/s]Loading weights:   1%|          | 2/257 [00:00<00:47,  5.34it/s]Loading weights:   3%|▎         | 7/257 [00:00<00:15, 16.44it/s]Loading weights:   5%|▍         | 12/257 [00:00<00:11, 20.88it/s]Loading weights:   7%|▋         | 17/257 [00:00<00:08, 26.67it/s]Loading weights:   8%|▊         | 21/257 [00:01<00:09, 25.28it/s]Loading weights:  10%|█         | 26/257 [00:01<00:08, 28.18it/s]Loading weights:  15%|█▍        | 38/257 [00:01<00:05, 36.55it/s]Loading weights:  20%|█▉        | 51/257 [00:01<00:04, 45.55it/s]Loading weights:  25%|██▍       | 64/257 [00:01<00:03, 48.42it/s]Loading weights:  30%|██▉       | 77/257 [00:02<00:03, 53.46it/s]Loading weights:  35%|███▌      | 90/257 [00:02<00:02, 61.97it/s]Loading weights:  38%|███▊      | 97/257 [00:02<00:02, 61.44it/s]Loading weights:  40%|████      | 104/257 [00:02<00:02, 56.84it/s]Loading weights:  45%|████▌     | 116/257 [00:02<00:02, 56.48it/s]Loading weights:  50%|█████     | 129/257 [00:02<00:01, 68.45it/s]Loading weights:  55%|█████▌    | 142/257 [00:02<00:01, 67.60it/s]Loading weights:  60%|██████    | 155/257 [00:03<00:01, 60.65it/s]Loading weights:  66%|██████▌   | 170/257 [00:03<00:01, 74.41it/s]Loading weights:  70%|██████▉   | 179/257 [00:03<00:01, 72.17it/s]Loading weights:  73%|███████▎  | 187/257 [00:03<00:00, 72.65it/s]Loading weights:  76%|███████▌  | 195/257 [00:03<00:00, 67.18it/s]Loading weights:  80%|███████▉  | 205/257 [00:03<00:00, 63.23it/s]Loading weights:  83%|████████▎ | 213/257 [00:04<00:00, 62.33it/s]Loading weights:  89%|████████▉ | 229/257 [00:04<00:00, 71.79it/s]Loading weights:  92%|█████████▏| 237/257 [00:04<00:00, 68.74it/s]Loading weights:  95%|█████████▌| 245/257 [00:04<00:00, 57.45it/s]Loading weights: 100%|██████████| 257/257 [00:04<00:00, 55.01it/s]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: Period with BDay freq is deprecated and will be removed in a future version. Use a DatetimeIndex with BDay freq instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
+  warnings.warn(
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: Period with BDay freq is deprecated and will be removed in a future version. Use a DatetimeIndex with BDay freq instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
+  warnings.warn(
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/dataset/common.py:263: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  return pd.Period(val, freq)
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/dataset/common.py:263: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  return pd.Period(val, freq)
+/fssmall/home/h61084/codes/tsrag_time/src/timebench/data/windows.py:50: FutureWarning: Period with BDay freq is deprecated and will be removed in a future version. Use a DatetimeIndex with BDay freq instead.
+  periods = [pd.Period(pd.Timestamp(entry['start']), freq=entry['freq']) for entry in self.source]
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/dataset/common.py:263: FutureWarning: Period with BDay freq is deprecated and will be removed in a future version. Use a DatetimeIndex with BDay freq instead.
+  return pd.Period(val, freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/dataset/split.py:181: FutureWarning: Period with BDay freq is deprecated and will be removed in a future version. Use a DatetimeIndex with BDay freq instead.
+  sliced_entry[FieldName.START] += offset
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/json.py:102: UserWarning: Using `json`-module for json-handling. Consider installing one of `orjson`, `ujson` to speed up serialization and deserialization.
+  warnings.warn(
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'T' is deprecated and will be removed in a future version, please use 'min' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'H' is deprecated and will be removed in a future version, please use 'h' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+/fssmall/home/h61084/codes/tsrag_time/.venv/lib/python3.12/site-packages/gluonts/time_feature/seasonality.py:47: FutureWarning: 'Q' is deprecated and will be removed in a future version, please use 'QE' instead.
+  offset = pd.tseries.frequencies.to_offset(freq)
+Error executing job with overrides: ['vanilla_predictions_path=/scratch/users/h61084/codes/evaluating_tsfms/outputs/foundation_models/inference', 'experiment_mode=full', 'stage=report']
+Traceback (most recent call last):
+  File "/fssmall/home/h61084/codes/tsrag_time/src/timebench/scripts/run_experiment.py", line 15, in main
+    Workflow(resolved).run(resolved['stage'])
+  File "/fssmall/home/h61084/codes/tsrag_time/src/timebench/pipeline/workflow.py", line 831, in run
+    getattr(self, stage)()
+  File "/fssmall/home/h61084/codes/tsrag_time/src/timebench/pipeline/workflow.py", line 824, in report
+    build_report(inputs, self.root / 'reports', self.config)
+  File "/fssmall/home/h61084/codes/tsrag_time/src/timebench/results/comparison.py", line 138, in build_report
+    performance_artifacts = write_performance_report(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/fssmall/home/h61084/codes/tsrag_time/src/timebench/results/performance.py", line 258, in write_performance_report
+    from timebench.visualization.performance import (
+  File "/fssmall/home/h61084/codes/tsrag_time/src/timebench/visualization/performance.py", line 5, in <module>
+    import matplotlib
+ModuleNotFoundError: No module named 'matplotlib'
+
+Set the environment variable HYDRA_FULL_ERROR=1 for a complete stack trace.
+srun: error: sean0006: task 0: Exited with exit code 1

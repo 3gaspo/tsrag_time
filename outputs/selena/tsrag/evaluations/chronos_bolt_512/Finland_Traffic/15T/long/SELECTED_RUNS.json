@@ -109,6 +109,45 @@
           }
         }
       }
+    },
+    {
+      "mode": "auto",
+      "run": "run_1",
+      "scientific_config": {
+        "experiment_config": {},
+        "model_config": {
+          "component": "evaluations",
+          "method": "chronos_bolt_512"
+        },
+        "pipeline_config": {
+          "dependencies": {
+            "prediction": {
+              "completed_at": "2026-09-27T14:55:11.836104+00:00",
+              "identity": {
+                "dataset": "Finland_Traffic",
+                "frequency": "15T",
+                "method": "chronos_bolt_512",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "long"
+              },
+              "run": "run_0"
+            }
+          },
+          "evaluation_grid": "finite_ground_truth_and_seasonal_naive_mase",
+          "method": "chronos_bolt_512",
+          "nan_policy": "omit_nan_predictions_report_counts_reject_infinity",
+          "phase": "evaluations",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "Finland_Traffic/15T",
+            "prediction_length": 672,
+            "seasonality": 96,
+            "term": "long",
+            "test_length": 2976
+          }
+        }
+      }
     }
   ]
 }

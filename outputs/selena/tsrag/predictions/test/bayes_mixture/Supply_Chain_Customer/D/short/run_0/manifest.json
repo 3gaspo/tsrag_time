@@ -1,0 +1,164 @@
+{
+  "completed_at": "2026-09-29T23:11:01.896405+00:00",
+  "computed_at": "2026-09-29T23:10:56.745957+00:00",
+  "experiment": "tsrag",
+  "experiment_config": {
+    "seed": 0
+  },
+  "identity": {
+    "dataset": "Supply_Chain_Customer",
+    "frequency": "D",
+    "method": "bayes_mixture",
+    "model": "bayes_mixture",
+    "target_mode": "univariate",
+    "term": "short"
+  },
+  "launch": {
+    "action": "new",
+    "attempts": [
+      {
+        "action": "new",
+        "launch_id": "selena_3607202",
+        "launched_at": "2026-09-29T23:10:56.714634+00:00",
+        "slurm_array_task_id": null,
+        "slurm_job_id": "3607202"
+      }
+    ],
+    "launch_id": "selena_3607202",
+    "launched_at": "2026-09-29T23:10:56.714634+00:00",
+    "slurm_job_id": "3607202"
+  },
+  "model_config": {
+    "components": [
+      "chronos2_max",
+      "tsrag"
+    ],
+    "method": "bayes_mixture",
+    "no_validation": "chronos2",
+    "nonfinite_fallback": "chronos_bolt_max",
+    "prior": [
+      1,
+      1
+    ],
+    "score": "per_date_mean_variate_msse"
+  },
+  "pipeline_config": {
+    "covariates": "none",
+    "dependencies": {
+      "chronos2": {
+        "completed_at": "2026-09-27T14:55:10.606046+00:00",
+        "identity": {
+          "dataset": "Supply_Chain_Customer",
+          "frequency": "D",
+          "method": "chronos2_max",
+          "model": "chronos2",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "data": {
+        "completed_at": "2026-09-27T14:52:32.682964+00:00",
+        "identity": {
+          "dataset": "Supply_Chain_Customer",
+          "frequency": "D",
+          "method": "shared",
+          "model": "shared",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "fallback": {
+        "completed_at": "2026-09-27T14:55:10.014911+00:00",
+        "identity": {
+          "dataset": "Supply_Chain_Customer",
+          "frequency": "D",
+          "method": "chronos_bolt_max",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "tsrag": {
+        "completed_at": "2026-09-29T23:10:25.447327+00:00",
+        "identity": {
+          "dataset": "Supply_Chain_Customer",
+          "frequency": "D",
+          "method": "tsrag",
+          "model": "chronos_bolt",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      },
+      "weight": {
+        "completed_at": "2026-09-29T23:10:56.662283+00:00",
+        "identity": {
+          "dataset": "Supply_Chain_Customer",
+          "frequency": "D",
+          "method": "bayes_mixture",
+          "model": "bayes_mixture",
+          "target_mode": "univariate",
+          "term": "short"
+        },
+        "run": "run_0"
+      }
+    },
+    "method": "bayes_mixture",
+    "phase": "predictions/test",
+    "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+    "split": "test",
+    "target_mode": "univariate",
+    "task": {
+      "dataset": "Supply_Chain_Customer/D",
+      "prediction_length": 30,
+      "seasonality": 1,
+      "term": "short",
+      "test_length": 365
+    },
+    "validation_support": null
+  },
+  "project": "tsrag_time",
+  "provenance": {
+    "dataset_path": "/scratch/users/h61084/datasets/hf_dataset/Supply_Chain_Customer/D",
+    "source_revisions": {
+      "adaptime": "33e75400d8c64414e4e13567c4e899803908bc44",
+      "improved_time": "541a2802cd2a35d39156aef4c37de6964d112786"
+    },
+    "task_config": {
+      "alignment_period": 7,
+      "dataset": "Supply_Chain_Customer/D",
+      "datastore_stride": 1,
+      "max_datastore_windows": null,
+      "prediction_length": 30,
+      "seasonality": 1,
+      "term": "short",
+      "test_length": 365,
+      "validation_length": 90
+    },
+    "upstream_manifests": {
+      "chronos2": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/chronos2_max/Supply_Chain_Customer/D/short/run_0/manifest.json",
+      "data": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/data/test/shared/Supply_Chain_Customer/D/short/run_0/manifest.json",
+      "fallback": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/chronos_bolt_max/Supply_Chain_Customer/D/short/run_0/manifest.json",
+      "tsrag": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/predictions/test/tsrag/Supply_Chain_Customer/D/short/run_0/manifest.json",
+      "weight": "/fslarge/scratch/users/h61084/codes/tsrag_time/outputs/tsrag/selections/bayes_mixture/Supply_Chain_Customer/D/short/run_0/manifest.json"
+    }
+  },
+  "required_artifacts": [
+    "prediction.npy",
+    "fallback.npy",
+    "retrieval_provenance.npy",
+    "prediction.json"
+  ],
+  "runtime_config": {
+    "batch_size": 32,
+    "device": "cuda",
+    "embedding_batch_size": 512
+  },
+  "schema_version": 1,
+  "started_at": "2026-09-29T23:10:56.714634+00:00",
+  "status": "completed",
+  "updated_at": "2026-09-29T23:11:01.896405+00:00"
+}

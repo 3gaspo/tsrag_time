@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "selections": [
+    {
+      "mode": "auto",
+      "run": "run_0",
+      "scientific_config": {
+        "experiment_config": {
+          "seed": 0
+        },
+        "model_config": {
+          "backbone": "chronos_bolt",
+          "checkpoint": "released_moe_arm",
+          "context_length": 512,
+          "fallback": "chronos_bolt_max",
+          "method": "tsrag",
+          "minimum_overlap_fraction": 0.8,
+          "native_horizon": 64,
+          "point_forecast": "median",
+          "retrieval": {
+            "aligned": false,
+            "query_scale": false,
+            "representation": "t5",
+            "scope": "all"
+          },
+          "retrieval_encoder": "chronos_t5_base_eos",
+          "source_commit": "73ac807789d2e61b8a3dfc8514e3fc947fe185cc",
+          "top_k": 10
+        },
+        "pipeline_config": {
+          "covariates": "none",
+          "dependencies": {
+            "data": {
+              "completed_at": "2026-09-27T14:52:31.948174+00:00",
+              "identity": {
+                "dataset": "MetroPT-3",
+                "frequency": "5T",
+                "method": "shared",
+                "model": "shared",
+                "target_mode": "univariate",
+                "term": "medium"
+              },
+              "run": "run_0"
+            },
+            "extraction": {
+              "completed_at": "2026-09-29T12:23:11.615373+00:00",
+              "identity": {
+                "dataset": "MetroPT-3",
+                "frequency": "5T",
+                "method": "t5",
+                "model": "t5",
+                "target_mode": "univariate",
+                "term": "medium"
+              },
+              "run": "run_0"
+            },
+            "fallback": {
+              "completed_at": "2026-09-27T14:55:07.768410+00:00",
+              "identity": {
+                "dataset": "MetroPT-3",
+                "frequency": "5T",
+                "method": "chronos_bolt_max",
+                "model": "chronos_bolt",
+                "target_mode": "univariate",
+                "term": "medium"
+              },
+              "run": "run_0"
+            }
+          },
+          "method": "tsrag",
+          "phase": "predictions/validation",
+          "prediction_artifact_contract": "vanilla_reuse_nan_counts_retrieval_provenance",
+          "split": "validation",
+          "target_mode": "univariate",
+          "task": {
+            "dataset": "MetroPT-3/5T",
+            "prediction_length": 288,
+            "seasonality": 288,
+            "term": "medium",
+            "test_length": 1728
+          },
+          "validation_support": "finite_context_and_future"
+        }
+      }
+    }
+  ]
+}
