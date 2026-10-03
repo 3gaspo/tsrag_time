@@ -273,7 +273,12 @@ class Contract(unittest.TestCase):
             save_window_predictions(dataset, forecasts[:, None], 'synthetic/D/short', str(grid.parent),
                                     seasonality=2, quantile_levels=[0.5], task_output_dir=str(grid.parent),
                                     inference_seconds=0, create_evaluation_grid=True)
-            (grid.parent/'manifest.json').write_text('{}')
+            (grid.parent/'manifest.json').write_text(json.dumps({
+                'schema_version': 1,
+                'status': 'completed',
+                'configuration': {'experiment': 'seasonal_naive'},
+                'artifacts': ['evaluation_grid.npz'],
+            }))
             def query(*args, **kwargs):
                 return np.full(4, np.nan, dtype=np.float32), None, np.zeros(4), 4
             with patch.dict(os.environ, {'TIME_LAUNCH_ID': 'synthetic', 'TSRAG_DEFER_COMPLETION': '0'}), \

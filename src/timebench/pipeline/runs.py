@@ -20,6 +20,29 @@ CONFIG_POLICIES = ("error", "distinct", "latest", "average")
 REPEAT_POLICIES = ("selected", "latest", "distinct", "average")
 RUN_PATTERN = re.compile(r"run_(\d+)")
 SELECTION_NAME = "SELECTED_RUNS.json"
+DEPENDENCY_REFERENCE_KIND = "time_manifest_dependency"
+OPERATIONAL_CONFIG_FIELDS = frozenset(
+    {
+        "action",
+        "artifact_revision",
+        "attempts",
+        "completed_at",
+        "computed_at",
+        "error",
+        "launch_id",
+        "launched_at",
+        "manifest_path",
+        "project",
+        "required_artifacts",
+        "run",
+        "runtime_config",
+        "slurm_array_task_id",
+        "slurm_job_id",
+        "started_at",
+        "status",
+        "updated_at",
+    }
+)
 PROJECT_NAME = os.environ.get(
     "TIME_PROJECT_NAME", Path(__file__).resolve().parents[3].name
 )
@@ -82,13 +105,117 @@ def load_manifest(path_or_run: str | Path) -> dict[str, Any]:
     return manifest
 
 
+def _scientific_snapshot(manifest: Mapping[str, Any]) -> dict[str, Any]:
+    snapshot = {
+        "schema_version": manifest.get("schema_version"),
+        "experiment": manifest.get("experiment"),
+        "identity": dict(manifest.get("identity", {})),
+        **_scientific_config(manifest),
+    }
+    for name in ("seed", "seeds"):
+        if name in manifest:
+            snapshot[name] = manifest[name]
+    return snapshot
+
+
 def manifest_reference(path_or_run: str | Path) -> dict[str, Any]:
-    """Compact dependency identity without recursively embedding its config."""
+    """Return a typed dependency reference with science and artifact state split."""
     path = Path(path_or_run)
     run_dir = path if path.is_dir() else path.parent
     manifest = load_manifest(run_dir)
-    return {"identity": manifest["identity"], "run": run_dir.name,
-        "completed_at": manifest.get("completed_at")}
+    if manifest["status"] != "completed":
+        raise ManifestError(f"Dependency is not completed: {run_dir}")
+    launch = manifest.get("launch", {})
+    return {
+        "kind": DEPENDENCY_REFERENCE_KIND,
+        "scientific": _scientific_snapshot(manifest),
+        "artifact": {
+            "run": run_dir.name,
+            "revision": int(manifest.get("artifact_revision", 1)),
+        },
+        "provenance": {
+            "project": manifest.get("project"),
+            "manifest_path": str((run_dir / MANIFEST_NAME).resolve()),
+            "completed_at": manifest.get("completed_at"),
+            "launch_id": launch.get("launch_id"),
+            "launched_at": launch.get("launched_at"),
+        },
+    }
+
+
+def _normalize_config_value(
+    value: Any,
+    path: str,
+    dependencies: dict[str, Any],
+) -> Any:
+    if isinstance(value, Mapping):
+        if value.get("kind") == DEPENDENCY_REFERENCE_KIND:
+            scientific = value.get("scientific")
+            artifact = value.get("artifact")
+            if not isinstance(scientific, Mapping) or not isinstance(artifact, Mapping):
+                raise ManifestError(f"Malformed dependency reference at {path}")
+            dependencies[path] = {
+                "scientific": dict(scientific),
+                "artifact": {
+                    "run": str(artifact.get("run")),
+                    "revision": int(artifact.get("revision", 1)),
+                },
+                "provenance": dict(value.get("provenance", {})),
+            }
+            return dict(scientific)
+        for key in value:
+            if str(key) in OPERATIONAL_CONFIG_FIELDS:
+                raise ManifestError(
+                    f"Operational field {path}.{key} cannot be part of a scientific "
+                    "configuration; use manifest_reference() for dependencies"
+                )
+        return {
+            str(key): _normalize_config_value(
+                item,
+                f"{path}.{key}",
+                dependencies,
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple)):
+        return [
+            _normalize_config_value(item, f"{path}[{index}]", dependencies)
+            for index, item in enumerate(value)
+        ]
+    return value
+
+
+def _prepare_scientific_config(
+    model_config: Mapping[str, Any],
+    pipeline_config: Mapping[str, Any],
+    experiment_config: Mapping[str, Any],
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    dependencies: dict[str, Any] = {}
+    scientific = {
+        "model_config": _normalize_config_value(
+            model_config, "model_config", dependencies
+        ),
+        "pipeline_config": _normalize_config_value(
+            pipeline_config, "pipeline_config", dependencies
+        ),
+        "experiment_config": _normalize_config_value(
+            experiment_config, "experiment_config", dependencies
+        ),
+    }
+    return scientific, dependencies
+
+
+def _dependency_fingerprint(manifest: Mapping[str, Any]) -> dict[str, Any]:
+    return {
+        str(path): {
+            "scientific": value.get("scientific", {}),
+            "artifact": {
+                "run": value.get("artifact", {}).get("run"),
+                "revision": int(value.get("artifact", {}).get("revision", 1)),
+            },
+        }
+        for path, value in manifest.get("dependencies", {}).items()
+    }
 
 
 @dataclass
@@ -252,11 +379,21 @@ def _scientific_config_from_values(
     pipeline_config: Mapping[str, Any],
     experiment_config: Mapping[str, Any],
 ) -> dict[str, Any]:
-    return {
-        "model_config": dict(model_config),
-        "pipeline_config": dict(pipeline_config),
-        "experiment_config": dict(experiment_config),
-    }
+    scientific, _ = _prepare_scientific_config(
+        model_config, pipeline_config, experiment_config
+    )
+    return scientific
+
+
+def normalize_scientific_config(
+    model_config: Mapping[str, Any],
+    pipeline_config: Mapping[str, Any],
+    experiment_config: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Normalize typed dependency references for exact scientific matching."""
+    return _scientific_config_from_values(
+        model_config, pipeline_config, experiment_config
+    )
 
 
 def _attempt(action: str, launched_at: str) -> dict[str, Any]:
@@ -459,7 +596,7 @@ def allocate_run(
     root = Path(identity_root).expanduser().resolve()
     root.mkdir(parents=True, exist_ok=True)
     run_dirs = _run_dirs(root)
-    scientific = _scientific_config_from_values(
+    scientific, dependencies = _prepare_scientific_config(
         model_config, pipeline_config, experiment_config
     )
     existing = [(path, load_manifest(path)) for path in run_dirs]
@@ -474,6 +611,8 @@ def allocate_run(
         (path, manifest)
         for path, manifest in exact
         if manifest["status"] == "computed"
+        and _dependency_fingerprint(manifest)
+        == _dependency_fingerprint({"dependencies": dependencies})
         and (run_index is None or _run_index(path) == run_index)
     ]
     if computed and policy == "skip" and not force:
@@ -529,6 +668,8 @@ def allocate_run(
             (path, manifest)
             for path, manifest in exact
             if manifest["status"] == "completed"
+            and _dependency_fingerprint(manifest)
+            == _dependency_fingerprint({"dependencies": dependencies})
         ]
         if completed_local and skip_completed and not force:
             target, local_manifest = max(
@@ -586,10 +727,16 @@ def allocate_run(
             "project": PROJECT_NAME,
             "experiment": str(experiment),
             "identity": dict(identity),
-            "model_config": dict(model_config),
-            "pipeline_config": dict(pipeline_config),
+            "model_config": scientific["model_config"],
+            "pipeline_config": scientific["pipeline_config"],
             "runtime_config": dict(runtime_config),
-            "experiment_config": dict(experiment_config),
+            "experiment_config": scientific["experiment_config"],
+            "dependencies": dependencies,
+            "artifact_revision": (
+                int(old_manifest.get("artifact_revision", 1)) + 1
+                if old_manifest is not None
+                else 1
+            ),
             "artifact_metadata": dict(source_manifest.get("artifact_metadata", {})),
             "provenance": {
                 **dict(provenance or {}),
@@ -653,7 +800,15 @@ def allocate_run(
             )
         if same:
             status = old_manifest["status"]
-            if status == "completed" and skip_completed and not force:
+            dependencies_match = _dependency_fingerprint(old_manifest) == (
+                _dependency_fingerprint({"dependencies": dependencies})
+            )
+            if (
+                status == "completed"
+                and dependencies_match
+                and skip_completed
+                and not force
+            ):
                 launched_at = _now()
                 attempt = _attempt("reuse", launched_at)
                 launch = dict(old_manifest.get("launch", {}))
@@ -671,7 +826,11 @@ def allocate_run(
                 return RunHandle(target, old_manifest, "skip", _completed=True)
             if status == "running" and not force:
                 raise ManifestError(f"Matching run is already running: {target}")
-            action = "resume" if status == "interrupted" and not force else "overwrite"
+            action = (
+                "resume"
+                if status == "interrupted" and dependencies_match and not force
+                else "overwrite"
+            )
         else:
             action = "overwrite"
 
@@ -707,10 +866,18 @@ def allocate_run(
         "project": PROJECT_NAME,
         "experiment": str(experiment),
         "identity": dict(identity),
-        "model_config": dict(model_config),
-        "pipeline_config": dict(pipeline_config),
+        "model_config": scientific["model_config"],
+        "pipeline_config": scientific["pipeline_config"],
         "runtime_config": dict(runtime_config),
-        "experiment_config": dict(experiment_config),
+        "experiment_config": scientific["experiment_config"],
+        "dependencies": dependencies,
+        "artifact_revision": (
+            int(old_manifest.get("artifact_revision", 1)) + 1
+            if old_manifest is not None and action == "overwrite"
+            else int(old_manifest.get("artifact_revision", 1))
+            if old_manifest is not None
+            else 1
+        ),
         "provenance": dict(provenance or {}),
         "launch": {
             "launch_id": attempt["launch_id"],
@@ -784,11 +951,17 @@ def resolve_target_mode(
 
 
 def _scientific_config(manifest: Mapping[str, Any]) -> dict[str, Any]:
-    return {
-        "model_config": manifest.get("model_config", {}),
-        "pipeline_config": manifest.get("pipeline_config", {}),
-        "experiment_config": manifest.get("experiment_config", {}),
-    }
+    scientific, embedded_dependencies = _prepare_scientific_config(
+        manifest.get("model_config", {}),
+        manifest.get("pipeline_config", {}),
+        manifest.get("experiment_config", {}),
+    )
+    if embedded_dependencies:
+        raise ManifestError(
+            "Stored scientific configuration contains typed artifact references; "
+            "artifact metadata must be stored in top-level dependencies"
+        )
+    return scientific
 
 
 def _same_config_groups(
@@ -856,16 +1029,18 @@ def select_completed_runs(
     target_modes: set[str] | None = None,
     launch_id: str | None = None,
     config_filters: Mapping[str, Any] | None = None,
-    config_policy: str = "latest",
+    config_policy: str = "error",
     repeat_policy: str = "latest",
     task_specific_model_fields: set[str] | None = None,
+    config_axis_fields: Sequence[str] | None = None,
 ) -> list[tuple[Path, dict[str, Any]]]:
-    """Select runs while allowing task fields such as Seasonal periodicity."""
+    """Select runs with explicitly declared scientific report axes."""
     if config_policy not in CONFIG_POLICIES:
         raise ManifestError(f"config_policy must be one of {CONFIG_POLICIES}")
     if repeat_policy not in REPEAT_POLICIES:
         raise ManifestError(f"repeat_policy must be one of {REPEAT_POLICIES}")
     task_specific_model_fields = set(task_specific_model_fields or ())
+    config_axis_fields = tuple(config_axis_fields or ())
     filters = dict(config_filters or {})
     candidates: list[tuple[Path, dict[str, Any]]] = []
     root = Path(root).expanduser().resolve()
@@ -905,15 +1080,16 @@ def select_completed_runs(
             identity = identity_group[0][1]["identity"]
             raise ManifestError(
                 "Multiple scientific run configurations match "
-                f"{identity}; use --run-config or an explicit distinct, latest, "
-                "or average config policy"
+                f"{identity}; use --run-config or an explicit distinct or "
+                "average config policy"
             )
         if config_policy == "latest" and len(config_groups) > 1:
-            latest_group = max(
-                config_groups,
-                key=lambda group: _latest_key(max(group, key=_latest_key)),
+            identity = identity_group[0][1]["identity"]
+            raise ManifestError(
+                "Latest scientific configuration is ambiguous for "
+                f"{identity}; use --run-config to select one configuration or "
+                "declare report axes and use the distinct policy"
             )
-            config_groups = [latest_group]
 
         flattened = [
             _flatten_config(_scientific_config(group[0][1]))
@@ -930,6 +1106,32 @@ def select_completed_runs(
             )
             > 1
         }
+        if config_policy == "distinct":
+            if not config_axis_fields:
+                raise ManifestError(
+                    "Distinct scientific configurations require explicit "
+                    "config_axis_fields; report labels are never inferred from "
+                    "all differing manifest fields"
+                )
+            missing_axes = [
+                field
+                for field in config_axis_fields
+                if any(field not in values for values in flattened)
+            ]
+            if missing_axes:
+                raise ManifestError(
+                    f"Declared report axes are absent from matching runs: {missing_axes}"
+                )
+            axis_values = [
+                tuple(json.dumps(values[field], sort_keys=True) for field in config_axis_fields)
+                for values in flattened
+            ]
+            if len(set(axis_values)) != len(axis_values):
+                hidden = sorted(differing_keys - set(config_axis_fields))
+                raise ManifestError(
+                    "Declared report axes collapse different scientific "
+                    f"configurations; add an explicit axis or filter: {hidden}"
+                )
         for group, flat_config in zip(config_groups, flattened):
             group = sorted(group, key=_latest_key)
             scientific = _scientific_config(group[0][1])
@@ -941,10 +1143,10 @@ def select_completed_runs(
                 chosen = group
 
             config_suffix = ""
-            if config_policy == "distinct" and differing_keys:
+            if config_policy == "distinct":
                 config_suffix = "__" + "__".join(
                     f"{_safe_name(key)}-{_label_value(flat_config.get(key))}"
-                    for key in sorted(differing_keys)
+                    for key in config_axis_fields
                 )
             for path, manifest in chosen:
                 selected_manifest = dict(manifest)

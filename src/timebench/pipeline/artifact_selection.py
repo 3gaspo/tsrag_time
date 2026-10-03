@@ -34,7 +34,9 @@ def selected(path, size):
         return size == "detailed" and path.name == "metrics.npz"
     if {"reports", "performance"}.intersection(path.parts):
         return True
-    if "manifest_history" in path.parts or "time_inference" in path.parts:
+    if "manifest_history" in path.parts:
+        return size == "detailed" and path.suffix == ".json"
+    if "time_inference" in path.parts:
         return path.suffix == ".json"
     return path.name in LIGHT_NAMES or (
         size == "detailed" and (
@@ -52,9 +54,11 @@ def filters(size):
     result.extend(f"--exclude=*{suffix}" for suffix in sorted(BINARY_SUFFIXES))
     result.extend([
         "--include=*/", "--include=/reports/***", "--include=**/reports/***",
-        "--include=**/performance/***", "--include=**/manifest_history/*.json",
+        "--include=**/performance/***",
         "--include=**/time_inference/**.json",
     ])
+    if size == "detailed":
+        result.append("--include=**/manifest_history/*.json")
     result.extend(f"--include={name}" for name in sorted(LIGHT_NAMES))
     if size == "detailed":
         result.extend(f"--include={name}" for name in sorted(DETAIL_NAMES))

@@ -34,7 +34,7 @@ def resolve_shared_evaluation_grid(
         config_filters={
             "pipeline_config.evaluation_grid": EVALUATION_GRID_DEFINITION,
         },
-        config_policy="latest",
+        config_policy="error",
         repeat_policy="latest",
     )
     if len(selected) != 1:

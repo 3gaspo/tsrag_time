@@ -61,13 +61,45 @@ proxy_script="${PROXY_SCRIPT_PATH:-$HOME/codes/proxy.sh}"
 . "$proxy_script"
 git pull --ff-only origin main
 
+# Capture the account-wide Selena queue before selecting publication paths.
+nni_file="${TIME_NNI_FILE:-$HOME/codes/.secrets/nni}"
+[ -f "$nni_file" ] || {
+    printf 'NNI file not found: %s\n' "$nni_file" >&2
+    exit 1
+}
+nni="$(sed -n '1p' "$nni_file" | tr -d '[:space:]')"
+nni="${nni,,}"
+[[ "$nni" =~ ^[a-z][a-z0-9_-]*$ ]] || {
+    printf 'NNI file must contain one valid account name\n' >&2
+    exit 1
+}
+selena_host="${TIME_SELENA_HOST:-$nni@selena.hpc.edf.fr}"
+queue_file="SELENA_QUEUE.txt"
+queue_temp="$(mktemp "$project_root/.selena-queue.XXXXXX")"
+if ! ssh -o BatchMode=yes -o ConnectTimeout=15 "$selena_host" '
+    set -e
+    printf "captured_at_utc: %s\n" "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    printf "cluster: selena\n"
+    printf "account: %s\n" "$(id -un)"
+    printf "scope: account-wide queue; absence does not prove success\n"
+    printf "\njob_id|name|state|elapsed|time_limit|nodes_or_reason|work_dir\n"
+    squeue --me --states=all --array --noheader --format="%i|%j|%T|%M|%l|%R|%Z"
+' > "$queue_temp"; then
+    rm -f -- "$queue_temp"
+    printf 'Could not fetch Selena queue; publication stopped and previous snapshot preserved.\n' >&2
+    exit 1
+fi
+mv -f -- "$queue_temp" "$project_root/$queue_file"
+printf 'Captured Selena queue in %s\n' "$queue_file"
+
+
 if [ "$clean_mode" = true ]; then
     deleted_paths=()
     while IFS= read -r -d '' deleted_path; do
         deleted_paths+=("$deleted_path")
     done < <(git diff --name-only --diff-filter=D -z HEAD --)
-    stage_paths=()
-    clean_paths=()
+    stage_paths=(":(literal)$queue_file")
+    clean_paths=(":(literal)$queue_file")
     for deleted_path in "${deleted_paths[@]}"; do
         clean_paths+=(":(literal)$deleted_path")
         if git ls-files --error-unmatch -- ":(literal)$deleted_path" >/dev/null 2>&1; then
@@ -90,8 +122,8 @@ if [ "$clean_mode" = true ]; then
             printf '%s\0' "${stage_paths[@]}" > "$stage_pathspec"
             git add -v -f -A --pathspec-from-file="$stage_pathspec" --pathspec-file-nul
         fi
-        if [ "${#deleted_paths[@]}" -gt 0 ] || ! git diff --cached --quiet -- pyproject.toml uv.lock; then
-            [ -n "$message" ] || message="maintenance: publish deletions and environment files"
+        if [ "${#deleted_paths[@]}" -gt 0 ] || ! git diff --cached --quiet -- "$queue_file" pyproject.toml uv.lock; then
+            [ -n "$message" ] || message="maintenance: publish deletions, environment files and Selena queue"
             git commit --only -m "$message" --pathspec-from-file="$clean_pathspec" --pathspec-file-nul
         else
             echo "No clean-mode changes; pushing existing local commits."
@@ -103,7 +135,7 @@ if [ "$clean_mode" = true ]; then
     exit 0
 fi
 
-paths=()
+paths=("$queue_file")
 if [ -n "$job_id" ]; then
     out_logs=()
     while IFS= read -r -d '' out_log; do

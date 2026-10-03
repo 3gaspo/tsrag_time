@@ -7,6 +7,7 @@ import json
 import numpy as np
 
 from timebench.pipeline.evaluation_grid import resolve_shared_evaluation_grid
+from timebench.pipeline.runs import manifest_reference
 from timebench.results.performance import write_performance_report
 
 
@@ -70,9 +71,9 @@ def build_report(inputs, destination, config):
         rows.append(row)
         grouped[method].append(row)
         sources.append({'dataset': task.dataset, 'term': task.term, 'method': method,
-                        'evaluation_manifest': str(evaluation / 'manifest.json'),
-                        'prediction_manifest': str(prediction / 'manifest.json'),
-                        'seasonal_manifest': str(seasonal_root / 'manifest.json')})
+                        'evaluation_dependency': manifest_reference(evaluation),
+                        'prediction_dependency': manifest_reference(prediction),
+                        'seasonal_dependency': manifest_reference(seasonal_root)})
     with (destination / 'comparison.csv').open('w', newline='', encoding='utf-8') as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()

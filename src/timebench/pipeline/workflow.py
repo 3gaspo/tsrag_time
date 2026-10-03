@@ -18,7 +18,7 @@ from timebench.model_loading.foundation import CONTEXT_LIMITS, CHECKPOINTS
 from timebench.paths import dataset_storage_root, outputs_root, weights_root
 from timebench.pipeline.evaluation_grid import resolve_shared_evaluation_grid
 from timebench.pipeline.runs import (allocate_run, load_manifest, manifest_reference,
-    select_completed_runs)
+    normalize_scientific_config, select_completed_runs)
 
 SOURCE_REVISIONS = {'adaptime': '33e75400d8c64414e4e13567c4e899803908bc44',
                     'improved_time': '541a2802cd2a35d39156aef4c37de6964d112786'}
@@ -246,8 +246,12 @@ class Workflow:
                                         'upstream_manifests': {name: str(Path(path) / 'manifest.json') for name, path in dependencies.items()}})
 
     def resolve(self, task, phase, method, dependencies=None):
-        expected = self.science(task, phase, method, dependencies or {})
-        selected = select_completed_runs(self.path(task, phase, method), config_policy='distinct', repeat_policy='latest')
+        expected = normalize_scientific_config(
+            **self.science(task, phase, method, dependencies or {})
+        )
+        selected = select_completed_runs(
+            self.path(task, phase, method), config_filters=expected,
+            config_policy='error', repeat_policy='latest')
         matches = [path for path, manifest in selected if all(manifest[key] == value for key, value in expected.items())
                    and manifest['identity'] == self.identity(task, method)]
         if len(matches) != 1:
@@ -818,10 +822,13 @@ class Workflow:
 
     def report(self):
         from timebench.results.comparison import build_report
+        from timebench.pipeline.report_transaction import ReportTransaction
 
         inputs = [(task, method, self.evaluation(task, method), self.prediction(task, method))
                   for task in self.tasks for method in self.methods()]
-        build_report(inputs, self.root / 'reports', self.config)
+        transaction = ReportTransaction(self.root / 'reports')
+        build_report(inputs, transaction.staging, self.config)
+        transaction.commit()
 
     def run(self, stage):
         from timebench.pipeline.runtime_resources import log_selected_device
